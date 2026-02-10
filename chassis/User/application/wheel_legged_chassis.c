@@ -58,7 +58,7 @@ float tlqrr;
 
 float lqr_k_l[2][6], lqr_k_r[2][6], xl[6], xr[6];
 
-static void ChassisInit(void);
+void ChassisInit(void);
 void Chassis_Motor_Transmit(Chassis_t *ch);
 void LQR_Control(Chassis_t *ch);
 void Control_Get(Chassis_t *ch);
@@ -85,11 +85,11 @@ void Chassis_Task(void const *argument)
 	}
 }
 
-static void ChassisInit(void)
+void ChassisInit(void)
 {
-	PID_init(&leglength_pid_l, PID_POSITION, 500, 0, 9000, 120, 0); // 腿长 left
-	PID_init(&leglength_pid_r, PID_POSITION, 500, 0, 9000, 120, 0); // 腿长 right
-	PID_init(&yaw_pid, PID_POSITION, 0.1f, 0, 0.5f, 1.5f, 0);		// yaw
+	PID_init(&leglength_pid_l, PID_POSITION, 400, 0, 9000, 120, 0); // 腿长 left
+	PID_init(&leglength_pid_r, PID_POSITION, 400, 0, 9000, 120, 0); // 腿长 right
+	PID_init(&yaw_pid, PID_POSITION, -0.1f, 0, -0.5f, 0, 0);		// yaw
 	PID_init(&roll_pid, PID_POSITION, 0.8f, 0, 0, 30.0f, 0);		// roll
 	PID_init(&tp_pid, PID_POSITION, 1.3, 0, 3, 1.5, 0);				// 劈叉
 
@@ -195,7 +195,7 @@ void Clamp(float *in, float min, float max)
 // 支持力前馈
 float fn_feedforward = 0;
 
-/// @date 2026-01-22 16:40
+/// @date 2026-02-09 14:52
 float lqr_coe[12][4] = {
 	{-267.114936387831278, 661.491964532750558, -682.122523751811173, -4.428510482632967},
 	{-2.711097130725094, -373.817462228878014, 658.245716813072590, 35.552038864414683},
@@ -264,17 +264,15 @@ void LQR_Control(Chassis_t *ch)
 	turn_t = yaw_pid.Kp * (set.yaw - ch->IMU_DATA.toatalyaw) - yaw_pid.Kd * ch->IMU_DATA.yawspd; // 这样计算更稳一点
 	if (ch->robo_status.flag.above)
 		turn_t = 0;
-	set.torque[5] = tlqrl + turn_t;
-	set.torque[4] = tlqrr - turn_t;
+	set.torque[5] = tlqrl - turn_t;
+	set.torque[4] = tlqrr + turn_t;
 
 	/* ================================ 腿 解算 ================================ */
 
 	/// @brief 腿推力 PID
-	fn_feedforward = 55.0f * arm_cos_f32(leg_r.theta);
-
-	leg_l.F0 = fn_feedforward +
+	leg_l.F0 = 55.0f * arm_cos_f32(leg_l.theta) +
 			   PID_Calc(&leglength_pid_l, set.left_length, leg_l.L0);
-	leg_r.F0 = fn_feedforward +
+	leg_r.F0 = 55.0f * arm_cos_f32(leg_r.theta) +
 			   PID_Calc(&leglength_pid_r, set.right_length, leg_r.L0);
 
 	leg_l.Tp = tplqrl;
