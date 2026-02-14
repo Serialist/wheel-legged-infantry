@@ -13,7 +13,7 @@
 #ifndef __INS_TASK_H
 #define __INS_TASK_H
 
-#include "stdint.h"
+#include "user_lib.h"
 #include "BMI088driver.h"
 #include "QuaternionEKF.h"
 #include "chassismotor.h"

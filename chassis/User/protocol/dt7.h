@@ -1,9 +1,23 @@
 /**
+ * @file dt7.h
+ * @author Serialist (ba3pt@qq.com)
+ * @brief 遥控器处理
+ * @version 0.1.0
+ * @date 2026-02-10
+ * 
+ * @copyright Copyright (c) Serialist 2026
+ * 
+ * @note
+ * 遥控器是通过类似SBUS的协议传输，利用DMA传输方式节约CPU
+ * 资源，利用串口空闲中断来拉起处理函数，同时提供一些掉线重启DMA，串口
+ * 的方式保证热插拔的稳定性。
+ * 
+*/
+
+/**
   ****************************(C) COPYRIGHT 2016 DJI****************************
   * @file       dt7.c/h
-  * @brief      遥控器处理，遥控器是通过类似SBUS的协议传输，利用DMA传输方式节约CPU
-  *             资源，利用串口空闲中断来拉起处理函数，同时提供一些掉线重启DMA，串口
-  *             的方式保证热插拔的稳定性。
+  * @brief      
   * @note
   * @history
   *  Version    Date            Author          Modification
@@ -17,26 +31,13 @@
   @endverbatim
   ****************************(C) COPYRIGHT 2016 DJI****************************
   */
+
+
 #ifndef REMOTE_CONTROL_H
 #define REMOTE_CONTROL_H
+
 #include "struct_typedef.h"
 #include "bsp_rc.h"
-
-#define SBUS_RX_BUF_NUM 36u
-
-#define RC_FRAME_LENGTH 18u
-
-#define RC_CH_VALUE_MIN ((uint16_t)364)
-#define RC_CH_VALUE_OFFSET ((uint16_t)1024)
-#define RC_CH_VALUE_MAX ((uint16_t)1684)
-
-/* ----------------------- RC Switch Definition----------------------------- */
-#define RC_SW_UP ((uint16_t)1)
-#define RC_SW_MID ((uint16_t)3)
-#define RC_SW_DOWN ((uint16_t)2)
-#define switch_is_down(s) (s == RC_SW_DOWN)
-#define switch_is_mid(s) (s == RC_SW_MID)
-#define switch_is_up(s) (s == RC_SW_UP)
 
 #define RC_IS_OFFLINE(rc_ctrl) ((rc_ctrl)->offline_flag == 1)
 
@@ -59,6 +60,19 @@
 #define KEY_PRESSED_OFFSET_B ((uint16_t)1 << 15)
 
 /* ----------------------- Data Struct ------------------------------------- */
+#define R_X 0
+#define R_Y 1
+#define L_X 2
+#define L_Y 3
+#define L_Z 4
+
+#define S_L 1
+#define S_R 0
+
+#define UP 1
+#define MID 3
+#define DOWN 2
+
 #define R_X 0
 #define R_Y 1
 #define L_X 2
@@ -94,13 +108,8 @@ typedef __packed struct
 /* ----------------------- Internal Data ----------------------------------- */
 
 extern RC_ctrl_t rc_ctrl;
-extern void remote_control_init(void);
-extern const RC_ctrl_t *get_remote_control_point(void);
-extern uint8_t RC_data_is_error(void);
-extern void slove_RC_lost(void);
-extern void slove_data_error(void);
-extern void sbus_to_usart1(uint8_t *sbus);
 
+void remote_control_init(void);
 void RC_Offline_Detection(RC_ctrl_t *rc_ctrl, uint32_t dt);
 
 #endif

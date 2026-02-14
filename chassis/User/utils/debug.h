@@ -9,54 +9,9 @@
  *
  ************************/
 
-#ifndef __DEBUG_H
-#define __DEBUG_H
+#ifndef DEBUG_H
+#define DEBUG_H
 
 #include "user_lib.h"
-
-#ifndef MAX
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-#endif
-
-#ifndef MIN
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#endif
-
-#ifndef CLAMP
-#define CLAMP(a, min, max) (MAX(min, MIN(a, max)))
-#endif
-
-#ifndef CLAMP_ABS
-#define CLAMP_ABS(a, max) (CLAMP(a, -max, max))
-#endif
-
-#ifndef REMAP
-#define REMAP(a, inmin, intmax, outmin, outmax) (outmin + (a - inmin) * (outmax - outmin) / (intmax - inmin))
-#endif
-
-#ifndef RAMP
-#define RAMP(prev_x, x, k_min, k_max, dt) (prev_x += CLAMP(x - prev_x, k_min * dt, k_max * dt))
-#endif
-
-struct Wheel_Leg_Debug
-{
-    float tpr;
-    float tpl;
-    float tr;
-    float tl;
-    uint8_t torque_flag;
-    uint8_t no_g_fn_flag;
-    uint8_t no_tp_flag;
-    uint8_t no_t_flag;
-    uint8_t no_yaw_flag;
-    uint8_t no_above_det_flag;
-    struct
-    {
-        float tpl, tpr;
-        float f0l, f0r;
-    } ground_det;
-};
-
-extern struct Wheel_Leg_Debug my_debug;
 
 #endif

@@ -11,12 +11,14 @@
  ******************************************************************************
  */
 #include "ins_task.h"
+#include "cmsis_os.h"
 #include "controller.h"
 #include "QuaternionEKF.h"
 #include "bsp_imu_pwm.h"
 #include "chassismotor.h"
 
 extern Chassis_t chassis;
+extern Robo_Attitude_t att;
 INS_t INS;
 IMU_Param_t IMU_Param;
 PID_t TempCtrl = {0};
@@ -35,17 +37,17 @@ static void IMU_Param_Correction(IMU_Param_t *param, float gyro[3], float accel[
 
 void chassis_data_fdb(Chassis_t *ch)
 {
-    ch->IMU_DATA.pitch = INS.Pitch;
-    ch->IMU_DATA.yaw = INS.Yaw;
-    ch->IMU_DATA.toatalyaw = INS.YawTotalAngle;
-    ch->IMU_DATA.roll = INS.Roll;
+    att.pitch = INS.Pitch;
+    att.yaw = INS.Yaw;
+    att.toatalyaw = INS.YawTotalAngle;
+    att.roll = INS.Roll;
 
-    ch->IMU_DATA.pitchspd = INS.Gyro[0];
-    ch->IMU_DATA.rollspd = INS.Gyro[1];
-    ch->IMU_DATA.yawspd = INS.Gyro[2];
+    att.pitchspd = INS.Gyro[0];
+    att.rollspd = INS.Gyro[1];
+    att.yawspd = INS.Gyro[2];
 
-    ch->IMU_DATA.ax = INS.Accel[0];
-    ch->IMU_DATA.az = INS.Accel[2];
+    att.ax = INS.Accel[0];
+    att.az = INS.Accel[2];
 }
 
 void INS_Init(void)

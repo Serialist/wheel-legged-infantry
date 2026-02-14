@@ -10,41 +10,26 @@
  ************************/
 
 #include "debug.h"
+#include "user_lib.h"
+#include <math.h>
 
-struct Wheel_Leg_Debug my_debug = {
-    .tpr = false,
-    .tpl = false,
-    .tr = false,
-    .tl = false,
-    .torque_flag = false,
-    .no_g_fn_flag = false,
-    .no_tp_flag = false,
-    .no_t_flag = false,
-    .no_yaw_flag = false,
-    .no_above_det_flag = false,
-    .ground_det = {
-        .tpl = false,
-        .tpr = false,
-        .f0l = false,
-        .f0r = false}};
+#include "tim.h"
+#include "bsp_buzzer.h"
 
-/* ================================================================ log ================================================================ */
-
-/* ================================================================ utils ================================================================ */
-
-/*
-BOOL Log_ATorder_Parse(Log_Def_t *log, uint8_t *order)
+extern TIM_HandleTypeDef htim4;
+void buzzer_on(uint16_t psc, uint16_t pwm)
 {
-    if (!(order[0] == 'A' && order[1] == 'T'))
-    {
-        return false;
-    }
-
-    if (String_Compare(&order[2], "DBG"))
-    {
-        log->Output_High("Log_ATorder_Parse");
-        log->Output_Mid("Log_ATorder_Parse");
-        log->Output_Low("Log_ATorder_Parse");
-    }
+    __HAL_TIM_PRESCALER(&htim4, psc);
+    __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_3, pwm);
 }
-*/
+void buzzer_off(void)
+{
+    __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_3, 0);
+}
+
+// float Rampf(float x, float x0, float kmax, float kmin, float dt) :
+// {
+//     float dx = fClam (kmax * dt, x0 - x);
+
+//     return new_channel;
+// }

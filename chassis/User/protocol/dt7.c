@@ -17,18 +17,21 @@
 
 /* ================================================================ include ================================================================ */
 
+#include "usart.h"
 #include "dt7.h"
 #include "main.h"
 #include "string.h"
-
 #include "cmsis_os.h"
 
 /* ================================================================ define ================================================================ */
 
-#define RC_CHANNAL_ERROR_VALUE 700 // 遥控器出错数据上限
+#define SBUS_RX_BUF_NUM 36u
 
-// 取正函数
-#define RC_ABS(value) ((value) > 0 ? (value) : -(value))
+#define RC_FRAME_LENGTH 18u
+
+#define RC_CH_VALUE_MIN ((uint16_t)364)
+#define RC_CH_VALUE_OFFSET ((uint16_t)1024)
+#define RC_CH_VALUE_MAX ((uint16_t)1684)
 
 /* ================================================================ struct ================================================================ */
 
@@ -45,7 +48,7 @@ uint32_t rc_time = 0;
 
 /* ================================================================ proto ================================================================ */
 
-static void Sbus_Parse(RC_ctrl_t *rc_ctrl, volatile const uint8_t *sbus_buf);
+static void Dbus_Parse(RC_ctrl_t *rc_ctrl, volatile const uint8_t *sbus_buf);
 static uint8_t sbus_rx_buf[2][SBUS_RX_BUF_NUM]; // 接收原始数据，为18个字节，给了36个字节长度，防止DMA传输越界
 
 /* ================================================================ func ================================================================ */
@@ -58,76 +61,6 @@ void remote_control_init(void)
 {
     rc_ctrl.offline_flag = 1;
     RC_Init(sbus_rx_buf[0], sbus_rx_buf[1], SBUS_RX_BUF_NUM);
-}
-
-/************************
- * @brief 获取遥控器数据指针
- *
- * @return const RC_ctrl_t* 遥控器数据指针
- ************************/
-const RC_ctrl_t *get_remote_control_point(void)
-{
-    return &rc_ctrl;
-}
-
-/************************
- * @brief 判断遥控器数据是否出错
- *
- * @return uint8_t (True)?0:1
- ************************/
-uint8_t RC_Data_Check(void)
-{
-    // 使用了go to语句 方便出错统一处理遥控器变量数据归零
-    if (RC_ABS(rc_ctrl.rc.ch[0]) > RC_CHANNAL_ERROR_VALUE)
-    {
-        goto error;
-    }
-    if (RC_ABS(rc_ctrl.rc.ch[1]) > RC_CHANNAL_ERROR_VALUE)
-    {
-        goto error;
-    }
-    if (RC_ABS(rc_ctrl.rc.ch[2]) > RC_CHANNAL_ERROR_VALUE)
-    {
-        goto error;
-    }
-    if (RC_ABS(rc_ctrl.rc.ch[3]) > RC_CHANNAL_ERROR_VALUE)
-    {
-        goto error;
-    }
-    if (rc_ctrl.rc.s[0] == 0)
-    {
-        goto error;
-    }
-    if (rc_ctrl.rc.s[1] == 0)
-    {
-        goto error;
-    }
-    return 0;
-
-error:
-    rc_ctrl.rc.ch[0] = 0;
-    rc_ctrl.rc.ch[1] = 0;
-    rc_ctrl.rc.ch[2] = 0;
-    rc_ctrl.rc.ch[3] = 0;
-    rc_ctrl.rc.ch[4] = 0;
-    //    rc_ctrl.rc.s[0] = RC_SW_UP;
-    //    rc_ctrl.rc.s[1] = RC_SW_MID;
-    rc_ctrl.mouse.x = 0;
-    rc_ctrl.mouse.y = 0;
-    rc_ctrl.mouse.z = 0;
-    rc_ctrl.mouse.press_l = 0;
-    rc_ctrl.mouse.press_r = 0;
-    rc_ctrl.key.v = 0;
-    return 1;
-}
-
-void Slove_RC_Lost(void)
-{
-    RC_restart(SBUS_RX_BUF_NUM);
-}
-void Slove_Data_Error(void)
-{
-    RC_restart(SBUS_RX_BUF_NUM);
 }
 
 int usart3_d = 0;
@@ -171,7 +104,7 @@ void USART3_IRQHandler(void)
 
             if (this_time_rx_len == RC_FRAME_LENGTH)
             {
-                Sbus_Parse(&rc_ctrl, sbus_rx_buf[0]);
+                Dbus_Parse(&rc_ctrl, sbus_rx_buf[0]);
             }
         }
         else
@@ -200,21 +133,19 @@ void USART3_IRQHandler(void)
             if (this_time_rx_len == RC_FRAME_LENGTH)
             {
                 // 处理遥控器数据
-                Sbus_Parse(&rc_ctrl, sbus_rx_buf[1]);
+                Dbus_Parse(&rc_ctrl, sbus_rx_buf[1]);
             }
         }
     }
 }
 
-// int rem_d = 0;
-// int rem_d_d = 0;
 /************************
  * @brief 遥控器协议解析
  *
  * @param sbus_buf 原数据
  * @param rc_ctrl 遥控器
  ************************/
-static void Sbus_Parse(RC_ctrl_t *rc_ctrl, volatile const uint8_t *buf)
+static void Dbus_Parse(RC_ctrl_t *rc_ctrl, volatile const uint8_t *buf)
 {
     if (buf == NULL || rc_ctrl == NULL)
     {
@@ -242,10 +173,6 @@ static void Sbus_Parse(RC_ctrl_t *rc_ctrl, volatile const uint8_t *buf)
     rc_ctrl->rc.ch[2] -= RC_CH_VALUE_OFFSET;
     rc_ctrl->rc.ch[3] -= RC_CH_VALUE_OFFSET;
     rc_ctrl->rc.ch[4] -= RC_CH_VALUE_OFFSET;
-
-    // 记录出现错误的次数
-    // if (RC_data_is_error() == 1)
-    //     rem_d++;
 
     rc_ctrl->receive_flag = 1;
 }

@@ -1,25 +1,57 @@
 /**
- ******************************************************************************
- * @file	 user_lib.h
- * @author  Wang Hongxi
- * @version V1.0.0
- * @date    2021/2/18
+ * @file userlib.h
+ * @author Serialist (ba3pt@chd.edu.cn)
  * @brief
- ******************************************************************************
- * @attention
+ * @version 0.1.0
+ * @date 2026-01-12
  *
- ******************************************************************************
+ * @copyright Copyright (c) Serialist 2026
+ *
  */
 
-#ifndef __USER_LIB_H
-#define __USER_LIB_H
+#ifndef USERLIB_H
+#define USERLIB_H
+
+/* ================================================================ include ================================================================ */
 
 #include "stdint.h"
 #include "stdbool.h"
-#include "main.h"
-#include "cmsis_os.h"
+#include "math.h"
 
-enum
+/* ================================================================ macro ================================================================ */
+
+#ifndef user_malloc
+#ifdef _CMSIS_OS_H
+#define user_malloc pvPortMalloc
+#else
+#define user_malloc malloc
+#endif /* _CMSIS_OS_H */
+#endif /* user_malloc */
+
+/* radian coefficient */
+#ifndef RAD_COEF
+#define RAD_COEF 57.295779513f
+#endif
+
+/* circumference ratio */
+#ifndef PI
+#define PI 3.14159265354f
+#endif
+
+#ifndef MIN
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#endif
+
+#ifndef MAX
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#endif
+
+#define DEG_CLAMPF(Ang) LoopClampf((Ang), -180.0f, 180.0f) // 角度格式化为-180~180
+#define RAD_CLAMPF(Ang) LoopClampf((Ang), -PI, PI)         // 弧度格式化为-PI~PI
+
+/* ================================================================ typedef ================================================================ */
+
+typedef enum
 {
     CHASSIS_DEBUG = 1,
     GIMBAL_DEBUG,
@@ -28,67 +60,7 @@ enum
     IMU_HEAT_DEBUG,
     SHOOT_DEBUG,
     AIMASSIST_DEBUG,
-};
-
-extern uint8_t GlobalDebugMode;
-
-#ifndef user_malloc
-#ifdef _CMSIS_OS_H
-#define user_malloc pvPortMalloc
-#else
-#define user_malloc malloc
-#endif
-#endif
-
-/* boolean type definitions */
-#ifndef TRUE
-#define TRUE 1 /**< boolean true  */
-#endif
-
-#ifndef FALSE
-#define FALSE 0 /**< boolean fails */
-#endif
-
-/* math relevant */
-/* radian coefficient */
-#ifndef RADIAN_COEF
-#define RADIAN_COEF 57.295779513f
-#endif
-
-/* circumference ratio */
-#ifndef PI
-#define PI 3.14159265354f
-#endif
-
-#define VAL_LIMIT(val, min, max) \
-    do                           \
-    {                            \
-        if ((val) <= (min))      \
-        {                        \
-            (val) = (min);       \
-        }                        \
-        else if ((val) >= (max)) \
-        {                        \
-            (val) = (max);       \
-        }                        \
-    } while (0)
-
-#define ANGLE_LIMIT_360(val, angle)     \
-    do                                  \
-    {                                   \
-        (val) = (angle) - (int)(angle); \
-        (val) += (int)(angle) % 360;    \
-    } while (0)
-
-#define ANGLE_LIMIT_360_TO_180(val) \
-    do                              \
-    {                               \
-        if ((val) > 180)            \
-            (val) -= 360;           \
-    } while (0)
-
-#define VAL_MIN(a, b) ((a) < (b) ? (a) : (b))
-#define VAL_MAX(a, b) ((a) > (b) ? (a) : (b))
+} GlobalDebugMode_t;
 
 typedef struct
 {
@@ -115,35 +87,37 @@ typedef __packed struct
     float t[4];
 } Ordinary_Least_Squares_t;
 
-// 快速开方
-float Sqrt(float x);
+/* ================================================================ variable ================================================================ */
 
-// 斜波函数初始化
-void ramp_init(ramp_function_source_t *ramp_source_type, float frame_period, float max, float min);
-// 斜波函数计算
-float ramp_calc(ramp_function_source_t *ramp_source_type, float input);
+/* ================================================================ prototype ================================================================ */
 
-// 绝对限制
-float abs_limit(float num, float Limit);
-// 判断符号位
-float sign(float value);
-// 浮点死区
-float float_deadband(float Value, float minValue, float maxValue);
-// int26死区
-int16_t int16_deadline(int16_t Value, int16_t minValue, int16_t maxValue);
-// 限幅函数
-float float_constrain(float Value, float minValue, float maxValue);
-// 限幅函数
-int16_t int16_constrain(int16_t Value, int16_t minValue, int16_t maxValue);
-// 循环限幅函数
-float loop_float_constrain(float Input, float minValue, float maxValue);
-// 角度 °限幅 180 ~ -180
-float theta_format(float Ang);
+float Signf(float value);                                                     // 符号函数
+float Clampf(float value, float min, float max);                              // 限幅
+float ClampAbsf(float value, float max);                                      // 绝对值限幅
+float LoopClampf(float Input, float minValue, float maxValue);                // 循环限幅
+float Remapf(float a, float inmin, float intmax, float outmin, float outmax); // 值映射
+float Rampf(float prev_x, float x, float k_min, float k_max, float dt);       // 斜坡函数
 
+float Sqrt(float x);                                      // 快速开方
+long long FPow(long long a, long long b);                 // 快速幂
+long long FPowMod(long long a, long long b, long long p); // 快速幂取模
+float FSqrtf(float x);                                    // 快速平方根
+long long FGcd(long long a, long long b);                 // 计算最大公约数 greatest common divisor
+
+float float_deadband(float Value, float minValue, float maxValue);         // 浮点死区
+int16_t int16_deadline(int16_t Value, int16_t minValue, int16_t maxValue); // int16 死区
+
+float float_constrain(float Value, float minValue, float maxValue);         // 限幅函数
+int16_t int16_constrain(int16_t Value, int16_t minValue, int16_t maxValue); // 限幅函数
 int float_rounding(float raw);
+void slope_following(float *target, float *set, float acc);
 
-// 弧度格式化为-PI~PI
-#define rad_format(Ang) loop_float_constrain((Ang), -PI, PI)
+/* ================================ 斜波函数 ================================ */
+
+void ramp_init(ramp_function_source_t *ramp_source_type, float frame_period, float max, float min); // 斜波函数初始化
+float ramp_calc(ramp_function_source_t *ramp_source_type, float input);                             // 斜波函数计算
+
+/* ================================ OLS 最小二乘法 ================================ */
 
 void OLS_Init(Ordinary_Least_Squares_t *OLS, uint16_t order);
 void OLS_Update(Ordinary_Least_Squares_t *OLS, float deltax, float y);
@@ -151,6 +125,7 @@ float OLS_Derivative(Ordinary_Least_Squares_t *OLS, float deltax, float y);
 float OLS_Smooth(Ordinary_Least_Squares_t *OLS, float deltax, float y);
 float Get_OLS_Derivative(Ordinary_Least_Squares_t *OLS);
 float Get_OLS_Smooth(Ordinary_Least_Squares_t *OLS);
-void slope_following(float *target, float *set, float acc);
+
+/* ================================================================ function ================================================================ */
 
 #endif

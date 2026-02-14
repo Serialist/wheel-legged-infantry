@@ -607,10 +607,10 @@ float TD_Calculate(TD_t *td, float input)
     a0 = td->dx * td->h0;
     y = td->x - td->Input + a0;
     a1 = sqrt(d * (d + 8 * abs(y)));
-    a2 = a0 + sign(y) * (a1 - d) / 2;
-    a = (a0 + y) * (sign(y + d) - sign(y - d)) / 2 + a2 * (1 - (sign(y + d) - sign(y - d)) / 2);
-    fhan = -td->r * a / d * (sign(a + d) - sign(a - d)) / 2 -
-           td->r * sign(a) * (1 - (sign(a + d) - sign(a - d)) / 2);
+    a2 = a0 + Signf(y) * (a1 - d) / 2;
+    a = (a0 + y) * (Signf(y + d) - Signf(y - d)) / 2 + a2 * (1 - (Signf(y + d) - Signf(y - d)) / 2);
+    fhan = -td->r * a / d * (Signf(a + d) - Signf(a - d)) / 2 -
+           td->r * Signf(a) * (1 - (Signf(a + d) - Signf(a - d)) / 2);
 
     td->ddx = fhan;
     td->dx += (td->ddx + td->last_ddx) * td->dt / 2;

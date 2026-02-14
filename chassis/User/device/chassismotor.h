@@ -188,7 +188,7 @@ typedef struct
 	float toatalyaw;
 	float roll;
 	float pitch;
-} IMU_FDB;
+} Robo_Attitude_t;
 
 typedef struct Robo_Attitude_Def_t
 {
@@ -283,8 +283,6 @@ typedef struct
 typedef struct
 {
 	CM_TRANSMIT_DATA ak_set[6];
-
-	IMU_FDB IMU_DATA;
 
 	State_Var_s state;
 
