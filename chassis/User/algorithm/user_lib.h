@@ -28,11 +28,6 @@
 #endif /* _CMSIS_OS_H */
 #endif /* user_malloc */
 
-/* radian coefficient */
-#ifndef RAD_COEF
-#define RAD_COEF 57.295779513f
-#endif
-
 /* circumference ratio */
 #ifndef PI
 #define PI 3.14159265354f
@@ -48,6 +43,9 @@
 
 #define DEG_CLAMPF(Ang) LoopClampf((Ang), -180.0f, 180.0f) // 角度格式化为-180~180
 #define RAD_CLAMPF(Ang) LoopClampf((Ang), -PI, PI)         // 弧度格式化为-PI~PI
+
+#define DEG2RAD(Ang) ((Ang) * 0.01745329252f)
+#define RAD2DEG(Ang) ((Ang) * 57.295779513f)
 
 /* ================================================================ typedef ================================================================ */
 
