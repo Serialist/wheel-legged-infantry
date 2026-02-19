@@ -290,6 +290,23 @@ typedef struct
 
 } Chassis_t;
 
+typedef enum
+{
+	RBS_NONE,
+	RBS_RUN,
+	RBS_JUMP
+} Robo_State_t;
+
+typedef enum
+{
+	JS_NONE,
+	JS_INIT,
+	JS_STRETCH,
+	JS_SHRINK,
+	JS_AIR,
+	JS_END
+} JUMP_State_t;
+
 typedef struct
 {
 	float x;						 // m   期望位置
@@ -298,6 +315,7 @@ typedef struct
 	float pitch;					 // rad 期望 pitch
 	float roll;						 // rad 期望 roll
 	float left_length, right_length; // m  期望腿长
+	float height;
 	float torque[6];
 } Wheel_Leg_Target_t;
 

@@ -1,6 +1,10 @@
 import datetime
 
-def LQR_K_Extract_PT():
+def file_clear():
+    with open("lqr_k.txt", "w") as f:
+        f.write("/// @date " + datetime.datetime.now().strftime('%Y-%m-%d %H:%M') + "\n\n")
+
+def k_extract(step):
     with open("lqr_k.m", "r") as f:
         ls = f.readlines()
     
@@ -18,11 +22,11 @@ def LQR_K_Extract_PT():
         
             lk.append( [k1, k2, k3, k4] )
 
-        head = "/// @date " + datetime.datetime.now().strftime('%Y-%m-%d %H:%M') + "\nfloat lqr_coe[12][4] = {\n"
+        head = "float lqr_coe{0}[12][4] = ".format(int(step)) + "{\n"
         body = "\t{{{0:.15f}, {1:.15f}, {2:.15f}, {3:.15f}}},\n"
-        tail = "};"
+        tail = "};\n\n"
 
-        fout = open("lqr_k.txt", "w")
+        fout = open("lqr_k.txt", "a")
 
         fout.write(head)
         for i in range(len(lk)):
