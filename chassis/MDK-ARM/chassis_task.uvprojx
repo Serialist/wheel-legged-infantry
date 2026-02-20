@@ -659,11 +659,6 @@
               <FilePath>..\User\algorithm\AHRS_middleware.c</FilePath>
             </File>
             <File>
-              <FileName>user_lib.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\User\algorithm\user_lib.c</FilePath>
-            </File>
-            <File>
               <FileName>AHRS.lib</FileName>
               <FileType>4</FileType>
               <FilePath>..\User\algorithm\AHRS.lib</FilePath>
@@ -758,6 +753,11 @@
               <FileType>1</FileType>
               <FilePath>..\User\utils\debug.c</FilePath>
             </File>
+            <File>
+              <FileName>user_lib.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\utils\user_lib.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -772,6 +772,11 @@
               <FileName>vmc-dm.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\module\vmc-dm.c</FilePath>
+            </File>
+            <File>
+              <FileName>lqr.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\module\lqr.c</FilePath>
             </File>
           </Files>
         </Group>

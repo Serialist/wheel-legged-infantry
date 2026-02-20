@@ -69,7 +69,7 @@ typedef struct
 
 extern INS_t INS;
 
-void chassis_data_fdb(Chassis_t* ch);
+void chassis_data_fdb(void);
 void INS_Init(void);
 void INS_Task(void);
 void IMU_Temperature_Ctrl(void);

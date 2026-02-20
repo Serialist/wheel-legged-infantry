@@ -16,7 +16,9 @@
   */
 #ifndef PID_H
 #define PID_H
+
 #include "struct_typedef.h"
+
 enum PID_MODE
 {
   PID_POSITION = 0,
@@ -32,7 +34,6 @@ typedef enum
 
 typedef struct
 {
-  uint8_t mode;
   // PID 三参数
   fp32 Kp;
   fp32 Ki;
@@ -106,50 +107,12 @@ typedef struct
   fp32 err_boundary[2]; // 误差分段点
 } piece3_pid_type_def;
 
-/**
- * @brief pid struct data init
- *
- * @param pid PID结构数据指针
- * @param mode PID_POSITION:普通PID
- *             PID_DELTA: 差分PID
- * @param kp
- * @param ki
- * @param kd
- * @param max_out 最大输出
- * @param max_iout 最大积分输出
- */
-void PID_init(PID_Typedef *pid, uint8_t mode, const fp32 kp, const fp32 ki, const fp32 kd, fp32 max_out, fp32 max_iout);
+void PID_init(PID_Typedef *pid, const fp32 kp, const fp32 ki, const fp32 kd, fp32 max_out, fp32 max_iout);
 
-/**
- * @brief          pid calculate
- * @param[out]     pid: PID struct data point
- * @param[in]      ref: feedback data
- * @param[in]      set: set point
- * @retval         pid out
- */
-/**
- * @brief          pid计算
- * @param[out]     pid: PID结构数据指针
- * @param[in]      ref: 反馈数据
- * @param[in]      set: 设定值
- * @retval         pid输出
- */
-// extern fp32 PID_Calc(PID_Typedef *pid, fp32 ref, fp32 set);
-extern fp32 PID_Calc(PID_Typedef *pid, fp32 set, fp32 ref);
-extern fp32 anglePidCalc(PID_Typedef *pid, fp32 set, fp32 get, fp32 gyro);
-extern fp32 Piece2_PID_Calc(piece2_pid_type_def *pid, fp32 set, fp32 ref);
-extern fp32 Piece3_PID_Calc(piece3_pid_type_def *pid, fp32 set, fp32 ref);
-extern fp32 ExpKp_PID_Calc(PID_Typedef *pid, fp32 set, fp32 ref);
-/**
- * @brief          pid out clear
- * @param[out]     pid: PID struct data point
- * @retval         none
- */
-/**
- * @brief          pid 输出清除
- * @param[out]     pid: PID结构数据指针
- * @retval         none
- */
-extern void PID_clear(PID_Typedef *pid);
+fp32 PID_Pos_Update(PID_Typedef *pid, fp32 set, fp32 ref);
+fp32 PID_Delta_Update(PID_Typedef *pid, fp32 set, fp32 ref);
+
+/// @brief          pid 输出清除
+void PID_clear(PID_Typedef *pid);
 
 #endif

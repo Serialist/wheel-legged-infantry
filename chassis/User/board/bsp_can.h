@@ -1,8 +1,20 @@
-#ifndef __BSP_CAN_H
-#define __BSP_CAN_H
+/**
+ * @file bsp_can.h
+ * @author Serialist (ba3pt@qq.com)
+ * @brief
+ * @version 0.1.0
+ * @date 2026-02-20
+ *
+ * @copyright Copyright (c) Serialist 2026
+ *
+ */
+
+#ifndef BSP_CAN_H
+#define BSP_CAN_H
 
 #include "struct_typedef.h"
 #include "chassismotor.h"
+#include "can.h"
 #include "dji_motor.h"
 
 #define M3508_WHELL_ID_1 0x206

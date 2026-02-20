@@ -49,7 +49,6 @@ const float vaEstimateKF_H[4] = {1.0f, 0.0f,
                                  0.0f, 1.0f}; // 设置矩阵H为常量
 
 extern INS_t INS;
-extern Chassis_t chassis;
 extern VMC_t leg_l, leg_r;
 extern Wheel_Leg_Target_t set;
 
@@ -63,6 +62,8 @@ float vrb = 0.0f, vlb = 0.0f; // vehicle
 float aver_v = 0.0f;
 
 float position_increment = 0;
+
+Observer_t ob;
 
 /* ================================================================ prototype ================================================================ */
 
@@ -111,11 +112,13 @@ void observer(void const *argument)
     xvEstimateKF_Update(&vaEstimateKF, INS.MotionAccel_n[1], aver_v); // ins 加速度 轮毂反馈速度 融合滤波
 
     // 原地自转的过程中v_filter和x_filter应该都是为0
-    chassis.state.v_filter = vel_acc[0]; // 得到卡尔曼滤波后的速度
+    // chassis.state.v_filter = vel_acc[0]; // 得到卡尔曼滤波后的速度
+    ob.v = vel_acc[0];
 
-    position_increment = chassis.state.v_filter * (TASK_PERIOD_MS * 0.001f);
+    position_increment = ob.v * (TASK_PERIOD_MS * 0.001f);
 
-    chassis.state.x_filter += position_increment;
+    // chassis.state.x_filter += position_increment;
+    ob.x += position_increment;
 
     /* ================================================================ 安全检测 ================================================================ */
 

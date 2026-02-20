@@ -8,10 +8,8 @@ py.lqr_k_extract.file_clear()
 
 L0s = 0.12:0.01:0.32;          % L0变化范围
 Ks = zeros(2, 6, length(L0s)); % 存放不同L0对应的K
-theta_list = [0 15 30 45];
-
-% 创建画布（所有子图都在这个窗口里）
-% figure('Color','white','Position',[100,100,1200,800]);  % 位置[左,下,宽,高]
+% theta_list = [0 15 30 45 60];
+theta_list = [0];
 
 for theta_step = 1:length(theta_list)
     
@@ -62,8 +60,8 @@ for theta_step = 1:length(theta_list)
         [G, H] = c2d(eval(A), eval(B), 0.005);
         
         % 定义权重矩阵Q, R
-        Q = diag([500, 0.5, 150, 10, 8000, 1]);
-        R = diag([1, 0.25]);
+        Q = diag([3000, 0.5, 5, 1, 4000, 1]);
+        R = diag([10 50]);
     
         % 求解反馈矩阵K
         Ks(:,:,step)=dlqr(G,H,Q,R);
@@ -89,16 +87,6 @@ for theta_step = 1:length(theta_list)
     % 代入L0 = 0.20打印矩阵K 
     len = 0.20;
     fprintf("len = %.2f, theta = %d:\n", len, theta_list(theta_step));
-    disp(vpa(subs(K, L0, 0.20)));
+    disp(eval(vpa(subs(K, L0, 0.20))));
 
-    % ========== 子图1：第一行第一列 ==========
-    % subplot(2,2,theta_step);  % 2行2列，第1个位置
-    % legend('theta_t',"dtheta_t", "x_t", "dx_t", "pitch_t", "dpitch_t", 'theta_tp',"dtheta_tp", "x_tp", "dx_tp", "pitch_tp", "dpitch_tp");
-    % for step_len = L0s
-    %     kr(:,step_len) = reshape(vpa(subs(K, L0, 0.20)))
-    % end
-    % plot(t, theta, 'r-', 'LineWidth',1.5);
-    % xlabel('时间 (s)'); ylabel('俯仰角 (rad)');
-    % title('子图1：俯仰角时域曲线');
-    % grid on; grid minor;  % 显示网格
 end

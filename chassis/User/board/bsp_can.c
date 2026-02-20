@@ -16,7 +16,6 @@
 #include "motor.h"
 
 extern Wheel_Leg_Target_t set;
-extern Chassis_t chassis;
 
 AK_motor_fdb_t AK_motor[6];
 AK_motor_ctrl_fdb_t motorAK10[6];

@@ -17,6 +17,9 @@
 #include "stdint.h"
 #include "stdbool.h"
 #include "math.h"
+#include "arm_math.h"
+
+// #include "cmsis_os.h" // 下面有这个要不要用呢（）
 
 /* ================================================================ macro ================================================================ */
 
@@ -46,6 +49,26 @@
 
 #define DEG2RAD(Ang) ((Ang) * 0.01745329252f)
 #define RAD2DEG(Ang) ((Ang) * 57.295779513f)
+
+#define LF 0
+#define LB 1
+#define RF 2
+#define RB 3
+
+// 轮子
+#define WL 4
+#define WR 5
+
+#define FRONT 0
+#define BACK 1
+
+#define LEFT 0
+#define RIGHT 1
+
+// 做一层 adapter，方便移植
+/// @todo 放到单独一个适配层文件中，比如 math-adapter，这样不同平台移植方便还能硬件优化
+#define SINF(x) arm_sin_f32(x)
+#define COSF(x) arm_cos_f32(x)
 
 /* ================================================================ typedef ================================================================ */
 

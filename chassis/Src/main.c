@@ -66,7 +66,7 @@
 void SystemClock_Config(void);
 void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
-extern Chassis_t chassis;
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -82,7 +82,7 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 
-  chassis.robo_status.status = ROBO_STATUS_INIT;
+  robo_status.status = ROBO_STATUS_INIT;
 
   /* USER CODE END 1 */
 

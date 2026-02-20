@@ -11,13 +11,12 @@
  ******************************************************************************
  */
 #include "ins_task.h"
+#include "wheel_legged_chassis.h"
 #include "cmsis_os.h"
 #include "controller.h"
 #include "QuaternionEKF.h"
 #include "bsp_imu_pwm.h"
-#include "chassismotor.h"
 
-extern Chassis_t chassis;
 extern Robo_Attitude_t att;
 INS_t INS;
 IMU_Param_t IMU_Param;
@@ -35,7 +34,7 @@ float RefTemp = 40;
 
 static void IMU_Param_Correction(IMU_Param_t *param, float gyro[3], float accel[3]);
 
-void chassis_data_fdb(Chassis_t *ch)
+void chassis_data_fdb(void)
 {
     att.pitch = INS.Pitch;
     att.yaw = INS.Yaw;
@@ -164,7 +163,7 @@ void INS_task(void const *argument)
     for (;;)
     {
         INS_Task();
-        chassis_data_fdb(&chassis);
+        chassis_data_fdb();
         osDelay(1);
     }
     /* USER CODE END StartINSTask */
