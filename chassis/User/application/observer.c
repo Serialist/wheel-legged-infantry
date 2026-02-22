@@ -94,8 +94,8 @@ void observer(void const *argument)
   {
     uint32_t current_time_ms = HAL_GetTick();
 
-    motor_vel_r = DJI_MOTOR_SPEED(&m3508[0]);
-    motor_vel_l = -DJI_MOTOR_SPEED(&m3508[1]);
+    motor_vel_r = DJI_MOTOR_SPEED(&m3508[RIGHT]);
+    motor_vel_l = -DJI_MOTOR_SPEED(&m3508[LEFT]);
 
     // 机体速度观测器
 
@@ -128,7 +128,7 @@ void observer(void const *argument)
     /// @brief 急停判断
     // if (RC_IS_OFFLINE(&rc_ctrl) || MOTOR_IS_OFFLINE(&motor_status) || (leg_l.theta >= (PI / 2)) || (leg_r.theta >= (PI / 2)))
     // {
-    //   chassis.robo_status.status = ROBO_STATUS_EMERGENCY;
+    //   robo_status = ROBO_STATUS_EMERGENCY;
     // }
 
     /* ================================================================ / 安全检测 ================================================================ */

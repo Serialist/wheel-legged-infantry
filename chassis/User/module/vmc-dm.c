@@ -61,10 +61,13 @@ void VMC_5bar_FK(VMC_t *vmc, float phi1, float phi4, float pitch, float dpitch, 
 	vmc->d_phi0 = (vmc->phi0 - vmc->last_phi0) / dt; // 计算phi0变化率，d_phi0用于计算lqr需要的d_theta
 	vmc->d_alpha = 0.0f - vmc->d_phi0;
 
+	// 计算 theta
 	vmc->last_theta = vmc->theta;
 	vmc->theta = PI / 2.0f - pitch - vmc->phi0; // 得到状态变量1
 	vmc->d_theta = (-dpitch - vmc->d_phi0);		// 得到状态变量2
 	// vmc->d_theta = (vmc->theta - vmc->last_theta) / dt;
+	vmc->dd_theta = (vmc->d_theta - vmc->last_d_theta) / dt;
+	vmc->last_d_theta = vmc->d_theta;
 
 	vmc->last_phi0 = vmc->phi0;
 
@@ -74,8 +77,6 @@ void VMC_5bar_FK(VMC_t *vmc, float phi1, float phi4, float pitch, float dpitch, 
 	vmc->last_d_L0 = vmc->d_L0;
 	vmc->last_L0 = vmc->L0;
 
-	vmc->dd_theta = (vmc->d_theta - vmc->last_d_theta) / dt;
-	vmc->last_d_theta = vmc->d_theta;
 }
 
 // 计算期望的关节输出力矩

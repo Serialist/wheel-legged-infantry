@@ -12,7 +12,6 @@
 #include "stdlib.h"
 #include "string.h"
 #include "user_lib.h"
-#include "math.h"
 
 // 快速开方
 float Sqrt(float x)

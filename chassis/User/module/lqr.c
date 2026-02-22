@@ -86,6 +86,7 @@ float lqr_coe5[12][4] = {
 
 float (*lqr_k_coef[])[12][4] = {&lqr_coe1, &lqr_coe2, &lqr_coe3, &lqr_coe4, &lqr_coe5};
 float (*lqr_coe)[12][4] = &lqr_coe1;
+float k[2][6];
 
 /************************
  * @brief 多项式拟合，腿长对应 K 矩阵
@@ -107,7 +108,6 @@ void LQR_Control(float *x, float *u, float len)
 {
 	int i, j, n;
 	float k_[6][2];
-	float k[6][2];
 
 	// 选择系数
 	int8_t coef_idx = (int)roundf(fabsf(x[0]) / (PI / 12)); // 选择系数

@@ -23,6 +23,19 @@
  * current
  */
 
+// config//
+// typedef struct
+// {
+// 	uint32_t omni_motor[2]; // 电机反馈时间
+// 	// uint32_t momentum_motor[2];
+// 	uint32_t speed_set[2]; // 底盘速度设定时间
+// 	uint32_t ree_power;	   // 裁判系统反馈功率时间
+// 	uint32_t ree_statue;   // 裁判系统反馈机器人状态时间
+// 	uint32_t model;
+// 	uint32_t imu;
+// 	uint32_t rc;
+// } Time_t;
+
 // enum Robo_Status
 // {
 //     ROBO_OFF,

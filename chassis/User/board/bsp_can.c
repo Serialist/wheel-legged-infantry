@@ -17,10 +17,9 @@
 
 extern Wheel_Leg_Target_t set;
 
-AK_motor_fdb_t AK_motor[6];
-AK_motor_ctrl_fdb_t motorAK10[6];
+// AK_motor_fdb_t AK_motor[4]; // 伺服模式的数据
 
-struct Motor_AK_Rx_Data ak10[4];
+Motor_AK_RxData_t ak10[4];
 DJI_RxData_Def_t m3508[2];
 
 uint8_t can_rx_data[8];
@@ -55,116 +54,40 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	{
 		if (HAL_CAN_GetRxMessage(&hcan1, CAN_RX_FIFO0, &rx_message, can_rx_data) == HAL_OK) // 获得接收到的数据头和数据
 		{
-			/**
-			 * @brief M3508 轮毂 接收
-			 * @date 2025-10-30
-			 */
-			/******** M3508 ********/
-			if (rx_message.StdId == M3508_WHELL_ID_1)
+			switch (rx_message.StdId)
 			{
-				DJI_Motor_Receive(&m3508[0], can_rx_data);
-				motor_status.receive_flag[4] = true;
-			}
-			else if (rx_message.StdId == M3508_WHELL_ID_2)
-			{
-				DJI_Motor_Receive(&m3508[1], can_rx_data);
-				motor_status.receive_flag[5] = true;
-			}
-			else if (rx_message.StdId == 0x01)
-			{
-				Motor_AK_MIT_Decode(&ak10[0], can_rx_data, P_MIN, V_MAX, T_MAX);
-				/////////////////////////////////////////////////////////////////
+			case HUB_R_ID:
+				DJI_Motor_Receive(&m3508[RIGHT], can_rx_data);
+				motor_status.receive_flag[WR] = true;
+				break;
 
-				int id = can_rx_data[0]; // 驱动 ID 号
-				int p_int = (can_rx_data[1] << 8) | (can_rx_data[2]);
-				int v_int = (can_rx_data[3] << 4) | (can_rx_data[4] >> 4);
-				int i_int = ((can_rx_data[4] & 0xF) << 8) | (can_rx_data[5]);
-				int T_int = can_rx_data[6];
-				float p = uint_to_float(p_int, P_MIN, P_MAX, 16);
-				float v = uint_to_float(v_int, V_MIN, V_MAX, 12);
-				float i = uint_to_float(i_int, -T_MAX, T_MAX, 12);
-				float Temp = T_int;
-				if (id == 1)
-				{
-					motorAK10[id - 1].angle = p;
-					motorAK10[id - 1].motor_ctrlspd = v;
-					motorAK10[id - 1].motor_ctrltor = i;
-					motorAK10[id - 1].motor_ctrltemp = Temp - 40;
-					motor_status.receive_flag[id - 1] = true;
-				}
-			}
-			else if (rx_message.StdId == 0x02)
-			{
-				Motor_AK_MIT_Decode(&ak10[1], can_rx_data, P_MIN, V_MAX, T_MAX);
-				/////////////////////////////////////////////////////////////////
+			case HUB_L_ID:
+				DJI_Motor_Receive(&m3508[LEFT], can_rx_data);
+				motor_status.receive_flag[WL] = true;
+				break;
 
-				int id = can_rx_data[0]; // 驱动 ID 号
-				int p_int = (can_rx_data[1] << 8) | (can_rx_data[2]);
-				int v_int = (can_rx_data[3] << 4) | (can_rx_data[4] >> 4);
-				int i_int = ((can_rx_data[4] & 0xF) << 8) | (can_rx_data[5]);
-				int T_int = can_rx_data[6];
-				float p = uint_to_float(p_int, P_MIN, P_MAX, 16);
-				float v = uint_to_float(v_int, V_MIN, V_MAX, 12);
-				float i = uint_to_float(i_int, -T_MAX, T_MAX, 12);
-				float Temp = T_int;
-				if (id == 2)
-				{
-					motorAK10[id - 1].angle = p;
-					motorAK10[id - 1].motor_ctrlspd = v;
-					motorAK10[id - 1].motor_ctrltor = i;
-					motorAK10[id - 1].motor_ctrltemp = Temp - 40;
-					motor_status.receive_flag[id - 1] = true;
-				}
-			}
-			else if (rx_message.StdId == 0x03)
-			{
-				Motor_AK_MIT_Decode(&ak10[2], can_rx_data, P_MIN, V_MAX, T_MAX);
-				ak10[2].position = -ak10[2].position;
-				ak10[2].speed = -ak10[2].speed;
-				/////////////////////////////////////////////////////////////////
+			case HIP_RF_ID:
+				Motor_AK_MIT_Decode(&ak10[RF], can_rx_data, P_MIN, V_MAX, T_MAX);
+				motor_status.receive_flag[RF] = true;
+				break;
 
-				int id = can_rx_data[0]; // 驱动 ID 号
-				int p_int = (can_rx_data[1] << 8) | (can_rx_data[2]);
-				int v_int = (can_rx_data[3] << 4) | (can_rx_data[4] >> 4);
-				int i_int = ((can_rx_data[4] & 0xF) << 8) | (can_rx_data[5]);
-				int T_int = can_rx_data[6];
-				float p = uint_to_float(p_int, P_MIN, P_MAX, 16);
-				float v = uint_to_float(v_int, V_MIN, V_MAX, 12);
-				float i = uint_to_float(i_int, -T_MAX, T_MAX, 12);
-				float Temp = T_int;
-				if (id == 3)
-				{
-					motorAK10[id - 1].angle = -p;
-					motorAK10[id - 1].motor_ctrlspd = -v;
-					motorAK10[id - 1].motor_ctrltor = i;
-					motorAK10[id - 1].motor_ctrltemp = Temp - 40;
-					motor_status.receive_flag[id - 1] = true;
-				}
-			}
-			else if (rx_message.StdId == 0x04)
-			{
-				Motor_AK_MIT_Decode(&ak10[3], can_rx_data, P_MIN, V_MAX, T_MAX);
-				ak10[3].position = -ak10[3].position;
-				ak10[3].speed = -ak10[3].speed;
-				/////////////////////////////////////////////////////////////////
+			case HIP_RB_ID:
+				Motor_AK_MIT_Decode(&ak10[RB], can_rx_data, P_MIN, V_MAX, T_MAX);
+				motor_status.receive_flag[RB] = true;
+				break;
 
-				int id = can_rx_data[0]; // 驱动 ID 号
-				int p_int = (can_rx_data[1] << 8) | (can_rx_data[2]);
-				int v_int = (can_rx_data[3] << 4) | (can_rx_data[4] >> 4);
-				int i_int = ((can_rx_data[4] & 0xF) << 8) | (can_rx_data[5]);
-				int T_int = can_rx_data[6];
-				float p = uint_to_float(p_int, P_MIN, P_MAX, 16);
-				float v = uint_to_float(v_int, V_MIN, V_MAX, 12);
-				float i = uint_to_float(i_int, -T_MAX, T_MAX, 12);
-				float Temp = T_int;
-				if (id == 4)
-				{
-					motorAK10[id - 1].angle = -p;
-					motorAK10[id - 1].motor_ctrlspd = -v;
-					motorAK10[id - 1].motor_ctrltor = i;
-					motorAK10[id - 1].motor_ctrltemp = Temp - 40;
-					motor_status.receive_flag[id - 1] = true;
-				}
+			case HIP_LF_ID:
+				Motor_AK_MIT_Decode(&ak10[LF], can_rx_data, P_MIN, V_MAX, T_MAX);
+				motor_status.receive_flag[LF] = true;
+				break;
+
+			case HIP_LB_ID:
+				Motor_AK_MIT_Decode(&ak10[LB], can_rx_data, P_MIN, V_MAX, T_MAX);
+				motor_status.receive_flag[LB] = true;
+				break;
+
+			default:
+				break;
 			}
 		}
 	}
@@ -176,10 +99,20 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	}
 }
 
-float uint_to_float(int x_int, float x_min, float x_max, int bits)
-{
-	/// converts unsigned int to float, given range and number of bits ///
-	float span = x_max - x_min;
-	float offset = x_min;
-	return ((float)x_int) * span / ((float)((1 << bits) - 1)) + offset;
-}
+// 古代的 ak10 mit 模式接受代码
+// int id = can_rx_data[0]; // 驱动 ID 号
+// int p_int = (can_rx_data[1] << 8) | (can_rx_data[2]);
+// int v_int = (can_rx_data[3] << 4) | (can_rx_data[4] >> 4);
+// int i_int = ((can_rx_data[4] & 0xF) << 8) | (can_rx_data[5]);
+// int T_int = can_rx_data[6];
+// float p = Uint_To_Float(p_int, P_MIN, P_MAX, 16);
+// float v = Uint_To_Float(v_int, V_MIN, V_MAX, 12);
+// float i = Uint_To_Float(i_int, -T_MAX, T_MAX, 12);
+// float Temp = T_int;
+// if (id == HIP_RF_ID)
+// {
+// 	motorAK10[RF].angle = p;
+// 	motorAK10[RF].motor_ctrlspd = v;
+// 	motorAK10[RF].motor_ctrltor = i;
+// 	motorAK10[RF].motor_ctrltemp = Temp - 40;
+// }

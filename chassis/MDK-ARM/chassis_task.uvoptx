@@ -193,67 +193,67 @@
         <Ww>
           <count>6</count>
           <WinNumber>1</WinNumber>
-          <ItemText>m3508</ItemText>
+          <ItemText>m3508,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>7</count>
           <WinNumber>1</WinNumber>
-          <ItemText>chassis</ItemText>
+          <ItemText>aver_v</ItemText>
         </Ww>
         <Ww>
           <count>8</count>
           <WinNumber>1</WinNumber>
-          <ItemText>aver_v</ItemText>
+          <ItemText>xl</ItemText>
         </Ww>
         <Ww>
           <count>9</count>
           <WinNumber>1</WinNumber>
-          <ItemText>xl</ItemText>
+          <ItemText>set</ItemText>
         </Ww>
         <Ww>
           <count>10</count>
           <WinNumber>1</WinNumber>
-          <ItemText>set</ItemText>
+          <ItemText>yaw_pid</ItemText>
         </Ww>
         <Ww>
           <count>11</count>
           <WinNumber>1</WinNumber>
-          <ItemText>yaw_pid</ItemText>
+          <ItemText>turn_t</ItemText>
         </Ww>
         <Ww>
           <count>12</count>
           <WinNumber>1</WinNumber>
-          <ItemText>turn_t</ItemText>
+          <ItemText>\\gimbal_task\../User/application/wheel_legged_chassis.c\yaw_pid.Kp</ItemText>
         </Ww>
         <Ww>
           <count>13</count>
           <WinNumber>1</WinNumber>
-          <ItemText>\\gimbal_task\../User/application/wheel_legged_chassis.c\yaw_pid.Kp</ItemText>
+          <ItemText>jump_state</ItemText>
         </Ww>
         <Ww>
           <count>14</count>
           <WinNumber>1</WinNumber>
-          <ItemText>robo_state</ItemText>
+          <ItemText>leg_l</ItemText>
         </Ww>
         <Ww>
           <count>15</count>
           <WinNumber>1</WinNumber>
-          <ItemText>jump_state</ItemText>
+          <ItemText>att</ItemText>
         </Ww>
         <Ww>
           <count>16</count>
           <WinNumber>1</WinNumber>
-          <ItemText>leg_l</ItemText>
+          <ItemText>leg_r</ItemText>
         </Ww>
         <Ww>
           <count>17</count>
           <WinNumber>1</WinNumber>
-          <ItemText>att</ItemText>
+          <ItemText>t1</ItemText>
         </Ww>
         <Ww>
           <count>18</count>
           <WinNumber>1</WinNumber>
-          <ItemText>leg_r</ItemText>
+          <ItemText>t2</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>
@@ -286,6 +286,41 @@
           <count>5</count>
           <WinNumber>2</WinNumber>
           <ItemText>\\gimbal_task\../User/application/wheel_legged_chassis.c\leg_r.torque_set</ItemText>
+        </Ww>
+        <Ww>
+          <count>6</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>\\gimbal_task\../User/board/bsp_can.c\ak10</ItemText>
+        </Ww>
+        <Ww>
+          <count>7</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>ob</ItemText>
+        </Ww>
+        <Ww>
+          <count>8</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>xr</ItemText>
+        </Ww>
+        <Ww>
+          <count>9</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>ur</ItemText>
+        </Ww>
+        <Ww>
+          <count>10</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>tttp</ItemText>
+        </Ww>
+        <Ww>
+          <count>11</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>ttf0</ItemText>
+        </Ww>
+        <Ww>
+          <count>12</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>k</ItemText>
         </Ww>
       </WatchWindow2>
       <MemoryWindow1>

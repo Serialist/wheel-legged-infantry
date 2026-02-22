@@ -17,6 +17,8 @@
  *
  *************************************************/
 
+/* ================================================================ include ================================================================ */
+
 #include "wheel_legged_chassis.h"
 #include "observer.h"
 #include "lqr.h"
@@ -32,11 +34,15 @@
 #include "filter.h"
 #include "motor.h"
 
-extern AK_motor_ctrl_fdb_t motorAK10[6];
+/* ================================================================ micro ================================================================ */
 
-Robo_State_t robo_state;
+/* ================================================================ variable ================================================================ */
+
+extern Motor_AK_RxData_t ak10[4];
+
+Robo_Status_t robo_status;
 Robo_Attitude_t att;
-JUMP_State_t jump_state = JS_NONE;
+JUMP_State_t jump_state = JPS_NONE;
 
 PID_Typedef pid_tpl = {0},
 			pid_tpr = {0},
@@ -49,30 +55,34 @@ PID_Typedef pid_tpl = {0},
 
 Wheel_Leg_Target_t set;
 VMC_t leg_l, leg_r;
-Robo_Status_t robo_status;
-
-/* ======================== he ======================== */
+Robo_Flag_t rbflag;
 
 float turn_t; // yaw轴补偿
 float tp_phi; // 劈叉
 float tplqrl;
-float tplqrr;
 float tlqrl;
+float tplqrr;
 float tlqrr;
-// 支持力前馈
 float leg_force_l = 0;
 float leg_force_r = 0;
 
+// 状态变量和控制量
 float xl[6], ul[2];
 float xr[6], ur[2];
+float t1 = 0, t2 = 0;
+
+/* ================================================================ prototype ================================================================ */
 
 void ChassisInit(void);
 void Chassis_Motor_Transmit(void);
 void Wheel_Leg_Control(void);
+void chassis_sys_calc(void);
 void Control_Get(void);
 void Clamp(float *in, float min, float max);
 void Motor_Enable(void);
 void Jump_FSM(void);
+
+/* ================================================================ function ================================================================ */
 
 void Chassis_Task(void const *argument)
 {
@@ -82,13 +92,17 @@ void Chassis_Task(void const *argument)
 
 	for (;;)
 	{
-		/* ================================ 状态更新 ================================ */
+		/* ================ 状态更新 ================ */
+
+		chassis_sys_calc();
+
+		/* ================ 控制 ================ */
 
 		Control_Get();
 		Jump_FSM();
 		Wheel_Leg_Control();
 
-		/* ================================ 电机控制指令 ================================ */
+		/* ================ 电机指令 ================ */
 
 		Chassis_Motor_Transmit();
 	}
@@ -118,74 +132,91 @@ void ChassisInit(void)
  ************************/
 void Motor_Enable(void)
 {
-	for (int a = 1; a <= 4; a++)
-	{
-		controller_init(a);
-		osDelay(1);
-	}
+	// AK_Motor_MIT_Enable(HIP_RF_ID);
+	// AK_Motor_MIT_Enable(HIP_RB_ID);
+	// for (int a = 1; a <= 4; a++)
+	// {
+	// AK_Motor_MIT_Enable(a);
+	// 	osDelay(1);
+	// }
 }
 
+// debug variable
 float ttphi1 = 0, ttphi4 = 0, tttp = 0, ttf0 = 0;
 
 void chassis_sys_calc(void)
 {
-
-	// leg_l.phi1 = PI / 2.0f - motorAK10[2].angle;
-	// leg_l.phi4 = PI / 2.0f - motorAK10[3].angle;
-	// leg_r.phi1 = PI / 2.0f - motorAK10[0].angle;
-	// leg_r.phi4 = PI / 2.0f - motorAK10[1].angle;
-
-	// leg_r.phi1 = ttphi1;
-	// leg_r.phi4 = ttphi4;
-
 	VMC_5bar_FK(&leg_l,
-				PI / 2.0f - motorAK10[2].angle,
-				PI / 2.0f - motorAK10[3].angle,
-				att.pitch, att.pitchspd,
+				// DEG2RAD(90) - ak10[2].angle,
+				PI / 2.0f - ak10[LF].angle,
+				PI / 2.0f - ak10[LB].angle,
+				-att.pitch, -att.vpitch,
 				3.0f / 1000.0f);
 	VMC_5bar_FK(&leg_r,
-				PI / 2.0f - motorAK10[0].angle,
-				PI / 2.0f - motorAK10[1].angle,
-				att.pitch, att.pitchspd,
+				PI / 2.0f - ak10[RF].angle,
+				PI / 2.0f - ak10[RB].angle,
+				att.pitch, att.vpitch,
 				3.0f / 1000.0f);
 
 	OffGround_Detection(&leg_l, att.az);
 	OffGround_Detection(&leg_r, att.az);
 
-	if (jump_state != JS_NONE && jump_state != JS_INIT)
+	if (jump_state != JPS_NONE && jump_state != JPS_INIT)
 	{
-		robo_status.flag.above = true;
+		rbflag.above = true;
 	}
 	else
 	{
-		// robo_status.flag.above = leg_l.is_offground && leg_r.is_offground;
-		robo_status.flag.above = false;
+		// rbflag.above = leg_l.is_offground && leg_r.is_offground;
+		rbflag.above = false;
 	}
 }
 
 void Chassis_Motor_Transmit(void)
 {
-	if (rc_ctrl.rc.s[S_L] == UP)
-	{
-		for (int i = 0; i < 6; i++)
-			set.torque[i] = 0;
-	}
+	// if (rc_ctrl.rc.s[S_L] == UP)
+	// {
+	// 	for (int i = 0; i < 6; i++)
+	// 		set.torque[i] = 0;
+	// }
 
-	/// @brief 用 3508
+	// /// @brief 用 3508
+	// RM_Motor_Transmit(&hcan1, M3508_TX_ID_2,
+	// 				  0,
+	// 				  HEXROLL_TORQUE_TO_CURRENT(set.torque[WR]),
+	// 				  HEXROLL_TORQUE_TO_CURRENT(set.torque[WL]),
+	// 				  0);
+	// osDelay(1);
+
+	// // MIT模式下发送
+	// AK_Motor_MIT_Transmit(HIP_LF_ID, 0, 0, 0, 0, set.torque[LF]);
+	// AK_Motor_MIT_Transmit(HIP_LB_ID, 0, 0, 0, 0, set.torque[LB]);
+	// osDelay(1);
+	// AK_Motor_MIT_Transmit(HIP_RF_ID, 0, 0, 0, 0, set.torque[RF]);
+	// AK_Motor_MIT_Transmit(HIP_RB_ID, 0, 0, 0, 0, set.torque[RB]);
+	// osDelay(1);
+
 	RM_Motor_Transmit(&hcan1, M3508_TX_ID_2,
 					  0,
-					  HEXROLL_TORQUE_TO_CURRENT(-set.torque[WR]),
-					  HEXROLL_TORQUE_TO_CURRENT(set.torque[WL]),
+					  HEXROLL_TORQUE_TO_CURRENT(t1),
+					  HEXROLL_TORQUE_TO_CURRENT(0),
 					  0);
 	osDelay(1);
 
 	// MIT模式下发送
-	AK_MIT_Transmit(3, 0, 0, 0, 0, set.torque[LF]);
-	AK_MIT_Transmit(4, 0, 0, 0, 0, set.torque[LB]);
+	AK_Motor_MIT_Transmit(HIP_LF_ID, 0, 0, 0, 0, 0);
+	AK_Motor_MIT_Transmit(HIP_LB_ID, 0, 0, 0, 0, 0);
 	osDelay(1);
-	AK_MIT_Transmit(1, 0, 0, 0, 0, -set.torque[RF]);
-	AK_MIT_Transmit(2, 0, 0, 0, 0, -set.torque[RB]);
+	AK_Motor_MIT_Transmit(HIP_RF_ID, 0, 0, 0, 0, set.torque[RF]);
+	AK_Motor_MIT_Transmit(HIP_RB_ID, 0, 0, 0, 0, set.torque[RB]);
 	osDelay(1);
+	// 1. 使用返回状态 HAL_BUSY
+	// if(HAL_CAN_AddTxMessage()==HAL_BUSY)
+	// osDelay(1);
+	// 2. 查看邮箱状态
+	// while (HAL_CAN_GetTxMailboxesFreeLevel(&hcan1) == 0);
+	// 3. interrupt
+	HAL_CAN_AddTxMessage
 }
 
 uint8_t last_switch = 0;
@@ -202,16 +233,16 @@ void Control_Get(void)
 
 	if (rc_ctrl.rc.s[S_L] == MID || last_switch == DOWN) // 正常行驶
 	{
-		robo_state = RBS_RUN;
+		robo_status = RBS_RUN;
 	}
-	else if (rc_ctrl.rc.s[S_L] == DOWN && jump_state == JS_NONE)
+	else if (rc_ctrl.rc.s[S_L] == DOWN && jump_state == JPS_NONE)
 	{
-		robo_state = RBS_JUMP;
+		robo_status = RBS_JUMP;
 	}
 	else
 	{
 		set.v = 0;
-		set.yaw = att.toatalyaw;
+		set.yaw = att.totalyaw;
 		set.roll = 0;
 		set.left_length = set.right_length = 0.2f;
 		set.x = ob.x;
@@ -240,20 +271,19 @@ void Clamp(float *in, float min, float max)
  *************************************************/
 void Wheel_Leg_Control(void)
 {
-
 	xl[0] = leg_l.theta;
 	xl[1] = leg_l.d_theta;
 	xl[2] = ob.x - set.x;
 	xl[3] = ob.v - set.v;
 	xl[4] = att.pitch;
-	xl[5] = att.pitchspd;
+	xl[5] = att.vpitch;
 
 	xr[0] = leg_r.theta;
 	xr[1] = leg_r.d_theta;
 	xr[2] = ob.x - set.x;
 	xr[3] = ob.v - set.v;
 	xr[4] = att.pitch;
-	xr[5] = att.pitchspd;
+	xr[5] = att.vpitch;
 
 	LQR_Control(xl, ul, leg_l.L0);
 	LQR_Control(xr, ur, leg_r.L0);
@@ -263,7 +293,7 @@ void Wheel_Leg_Control(void)
 	tlqrr = ur[0];
 	tplqrr = ur[1];
 
-	// if (chassis.robo_status.flag.above)
+	// if (rbflag.above)
 	// {
 	// 	for (int i = 0; i < 6; i++)
 	// 	{
@@ -281,21 +311,10 @@ void Wheel_Leg_Control(void)
 	// 	// tplqrr = tp_offground_pid.Kp * leg_r.theta + tp_offground_pid.Kd * leg_r.d_theta;
 	// }
 
-	// /// @brief u = - K * x。分左右腿
-	// tlqrl = tplqrl = tlqrr = tplqrr = 0;
-	// for (int i = 0; i < 6; i++)
-	// {
-	// 	tlqrl += xl[i] * lqr_k_l[0][i];
-	// 	tplqrl += xl[i] * lqr_k_l[1][i];
-
-	// 	tlqrr += xr[i] * lqr_k_r[0][i];
-	// 	tplqrr += xr[i] * lqr_k_r[1][i];
-	// }
-
 	/* ================================ 轮 解算 ================================ */
-	turn_t = yaw_pid.Kp * (set.yaw - att.toatalyaw) - yaw_pid.Kd * att.yawspd; // 这样计算更稳一点
-	if (robo_status.flag.above)
-		turn_t = 0;
+	// turn_t = yaw_pid.Kp * (set.yaw - att.totalyaw) - yaw_pid.Kd * att.vyaw; // 这样计算更稳一点
+	// if (rbflag.above)
+	turn_t = 0;
 	set.torque[WL] = tlqrl - turn_t;
 	set.torque[WR] = tlqrr + turn_t;
 
@@ -312,18 +331,18 @@ void Wheel_Leg_Control(void)
 			   PID_Pos_Update(&leglength_pid_r, set.right_length, leg_r.L0) +
 			   leg_force_r;
 
-	// leg_l.Tp = tplqrl;
-	// leg_r.Tp = tplqrr;
+	leg_l.Tp = tplqrl;
+	leg_r.Tp = tplqrr;
 
 	// leg_r.Tp = tttp;
 	// leg_r.F0 = ttf0;
 
 	/// @brief 正 VMC
 	VMC_5bar_IK(&leg_l,
-				tplqrl,
+				leg_l.Tp,
 				leg_l.F0);
 	VMC_5bar_IK(&leg_r,
-				tplqrr,
+				leg_r.Tp,
 				leg_r.F0);
 
 	/// @brief 发送 buf
@@ -335,8 +354,8 @@ void Wheel_Leg_Control(void)
 /* ================================ 发送 ================================ */
 
 /// @brief 限幅
-#define HIP_TORQUE_MAX 40.0f
-#define HUB_TORQUE_MAX 2.5f
+#define HIP_TORQUE_MAX 10.0f
+#define HUB_TORQUE_MAX 0.8f
 	Clamp(&set.torque[0], -HIP_TORQUE_MAX, HIP_TORQUE_MAX);
 	Clamp(&set.torque[1], -HIP_TORQUE_MAX, HIP_TORQUE_MAX);
 	Clamp(&set.torque[2], -HIP_TORQUE_MAX, HIP_TORQUE_MAX);
@@ -352,14 +371,6 @@ void Wheel_Leg_Control(void)
 
 	// set.torque[4] = ClampAbsf(set.torque[4], HUB_TORQUE_MAX);
 	// set.torque[5] = ClampAbsf(set.torque[5], HUB_TORQUE_MAX);
-
-	// /// @brief 发送
-	// ch->ak_set[0].torset = -set.torque[0];
-	// ch->ak_set[1].torset = -set.torque[1];
-	// ch->ak_set[2].torset = set.torque[2];
-	// ch->ak_set[3].torset = set.torque[3];
-	// ch->ak_set[4].torset = -set.torque[4];
-	// ch->ak_set[5].torset = set.torque[5];
 }
 
 uint32_t jump_time = 0;
@@ -377,71 +388,71 @@ void Jump_FSM(void)
 {
 	switch (jump_state)
 	{
-	case JS_NONE:
+	case JPS_NONE:
 	{
 		leg_force_l = leg_force_r = 0;
 		set.left_length = set.right_length = (rc_ctrl.rc.ch[R_Y] * 0.01f) / 66 + 0.2f;
-		if (robo_state == RBS_JUMP)
+		if (robo_status == RBS_JUMP)
 		{
-			jump_state = JS_INIT;
+			jump_state = JPS_INIT;
 			jump_time = 0;
 		}
 	}
 	break;
 
-	case JS_INIT:
+	case JPS_INIT:
 	{
 		set.left_length = set.right_length = .15f;
 		if (jump_time >= 500)
 		{
-			jump_state = JS_STRETCH;
+			jump_state = JPS_STRETCH;
 			jump_time = 0;
 		}
 	}
 	break;
 
-	case JS_STRETCH:
+	case JPS_STRETCH:
 	{
 		set.left_length = set.right_length = .4f;
 		leg_force_l = leg_force_r = stretch_force;
 		if (((leg_l.L0 + leg_r.L0) / 2) >= .3f || jump_time >= stretch_time)
 		{
-			jump_state = JS_SHRINK;
+			jump_state = JPS_SHRINK;
 			jump_time = 0;
 		}
 	}
 	break;
 
-	case JS_SHRINK:
+	case JPS_SHRINK:
 	{
 		set.left_length = set.right_length = .15f;
 		leg_force_l = leg_force_r = shrink_force;
 		if (((leg_l.L0 + leg_r.L0) / 2) <= .18f || jump_time >= shrink_time)
 		{
-			jump_state = JS_AIR;
+			jump_state = JPS_AIR;
 			jump_time = 0;
 		}
 	}
 	break;
 
-	case JS_AIR:
+	case JPS_AIR:
 	{
 
 		set.left_length = set.right_length = .2f;
 		leg_force_l = leg_force_r = air_force;
 		if (/* (leg_l.is_offground == false && leg_r.is_offground == false) || */ /* (leg_l.d_L0 + leg_r.d_L0) / 2 */ jump_time >= air_time)
 		{
-			jump_state = JS_END;
+			jump_state = JPS_END;
 			jump_time = 0;
 		}
 	}
 	break;
 
-	case JS_END:
+	case JPS_END:
 	{
 		if ((leg_l.is_offground == false && leg_r.is_offground == false) || jump_time >= end_time)
 		{
-			jump_state = JS_NONE;
+			jump_state = JPS_NONE;
 			jump_time = 0;
 		}
 	}

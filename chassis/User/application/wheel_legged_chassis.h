@@ -14,60 +14,24 @@
 
 #include "user_lib.h"
 
+#define HIP_LF_ID 0x03
+#define HIP_LB_ID 0x04
+#define HIP_RF_ID 0x01
+#define HIP_RB_ID 0x02
+#define HUB_L_ID 0x207
+#define HUB_R_ID 0x206
+
 typedef struct
 {
-    // 机体加速度
-    float ax;
-    float az;
-    // 机体角速度
-    float yawspd;
-    float pitchspd;
-    float rollspd;
+    float x, y, z;
+    float vx, vy, vz;
+    float ax, ay, az; // 机体加速度
+
     // 欧拉角
-    float yaw;
-    float toatalyaw;
-    float roll;
-    float pitch;
+    float totalyaw;
+    float roll, pitch, yaw;
+    float vyaw, vpitch, vroll; // 机体角速度
 } Robo_Attitude_t;
-
-typedef struct Robo_Attitude_Def_t
-{
-    float yaw, v_yaw, a_yaw;
-    float pitch, v_pitch, a_pitch;
-    float roll, v_roll, a_roll;
-
-    float x, v_x, a_x;
-    float y, v_y, a_y;
-    float z, v_z, a_z;
-
-    float f_x, f_y, f_z;
-    float m_x, m_y, m_z;
-} Robo_Attitude_Def_t;
-
-typedef struct Leg_Def_t
-{
-    float theta, v_theta;
-    float alpha, v_lpha;
-
-} Leg_Def_t;
-
-typedef struct Chassis_Def_t
-{
-    Robo_Attitude_Def_t attitude;
-    Leg_Def_t leg[2];
-
-} Chassis_Def_t;
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-
-typedef enum Robo_Status_Def
-{
-    ROBO_STATUS_INIT,      // 初始化
-    ROBO_STATUS_RUN,       // 运行
-    ROBO_STATUS_STOP,      // 停止
-    ROBO_STATUS_EMERGENCY, // 急停
-    ROBO_STATUS_
-} Robo_Status_Def;
 
 typedef struct
 {
@@ -75,14 +39,7 @@ typedef struct
     bool above_right;
     bool above;
     bool fallen;
-} Wheel_Leg_Flag_t;
-
-typedef struct
-{
-    Robo_Status_Def status;
-
-    Wheel_Leg_Flag_t flag;
-} Robo_Status_t;
+} Robo_Flag_t;
 
 typedef enum
 {
@@ -90,16 +47,16 @@ typedef enum
     RBS_INIT,
     RBS_RUN,
     RBS_JUMP
-} Robo_State_t;
+} Robo_Status_t;
 
 typedef enum
 {
-    JS_NONE,
-    JS_INIT,
-    JS_STRETCH,
-    JS_SHRINK,
-    JS_AIR,
-    JS_END
+    JPS_NONE,
+    JPS_INIT,
+    JPS_STRETCH,
+    JPS_SHRINK,
+    JPS_AIR,
+    JPS_END
 } JUMP_State_t;
 
 typedef struct
@@ -115,5 +72,8 @@ typedef struct
 } Wheel_Leg_Target_t;
 
 extern Robo_Status_t robo_status;
+extern Robo_Flag_t rbflag;
+
+void Chassis_Task(void const *argument);
 
 #endif

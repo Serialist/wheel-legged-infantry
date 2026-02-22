@@ -25,23 +25,6 @@ uint8_t can_tx_data[8];
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// dji motors//
-
-void TransmitChassisMotorCurrent(int16_t o1, int16_t o2)
-{
-  uint32_t send_mail_box = CAN_TX_MAILBOX0;
-  TX_message.StdId = 0x1FF;
-  TX_message.IDE = CAN_ID_STD;
-  TX_message.RTR = CAN_RTR_DATA;
-  TX_message.DLC = 0x08;
-
-  can_tx_data[0] = (uint8_t)(o1 >> 8); // 将16位数据分为高8位和低8位
-  can_tx_data[1] = (uint8_t)o1;
-  can_tx_data[2] = (uint8_t)(o2 >> 8);
-  can_tx_data[3] = (uint8_t)o2;
-  HAL_CAN_AddTxMessage(&hcan1, &TX_message, can_tx_data, &send_mail_box);
-}
-
 // cubemars motors//
 // servo mode
 void comm_can_transmit_eid(uint32_t id, const uint8_t *data, uint8_t len)
@@ -118,7 +101,15 @@ void comm_can_set_origin(uint8_t controller_id, uint8_t set_origin_mode)
 }
 
 // motion controller
-void controller_init(uint8_t id)
+
+/**
+ * @brief mit 模式使能
+ *
+ * @param id
+ *
+ * @note 据说使能命令最好不要重复发送...?
+ */
+void AK_Motor_MIT_Enable(uint8_t id)
 {
   uint32_t send_mail_box = CAN_TX_MAILBOX0;
   TX_message.StdId = id;
@@ -138,7 +129,12 @@ void controller_init(uint8_t id)
   HAL_CAN_AddTxMessage(&hcan1, &TX_message, can_tx_data, &send_mail_box);
 }
 
-void controller_close(uint8_t id)
+/**
+ * @brief mit 模式失能
+ *
+ * @param id
+ */
+void AK_Motor_MIT_Disable(uint8_t id)
 {
   TX_message.StdId = id;
   TX_message.IDE = CAN_ID_STD;
@@ -157,7 +153,14 @@ void controller_close(uint8_t id)
   HAL_CAN_AddTxMessage(&hcan1, &TX_message, can_tx_data, &send_mailbox1);
 }
 
-void controller_setorigin(uint8_t id)
+/**
+ * @brief 设置编码器零点
+ *
+ * @param id
+ *
+ * @note 这个设置的零点位置似乎断电不保存
+ */
+void AK_Motor_MIT_Setorigin(uint8_t id)
 {
   TX_message.StdId = id;
   TX_message.IDE = CAN_ID_STD;
@@ -196,17 +199,25 @@ int float_to_uint(float x, float x_min, float x_max, unsigned int bits)
   return (int)((x - x_min) * ((float)((1 << bits) / span)));
 }
 
+float Uint_To_Float(int x_int, float x_min, float x_max, int bits)
+{
+  /// converts unsigned int to float, given range and number of bits ///
+  float span = x_max - x_min;
+  float offset = x_min;
+  return ((float)x_int) * span / ((float)((1 << bits) - 1)) + offset;
+}
+
 /************************
  * @brief 发送电机 MIT 模式控制
  *
  * @param id 电机 ID
  * @param p_des 目标位置
  * @param v_des 目标速度
- * @param kp 内置 PID
- * @param kd 内置 PID
+ * @param kp 内置 PID 参数
+ * @param kd 内置 PID 参数
  * @param t_ff 力矩前馈
  ************************/
-void AK_MIT_Transmit(uint8_t id, float p_des, float v_des, float kp, float kd, float t_ff)
+void AK_Motor_MIT_Transmit(uint8_t id, float p_des, float v_des, float kp, float kd, float t_ff)
 {
   CAN_TxHeaderTypeDef header;
   uint8_t data[8];
@@ -260,17 +271,22 @@ void AK_MIT_Transmit(uint8_t id, float p_des, float v_des, float kp, float kd, f
   HAL_CAN_AddTxMessage(&hcan1, &header, data, &send_mail_box);
 }
 
-float Uint_To_Float(int x_int, float x_min, float x_max, int bits)
+void Motor_AK_MIT_Decode(Motor_AK_RxData_t *data, uint8_t buf[8], float pMax, float vMax, float tMax)
 {
-	// 将无符号整数转换为浮点数，给定范围和位数
-	return ((float)x_int) * (x_max - x_min) / ((float)((1 << bits) - 1)) + x_min;
-}
+  data->id = buf[0]; // 驱动 ID 号
 
-void Motor_AK_MIT_Decode(struct Motor_AK_Rx_Data *rxData, uint8_t data[8], float pMax, float vMax, float tMax)
-{
-  rxData->id = data[0];
-  rxData->position = Uint_To_Float((int)(data[1] << 8) | (data[2]), -pMax, pMax, 16);
-  rxData->speed = Uint_To_Float((int)(data[3] << 4) | (data[4] >> 4), -vMax, vMax, 12);
-  rxData->torque = Uint_To_Float((int)((data[4] & 0xF) << 8) | (data[5]), -tMax, tMax, 12);
-  rxData->temp = (float)data[6] - 40.0f;
+  int p_int = (buf[1] << 8) | (buf[2]);
+  int v_int = (buf[3] << 4) | (buf[4] >> 4);
+  int i_int = ((buf[4] & 0xF) << 8) | (buf[5]);
+  int T_int = buf[6];
+
+  float p = Uint_To_Float(p_int, P_MIN, P_MAX, 16);
+  float v = Uint_To_Float(v_int, V_MIN, V_MAX, 12);
+  float i = Uint_To_Float(i_int, -T_MAX, T_MAX, 12);
+  float Temp = T_int;
+
+  data->angle = p;
+  data->speed = v;
+  data->torque = i;
+  data->temp = Temp - 40;
 }

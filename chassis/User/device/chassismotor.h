@@ -6,56 +6,6 @@
 #include "dt7.h"
 #include "main.h"
 #include "struct_typedef.h"
-// #include "bsp_usart.h"
-
-// DJI motors
-#define CHASSIS_MOTOR1_ID 0x201
-#define CHASSIS_MOTOR2_ID 0x202
-// cubemars motors
-
-#define AK_ID_1 0x2963 // L
-#define AK_ID_2 0x2964 // R
-
-#define AK_ID_3 0x2965
-#define AK_ID_4 0x2966
-#define AK_ID_5 0x2967
-#define AK_ID_6 0x2968
-
-#define AK_ID_11 0x63 // L
-#define AK_ID_21 0x64 // R
-
-#define AK_ID_31 0x65
-#define AK_ID_41 0x66
-#define AK_ID_51 0x67
-#define AK_ID_61 0x68
-
-#define M1 0
-#define M2 1
-// 两腿
-#define AK1 0
-#define AK2 1
-// 左侧
-#define AK3 2
-#define AK4 3
-// 右侧
-#define AK5 4
-#define AK6 5
-
-// 串级PID调参
-
-#define M1I 7
-#define M2I 8
-
-#define REDUCTION_RATIO_M3508 19.20320855614973f
-#define REDUCTION_RATIO_M2006 36.20320855614973f
-// 扭矩常数
-#define KTAK10 1 / 0.198f
-#define KTAK60 1 / 0.135f
-
-// #define REMOTE_CHANNLE_TO_CHASSIS_SPEED 0.0053f
-
-#define LEFT 0
-#define RIGHT 1
 
 #define P_MIN -12.5f
 #define P_MAX 12.5f
@@ -73,11 +23,6 @@
 #define Kd_MAX 5.0f
 
 #define wheelRadius 0.077f
-#define Mg 1.482f * 9.8f
-
-//**********************************************************//
-// motors//
-// cubemars//
 
 typedef struct
 {
@@ -125,59 +70,6 @@ typedef struct
 
 } CM_TRANSMIT_DATA;
 
-// DJI//
-typedef struct
-{
-	int16_t angle_first;
-	int16_t angle;
-	int16_t angle_last;
-	int16_t angle_set;
-
-} MOTOR_ANGLE;
-
-typedef struct
-{
-	int16_t ecd_fdb;
-	int16_t speed_rpm_fdb;
-	int16_t current_fdb;
-	int16_t temperate_fdb;
-	int16_t motor_old_angle;
-	int16_t cycle_num;
-	int16_t angle_err;
-
-	fp32 speed;
-
-} MOTOR_RECEIVE_DATA;
-
-//**********************************************************//
-// config//
-typedef struct
-{
-	uint32_t omni_motor[2]; // 电机反馈时间
-	// uint32_t momentum_motor[2];
-	uint32_t speed_set[2]; // 底盘速度设定时间
-	uint32_t ree_power;	   // 裁判系统反馈功率时间
-	uint32_t ree_statue;   // 裁判系统反馈机器人状态时间
-	uint32_t model;
-	uint32_t imu;
-	uint32_t rc;
-} Time_t;
-
-#ifdef OPEN_SUPER_POWER
-typedef struct // 超级电容数据
-{
-	float input_vot;	// 输入电压
-	float cap_vot;		// 电容电压
-	float input_cur;	// 输入电流
-	float target_power; // 设定功率
-						//	Flag control_flag; //超级电容开关标志，1开，0关
-} Super_Power_t;
-#endif
-
-extern void Chassis_Task(void const *argument);
-
-// DJI motor//
-void TransmitChassisMotorCurrent(int16_t o1, int16_t o2);
 // 伺服模式//
 void comm_can_transmit_eid(uint32_t id, const uint8_t *data, uint8_t len);
 void buffer_append_int32(uint8_t *buffer, int32_t number, int32_t *index);
@@ -187,26 +79,25 @@ void comm_can_set_rpm(uint8_t controller_id, float rpm);
 void comm_can_set_pos(uint8_t controller_id, float pos);
 void comm_can_set_origin(uint8_t controller_id, uint8_t set_origin_mode);
 // 运控模式//
-void controller_init(uint8_t id);
-void controller_close(uint8_t id);
-void controller_setorigin(uint8_t id);
+void AK_Motor_MIT_Enable(uint8_t id);
+void AK_Motor_MIT_Disable(uint8_t id);
+void AK_Motor_MIT_Setorigin(uint8_t id);
 int float_to_uint(float x, float x_min, float x_max, unsigned int bits);
-void AK_MIT_Transmit(uint8_t id, float p_des, float v_des, float kp, float kd, float t_ff);
+void AK_Motor_MIT_Transmit(uint8_t id, float p_des, float v_des, float kp, float kd, float t_ff);
 
-/* ================================ new motor program ================================ */
+/* ================================ new cubemars code ================================ */
 
-struct Motor_AK_Rx_Data
+typedef struct
 {
 	uint8_t id;
-	float position; // 位置
-	float speed;	// 速度
-	float torque;	// 扭矩
-	float temp;		// 温度
-	float errCode;	// 故障码
-};
+	float angle;   // 位置
+	float speed;   // 速度
+	float torque;  // 扭矩
+	float temp;	   // 温度
+	float errCode; // 故障码
+} Motor_AK_RxData_t;
 
 float Uint_To_Float(int x_int, float x_min, float x_max, int bits);
-void Motor_AK_MIT_Decode(struct Motor_AK_Rx_Data *rxData, uint8_t data[8],
-						 float pMax, float vMax, float tMax);
+void Motor_AK_MIT_Decode(Motor_AK_RxData_t *rxData, uint8_t data[8], float pMax, float vMax, float tMax);
 
 #endif

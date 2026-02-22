@@ -38,12 +38,12 @@ void chassis_data_fdb(void)
 {
     att.pitch = INS.Pitch;
     att.yaw = INS.Yaw;
-    att.toatalyaw = INS.YawTotalAngle;
+    att.totalyaw = INS.YawTotalAngle;
     att.roll = INS.Roll;
 
-    att.pitchspd = INS.Gyro[0];
-    att.rollspd = INS.Gyro[1];
-    att.yawspd = INS.Gyro[2];
+    att.vpitch = INS.Gyro[0];
+    att.vroll = INS.Gyro[1];
+    att.vyaw = INS.Gyro[2];
 
     att.ax = INS.Accel[0];
     att.az = INS.Accel[2];
