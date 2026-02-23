@@ -8,8 +8,8 @@ py.lqr_k_extract.file_clear()
 
 L0s = 0.12:0.01:0.32;          % L0变化范围
 Ks = zeros(2, 6, length(L0s)); % 存放不同L0对应的K
-% theta_list = [0 15 30 45 60];
-theta_list = [0];
+theta_list = [0 15 30 45 60];
+% theta_list = [0];
 
 for theta_step = 1:length(theta_list)
     
@@ -28,7 +28,7 @@ for theta_step = 1:length(theta_list)
         L = L0s(step) / 2;
         Lm = L0s(step) / 2;
         mw = 0.334 *2;
-        l = 0.004;
+        l = 0.3; % 机体质心到髋关机中心距离
         mp = 1.482 *2;
         M = (17.5 + 0.68 - mp*2 - mw*2);
         Iw = 0.5 * mw * R ^ 2;
@@ -60,11 +60,16 @@ for theta_step = 1:length(theta_list)
         [G, H] = c2d(eval(A), eval(B), 0.005);
         
         % 定义权重矩阵Q, R
-        Q = diag([3000, 0.5, 5, 1, 4000, 1]);
-        R = diag([10 50]);
+        % Q = diag([1000, 5, 150, 10, 10000, 0.5]);
+        % R = diag([1 0.25]);
+        Q = diag([1500, 100, 20, 20, 8000, 5]);
+        R_ = diag([80 5]);
+
+        % Q = diag([36  1.5  10  0.5  320  3]);
+        % R = diag([1.6  0.1]);
     
         % 求解反馈矩阵K
-        Ks(:,:,step)=dlqr(G,H,Q,R);
+        Ks(:,:,step)=dlqr(G,H,Q,R_);
     
     end
     

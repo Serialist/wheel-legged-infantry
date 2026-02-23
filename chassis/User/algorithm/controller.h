@@ -1,19 +1,18 @@
 /**
-  ******************************************************************************
-  * @file	 controller.h
-  * @author  Wang Hongxi
-  * @author  Zhang Hongyu (fuzzy pid)
-  * @version V1.1.3
-  * @date    2021/7/3
-  * @brief   
-  ******************************************************************************
-  * @attention 
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file	 controller.h
+ * @author  Wang Hongxi
+ * @author  Zhang Hongyu (fuzzy pid)
+ * @version V1.1.3
+ * @date    2021/7/3
+ * @brief
+ ******************************************************************************
+ * @attention
+ *
+ ******************************************************************************
+ */
 #ifndef _CONTROLLER_H
 #define _CONTROLLER_H
-
 
 #include "main.h"
 #include "stdint.h"
@@ -78,15 +77,15 @@ void Fuzzy_Rule_Implementation(FuzzyRule_t *fuzzyRule, float measure, float ref)
 /******************************* PID CONTROL *********************************/
 typedef enum pid_Improvement_e
 {
-    NONE = 0X00,                        //0000 0000
-    Integral_Limit = 0x01,              //0000 0001
-    Derivative_On_Measurement = 0x02,   //0000 0010
-    Trapezoid_Intergral = 0x04,         //0000 0100
-    Proportional_On_Measurement = 0x08, //0000 1000
-    OutputFilter = 0x10,                //0001 0000
-    ChangingIntegrationRate = 0x20,     //0010 0000
-    DerivativeFilter = 0x40,            //0100 0000
-    ErrorHandle = 0x80,                 //1000 0000
+    PID_Improvement__e_NONE = 0X00,     // 0000 0000
+    Integral_Limit = 0x01,              // 0000 0001
+    Derivative_On_Measurement = 0x02,   // 0000 0010
+    Trapezoid_Intergral = 0x04,         // 0000 0100
+    Proportional_On_Measurement = 0x08, // 0000 1000
+    OutputFilter = 0x10,                // 0001 0000
+    ChangingIntegrationRate = 0x20,     // 0010 0000
+    DerivativeFilter = 0x40,            // 0100 0000
+    ErrorHandle = 0x80,                 // 1000 0000
 } PID_Improvement_e;
 
 typedef enum errorType_e
@@ -127,8 +126,8 @@ typedef __packed struct pid_t
     float IntegralLimit;
     float DeadBand;
     float ControlPeriod;
-    float CoefA;         //For Changing Integral
-    float CoefB;         //ITerm = Err*((A-abs(err)+B)/A)  when B<|err|<A+B
+    float CoefA;         // For Changing Integral
+    float CoefB;         // ITerm = Err*((A-abs(err)+B)/A)  when B<|err|<A+B
     float Output_LPF_RC; // RC = 1/omegac
     float Derivative_LPF_RC;
 

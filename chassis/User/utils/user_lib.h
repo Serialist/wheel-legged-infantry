@@ -65,6 +65,8 @@
 #define LEFT 0
 #define RIGHT 1
 
+#define NONE 0
+
 // 做一层 adapter，方便移植
 /// @todo 放到单独一个适配层文件中，比如 math-adapter，这样不同平台移植方便还能硬件优化
 #define SINF(x) arm_sin_f32(x)
@@ -113,6 +115,7 @@ typedef __packed struct
 /* ================================================================ prototype ================================================================ */
 
 float Signf(float value);                                                     // 符号函数
+void Clamp(float *in, float min, float max);                                  // 限幅
 float Clampf(float value, float min, float max);                              // 限幅
 float ClampAbsf(float value, float max);                                      // 绝对值限幅
 float LoopClampf(float Input, float minValue, float maxValue);                // 循环限幅

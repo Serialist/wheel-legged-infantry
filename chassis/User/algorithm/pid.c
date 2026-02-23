@@ -42,14 +42,14 @@ void PID_init(PID_Typedef *pid, const fp32 kp, const fp32 ki, const fp32 kd, fp3
 }
 
 /**
- * @brief PID 位置式
+ * @brief PID 位置式（普通式）
  *
  * @param pid
  * @param set
  * @param ref
  * @return fp32
  */
-fp32 PID_Pos_Update(PID_Typedef *pid, fp32 set, fp32 ref)
+fp32 PID_Update(PID_Typedef *pid, fp32 set, fp32 ref)
 {
     if (pid == NULL)
     {
@@ -78,14 +78,14 @@ fp32 PID_Pos_Update(PID_Typedef *pid, fp32 set, fp32 ref)
 }
 
 /**
- * @brief PID 增量式
+ * @brief PID 差分式
  *
  * @param pid
  * @param set
  * @param ref
  * @return fp32
  */
-fp32 PID_Delta_Update(PID_Typedef *pid, fp32 set, fp32 ref)
+fp32 PID_Diff_Update(PID_Typedef *pid, fp32 set, fp32 ref)
 {
     if (pid == NULL)
     {

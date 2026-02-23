@@ -1,5 +1,5 @@
 /**
- * @file update_task.h
+ * @file command.h
  * @author Serialist (ba3pt@qq.com)
  * @brief
  * @version 0.1.0
@@ -9,9 +9,9 @@
  *
  */
 
-#ifndef UPDATE_TASK_H
-#define UPDATE_TASK_H
+#ifndef COMMAND_TASK_H
+#define COMMAND_TASK_H
 
-#include "user_lib.h"
+void Command_Task(void const *argument);
 
 #endif

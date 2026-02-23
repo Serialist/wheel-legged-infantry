@@ -207,6 +207,9 @@ float Uint_To_Float(int x_int, float x_min, float x_max, int bits)
   return ((float)x_int) * span / ((float)((1 << bits) - 1)) + offset;
 }
 
+HAL_StatusTypeDef ak10_send_status = HAL_OK;
+bool busy_flag = false;
+
 /************************
  * @brief 发送电机 MIT 模式控制
  *
@@ -268,7 +271,12 @@ void AK_Motor_MIT_Transmit(uint8_t id, float p_des, float v_des, float kp, float
   data[6] = ((kd_int & 0xF) << 4) | (t_int >> 8);
   data[7] = t_int & 0xff;
 
-  HAL_CAN_AddTxMessage(&hcan1, &header, data, &send_mail_box);
+  ak10_send_status = HAL_CAN_AddTxMessage(&hcan1, &header, data, &send_mail_box);
+
+  if (ak10_send_status != HAL_OK)
+  {
+    busy_flag = true;
+  }
 }
 
 void Motor_AK_MIT_Decode(Motor_AK_RxData_t *data, uint8_t buf[8], float pMax, float vMax, float tMax)

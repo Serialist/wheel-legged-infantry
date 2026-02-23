@@ -20,6 +20,7 @@
 #define HIP_RB_ID 0x02
 #define HUB_L_ID 0x207
 #define HUB_R_ID 0x206
+#define B2B_CHASSIS_CMD_ID 0x666
 
 typedef struct
 {

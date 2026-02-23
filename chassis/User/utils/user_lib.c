@@ -412,6 +412,19 @@ long long FGcd(long long a, long long b)
 }
 
 /// @brief оч╥Ы
+void Clamp(float *in, float min, float max)
+{
+    if (*in < min)
+    {
+        *in = min;
+    }
+    else if (*in > max)
+    {
+        *in = max;
+    }
+}
+
+/// @brief оч╥Ы
 float Clampf(float value, float min, float max)
 {
     return fminf(fmaxf(value, min), max);

@@ -79,6 +79,7 @@ void comm_can_set_rpm(uint8_t controller_id, float rpm);
 void comm_can_set_pos(uint8_t controller_id, float pos);
 void comm_can_set_origin(uint8_t controller_id, uint8_t set_origin_mode);
 // ÔË¿ØÄ£Ê½//
+
 void AK_Motor_MIT_Enable(uint8_t id);
 void AK_Motor_MIT_Disable(uint8_t id);
 void AK_Motor_MIT_Setorigin(uint8_t id);

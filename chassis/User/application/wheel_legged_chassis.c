@@ -65,20 +65,22 @@ float tplqrr;
 float tlqrr;
 float leg_force_l = 0;
 float leg_force_r = 0;
+float leg_force = 0;
 
 // 状态变量和控制量
 float xl[6], ul[2];
 float xr[6], ur[2];
+
+// debug variable
 float t1 = 0, t2 = 0;
 
 /* ================================================================ prototype ================================================================ */
 
-void ChassisInit(void);
+void Chassis_PID_Init(void);
 void Chassis_Motor_Transmit(void);
 void Wheel_Leg_Control(void);
-void chassis_sys_calc(void);
+void Wheel_Leg_Attitude_Calc(void);
 void Control_Get(void);
-void Clamp(float *in, float min, float max);
 void Motor_Enable(void);
 void Jump_FSM(void);
 
@@ -86,15 +88,17 @@ void Jump_FSM(void);
 
 void Chassis_Task(void const *argument)
 {
-	ChassisInit();
+	Chassis_PID_Init();
 	VMC_Init(&leg_l);
 	VMC_Init(&leg_r);
+	Motor_Enable();
+	set.left_length = set.right_length = 0.15f;
 
 	for (;;)
 	{
 		/* ================ 状态更新 ================ */
 
-		chassis_sys_calc();
+		Wheel_Leg_Attitude_Calc();
 
 		/* ================ 控制 ================ */
 
@@ -108,22 +112,19 @@ void Chassis_Task(void const *argument)
 	}
 }
 
-void ChassisInit(void)
+void Chassis_PID_Init(void)
 {
 	PID_init(&leglength_pid_l, 400, 0, 9000, 120, 0); // 腿长 left
 	PID_init(&leglength_pid_r, 400, 0, 9000, 120, 0); // 腿长 right
-	PID_init(&yaw_pid, -0.1f, 0, -0.5f, 0, 0);		  // yaw
+	PID_init(&yaw_pid, 0.1f, 0, 0.5f, 0, 0);		  // yaw
 	PID_init(&roll_pid, 0.8f, 0, 0, 30.0f, 0);		  // roll
 	PID_init(&tp_pid, 1.3, 0, 3, 1.5, 0);			  // 劈叉
 
 	// 腿摆角扭矩pid，用于板凳模型
 	PID_init(&pid_tpl, 80, 0, 400, 10, 0);
 	PID_init(&pid_tpr, 80, 0, 400, 10, 0);
+
 	PID_init(&tp_offground_pid, 80, 0, 400, 0, 0);
-
-	set.left_length = set.right_length = 0.15f;
-
-	Motor_Enable();
 }
 
 /************************
@@ -132,31 +133,28 @@ void ChassisInit(void)
  ************************/
 void Motor_Enable(void)
 {
-	// AK_Motor_MIT_Enable(HIP_RF_ID);
-	// AK_Motor_MIT_Enable(HIP_RB_ID);
-	// for (int a = 1; a <= 4; a++)
-	// {
-	// AK_Motor_MIT_Enable(a);
-	// 	osDelay(1);
-	// }
+	for (int a = 1; a <= 4; a++)
+	{
+		AK_Motor_MIT_Enable(a);
+		osDelay(1);
+	}
 }
 
 // debug variable
 float ttphi1 = 0, ttphi4 = 0, tttp = 0, ttf0 = 0;
 
-void chassis_sys_calc(void)
+void Wheel_Leg_Attitude_Calc(void)
 {
 	VMC_5bar_FK(&leg_l,
-				// DEG2RAD(90) - ak10[2].angle,
-				PI / 2.0f - ak10[LF].angle,
-				PI / 2.0f - ak10[LB].angle,
-				-att.pitch, -att.vpitch,
-				3.0f / 1000.0f);
+				PI / 2.0f + ak10[LF].angle, // left 反转
+				PI / 2.0f + ak10[LB].angle,
+				att.pitch, att.vpitch,
+				0.003f);
 	VMC_5bar_FK(&leg_r,
 				PI / 2.0f - ak10[RF].angle,
 				PI / 2.0f - ak10[RB].angle,
 				att.pitch, att.vpitch,
-				3.0f / 1000.0f);
+				0.003f);
 
 	OffGround_Detection(&leg_l, att.az);
 	OffGround_Detection(&leg_r, att.az);
@@ -174,49 +172,49 @@ void chassis_sys_calc(void)
 
 void Chassis_Motor_Transmit(void)
 {
-	// if (rc_ctrl.rc.s[S_L] == UP)
-	// {
-	// 	for (int i = 0; i < 6; i++)
-	// 		set.torque[i] = 0;
-	// }
+	if (rc_ctrl.rc.s[S_L] == UP)
+	{
+		for (int i = 0; i < 6; i++)
+			set.torque[i] = 0;
+	}
 
-	// /// @brief 用 3508
-	// RM_Motor_Transmit(&hcan1, M3508_TX_ID_2,
-	// 				  0,
-	// 				  HEXROLL_TORQUE_TO_CURRENT(set.torque[WR]),
-	// 				  HEXROLL_TORQUE_TO_CURRENT(set.torque[WL]),
-	// 				  0);
-	// osDelay(1);
-
-	// // MIT模式下发送
-	// AK_Motor_MIT_Transmit(HIP_LF_ID, 0, 0, 0, 0, set.torque[LF]);
-	// AK_Motor_MIT_Transmit(HIP_LB_ID, 0, 0, 0, 0, set.torque[LB]);
-	// osDelay(1);
-	// AK_Motor_MIT_Transmit(HIP_RF_ID, 0, 0, 0, 0, set.torque[RF]);
-	// AK_Motor_MIT_Transmit(HIP_RB_ID, 0, 0, 0, 0, set.torque[RB]);
-	// osDelay(1);
-
+	/// @brief 用 3508
 	RM_Motor_Transmit(&hcan1, M3508_TX_ID_2,
 					  0,
-					  HEXROLL_TORQUE_TO_CURRENT(t1),
-					  HEXROLL_TORQUE_TO_CURRENT(0),
+					  HEXROLL_TORQUE_TO_CURRENT(set.torque[WR]),
+					  HEXROLL_TORQUE_TO_CURRENT(set.torque[WL]),
 					  0);
 	osDelay(1);
 
 	// MIT模式下发送
-	AK_Motor_MIT_Transmit(HIP_LF_ID, 0, 0, 0, 0, 0);
-	AK_Motor_MIT_Transmit(HIP_LB_ID, 0, 0, 0, 0, 0);
+	AK_Motor_MIT_Transmit(HIP_LF_ID, 0, 0, 0, 0, set.torque[LF]);
+	AK_Motor_MIT_Transmit(HIP_LB_ID, 0, 0, 0, 0, set.torque[LB]);
 	osDelay(1);
 	AK_Motor_MIT_Transmit(HIP_RF_ID, 0, 0, 0, 0, set.torque[RF]);
 	AK_Motor_MIT_Transmit(HIP_RB_ID, 0, 0, 0, 0, set.torque[RB]);
 	osDelay(1);
+
+	// RM_Motor_Transmit(&hcan1, M3508_TX_ID_2,
+	// 				  0,
+	// 				  HEXROLL_TORQUE_TO_CURRENT(0),
+	// 				  HEXROLL_TORQUE_TO_CURRENT(0),
+	// 				  0);
+	// osDelay(1);
+
+	// AK_Motor_MIT_Transmit(HIP_LF_ID, 0, 0, 0, 0, 0);
+	// AK_Motor_MIT_Transmit(HIP_LB_ID, 0, 0, 0, 0, 0);
+	// osDelay(1);
+	// AK_Motor_MIT_Transmit(HIP_RF_ID, 0, 0, 0, 0, 0);
+	// AK_Motor_MIT_Transmit(HIP_RB_ID, 0, 0, 0, 0, 0);
+	// osDelay(1);
+
 	// 1. 使用返回状态 HAL_BUSY
 	// if(HAL_CAN_AddTxMessage()==HAL_BUSY)
 	// osDelay(1);
 	// 2. 查看邮箱状态
 	// while (HAL_CAN_GetTxMailboxesFreeLevel(&hcan1) == 0);
 	// 3. interrupt
-	HAL_CAN_AddTxMessage
+	// HAL_CAN_AddTxMessage
 }
 
 uint8_t last_switch = 0;
@@ -227,6 +225,7 @@ void Control_Get(void)
 	set.yaw -= rc_ctrl.rc.ch[L_X] * 0.001f;
 	set.left_length = set.right_length = (rc_ctrl.rc.ch[R_Y] * 0.01f) / 66 + 0.2f;
 	set.roll = -rc_ctrl.rc.ch[R_X] * 45.0f / 660.0f;
+	leg_force = rc_ctrl.rc.ch[L_Z] * 50 / 660.0f;
 
 	if (set.v != 0)
 		set.x = ob.x;
@@ -234,10 +233,26 @@ void Control_Get(void)
 	if (rc_ctrl.rc.s[S_L] == MID || last_switch == DOWN) // 正常行驶
 	{
 		robo_status = RBS_RUN;
+
+		leglength_pid_l.Kp = 400;
+		leglength_pid_l.Kd = 9000;
+		leglength_pid_l.max_out = 120;
+
+		leglength_pid_r.Kp = 400;
+		leglength_pid_r.Kd = 9000;
+		leglength_pid_r.max_out = 120;
 	}
 	else if (rc_ctrl.rc.s[S_L] == DOWN && jump_state == JPS_NONE)
 	{
 		robo_status = RBS_JUMP;
+
+		leglength_pid_l.Kp = 800;
+		leglength_pid_l.Kd = 15000;
+		leglength_pid_l.max_out = 200;
+
+		leglength_pid_r.Kp = 800;
+		leglength_pid_r.Kd = 15000;
+		leglength_pid_r.max_out = 200;
 	}
 	else
 	{
@@ -249,19 +264,6 @@ void Control_Get(void)
 	}
 
 	last_switch = rc_ctrl.rc.s[S_L];
-}
-
-/// @brief 限幅
-void Clamp(float *in, float min, float max)
-{
-	if (*in < min)
-	{
-		*in = min;
-	}
-	else if (*in > max)
-	{
-		*in = max;
-	}
 }
 
 /***********************************************
@@ -288,10 +290,11 @@ void Wheel_Leg_Control(void)
 	LQR_Control(xl, ul, leg_l.L0);
 	LQR_Control(xr, ur, leg_r.L0);
 
-	tlqrl = ul[0];
-	tplqrl = ul[1];
-	tlqrr = ur[0];
-	tplqrr = ur[1];
+	// 应为 u = -kx，所以这里取负
+	tlqrl = -ul[0];
+	tplqrl = -ul[1];
+	tlqrr = -ur[0];
+	tplqrr = -ur[1];
 
 	// if (rbflag.above)
 	// {
@@ -311,11 +314,15 @@ void Wheel_Leg_Control(void)
 	// 	// tplqrr = tp_offground_pid.Kp * leg_r.theta + tp_offground_pid.Kd * leg_r.d_theta;
 	// }
 
+	tplqrl = PID_Update(&pid_tpl, 0, leg_l.alpha);
+	tplqrr = PID_Update(&pid_tpr, 0, leg_r.alpha);
+
 	/* ================================ 轮 解算 ================================ */
-	// turn_t = yaw_pid.Kp * (set.yaw - att.totalyaw) - yaw_pid.Kd * att.vyaw; // 这样计算更稳一点
-	// if (rbflag.above)
-	turn_t = 0;
-	set.torque[WL] = tlqrl - turn_t;
+
+	turn_t = yaw_pid.Kp * (set.yaw - att.totalyaw) - yaw_pid.Kd * att.vyaw; // 这样计算更稳一点
+	if (rbflag.above)
+		turn_t = 0;
+	set.torque[WL] = -(tlqrl - turn_t); // left 反转
 	set.torque[WR] = tlqrr + turn_t;
 
 	/* ================================ 腿 解算 ================================ */
@@ -325,11 +332,13 @@ void Wheel_Leg_Control(void)
 
 	/// @brief 腿推力 PID
 	leg_l.F0 = 55.0f * arm_cos_f32(leg_l.theta) +
-			   PID_Pos_Update(&leglength_pid_l, set.left_length, leg_l.L0) +
+			   PID_Update(&leglength_pid_l, set.left_length, leg_l.L0) +
+			   leg_force +
 			   leg_force_l;
-	leg_r.F0 = 55.0f * arm_cos_f32(leg_r.theta) +
-			   PID_Pos_Update(&leglength_pid_r, set.right_length, leg_r.L0) +
-			   leg_force_r;
+	leg_r.F0 = -55.0f * arm_cos_f32(leg_r.theta) +
+			   -PID_Update(&leglength_pid_r, set.right_length, leg_r.L0) +
+			   -leg_force +
+			   -leg_force_r;
 
 	leg_l.Tp = tplqrl;
 	leg_r.Tp = tplqrr;
@@ -346,16 +355,16 @@ void Wheel_Leg_Control(void)
 				leg_r.F0);
 
 	/// @brief 发送 buf
-	set.torque[LF] = leg_l.torque_set[FRONT];
-	set.torque[LB] = leg_l.torque_set[BACK];
+	set.torque[LF] = -leg_l.torque_set[BACK]; // left 反转
+	set.torque[LB] = -leg_l.torque_set[FRONT];
 	set.torque[RF] = leg_r.torque_set[FRONT];
 	set.torque[RB] = leg_r.torque_set[BACK];
 
 /* ================================ 发送 ================================ */
 
 /// @brief 限幅
-#define HIP_TORQUE_MAX 10.0f
-#define HUB_TORQUE_MAX 0.8f
+#define HIP_TORQUE_MAX 30.0f
+#define HUB_TORQUE_MAX 2.5f
 	Clamp(&set.torque[0], -HIP_TORQUE_MAX, HIP_TORQUE_MAX);
 	Clamp(&set.torque[1], -HIP_TORQUE_MAX, HIP_TORQUE_MAX);
 	Clamp(&set.torque[2], -HIP_TORQUE_MAX, HIP_TORQUE_MAX);

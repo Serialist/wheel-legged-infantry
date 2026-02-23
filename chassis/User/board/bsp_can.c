@@ -14,6 +14,7 @@
 #include "cmsis_os.h"
 #include "wheel_legged_chassis.h"
 #include "motor.h"
+#include "b2b.h"
 
 extern Wheel_Leg_Target_t set;
 
@@ -21,6 +22,7 @@ extern Wheel_Leg_Target_t set;
 
 Motor_AK_RxData_t ak10[4];
 DJI_RxData_Def_t m3508[2];
+B2B_Chassis_Cmd_t ch_cmd;
 
 uint8_t can_rx_data[8];
 void can_filter_init(void)
@@ -95,6 +97,15 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	{
 		if (HAL_CAN_GetRxMessage(&hcan2, CAN_RX_FIFO0, &rx_message, can_rx_data) == HAL_OK) // 获得接收到的数据头和数据
 		{
+			switch (rx_message.StdId)
+			{
+			case B2B_CHASSIS_CMD_ID:
+				B2B_Chassis_Cmd_Decode(can_rx_data, &ch_cmd);
+				break;
+
+			default:
+				break;
+			}
 		}
 	}
 }

@@ -30,14 +30,15 @@
 #include "wheel_legged_chassis.h"
 #include "INS_task.h"
 #include "update_task.h"
+#include "command.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
-// osThreadId calibrate_tast_handle;
-// osThreadId detect_handle;
-osThreadId testHandle;
+osThreadId commandTaskHandle;
+osThreadId observerTaskHandle;
 osThreadId chassisTaskHandle;
 osThreadId imuTaskHandle;
 osThreadId updateTaskHandle;
@@ -129,9 +130,9 @@ void MX_FREERTOS_Init(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* definition and creation of test */
-  osThreadDef(test, observer, osPriorityHigh, 0, 512);
-  testHandle = osThreadCreate(osThread(test), NULL);
+  /* definition and creation of observer */
+  osThreadDef(observerTask, observer, osPriorityHigh, 0, 512);
+  observerTaskHandle = osThreadCreate(osThread(observerTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -144,6 +145,9 @@ void MX_FREERTOS_Init(void)
 
   osThreadDef(imuTask, INS_task, osPriorityRealtime, 0, 1024);
   imuTaskHandle = osThreadCreate(osThread(imuTask), NULL);
+
+  osThreadDef(commandTask, Command_Task, osPriorityHigh, 0, 512);
+  commandTaskHandle = osThreadCreate(osThread(commandTask), NULL);
 
   /* USER CODE END RTOS_THREADS */
 }

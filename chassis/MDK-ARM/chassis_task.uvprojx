@@ -699,11 +699,6 @@
           <GroupName>User/application</GroupName>
           <Files>
             <File>
-              <FileName>current_task.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\User\application\current_task.c</FilePath>
-            </File>
-            <File>
               <FileName>INS_task.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\application\INS_task.c</FilePath>
@@ -722,6 +717,11 @@
               <FileName>wheel_legged_chassis.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\application\wheel_legged_chassis.c</FilePath>
+            </File>
+            <File>
+              <FileName>command.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\application\command.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -742,6 +742,11 @@
               <FileName>dt7.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\User\protocol\dt7.c</FilePath>
+            </File>
+            <File>
+              <FileName>b2b.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\protocol\b2b.c</FilePath>
             </File>
           </Files>
         </Group>
