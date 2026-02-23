@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32H723xx,ARM_MATH_CM7,__FPU_PRESENT=1U,ARM_MATH_CHECK</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32H7xx/Include;../Drivers/CMSIS/Include;../Middlewares/ST/ARM/DSP/Inc;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../USB_DEVICE/App;../USB_DEVICE/Target;../Middlewares/ST/STM32_USB_Device_Library/Core/Inc;../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc;../Application/Task/Inc;../Components/Device/Inc;../Components/Controller/Inc;../Components/Algorithm/Inc;../BSP/Inc;../SystemView/SEGGER/Syscalls;../SystemView/Sample/FreeRTOSV10;../SystemView/Sample/FreeRTOSV10/Patch;../SystemView/Config;../SystemView/SEGGER</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32H7xx/Include;../Drivers/CMSIS/Include;../Middlewares/ST/ARM/DSP/Inc;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../USB_DEVICE/App;../USB_DEVICE/Target;../Middlewares/ST/STM32_USB_Device_Library/Core/Inc;../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc;../Application/Task/Inc;../Components/Device/Inc;../Components/Controller/Inc;../Components/Algorithm/Inc;../BSP/Inc;../SystemView/SEGGER/Syscalls;../SystemView/Sample/FreeRTOSV10;../SystemView/Sample/FreeRTOSV10/Patch;../SystemView/Config;../SystemView/SEGGER;..\Components\protocol;..\Components\utils</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -533,6 +533,26 @@
               <FileName>CRC.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Components\Algorithm\Src\CRC.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>protocol</GroupName>
+          <Files>
+            <File>
+              <FileName>b2b.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Components\protocol\b2b.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>utils</GroupName>
+          <Files>
+            <File>
+              <FileName>user_lib.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Components\utils\user_lib.c</FilePath>
             </File>
           </Files>
         </Group>

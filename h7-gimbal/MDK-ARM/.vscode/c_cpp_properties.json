@@ -131,6 +131,8 @@
                 "e:\\serialist\\workspace\\robomaster\\project\\wheel_legged_dev\\h7-gimbal\\SystemView\\Sample\\FreeRTOSV10\\Patch",
                 "e:\\serialist\\workspace\\robomaster\\project\\wheel_legged_dev\\h7-gimbal\\SystemView\\Config",
                 "e:\\serialist\\workspace\\robomaster\\project\\wheel_legged_dev\\h7-gimbal\\SystemView\\SEGGER",
+                "e:\\serialist\\workspace\\robomaster\\project\\wheel_legged_dev\\h7-gimbal\\Components\\protocol",
+                "e:\\serialist\\workspace\\robomaster\\project\\wheel_legged_dev\\h7-gimbal\\Components\\utils",
                 "D:\\Program Files\\Keil_v5\\ARM\\ARMCLANG\\include",
                 "D:\\Program Files\\Keil_v5\\ARM\\ARMCLANG\\include\\arm_linux",
                 "D:\\Program Files\\Keil_v5\\ARM\\ARMCLANG\\include\\arm_linux_compat",

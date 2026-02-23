@@ -12,7 +12,6 @@
 #include "stdlib.h"
 #include "string.h"
 #include "user_lib.h"
-#include "math.h"
 
 // 快速开方
 float Sqrt(float x)
@@ -410,6 +409,19 @@ long long FGcd(long long a, long long b)
     if (b == 0)
         return a;
     return FGcd(b, a % b);
+}
+
+/// @brief 限幅
+void Clamp(float *in, float min, float max)
+{
+    if (*in < min)
+    {
+        *in = min;
+    }
+    else if (*in > max)
+    {
+        *in = max;
+    }
 }
 
 /// @brief 限幅

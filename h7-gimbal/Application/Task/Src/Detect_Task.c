@@ -1,57 +1,36 @@
-/* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : Detect_Task.h
-  * @brief          : Detect task
-  * @author         : GrassFan Wang
-  * @date           : 2025/01/22
-  * @version        : v1.0
-  ******************************************************************************
-  * @attention      : None
-  ******************************************************************************
-  */
-/* USER CODE END Header */
+ * @file Detect_Task.c
+ * @author Serialist (ba3pt@qq.com)
+ * @brief
+ * @version 0.1.0
+ * @date 2026-02-24
+ *
+ * @copyright Copyright (c) Serialist 2026
+ *
+ */
 
-/* Includes ------------------------------------------------------------------*/
 #include "cmsis_os.h"
 #include "Detect_Task.h"
 #include "Control_Task.h"
 #include "Remote_Control.h"
 #include "bsp_gpio.h"
+#include "bsp_can.h"
+#include "b2b.h"
 
-/**
-  * @note turn on:  800
-	*       turn off: 4150
-	*/
+#define CHASSIS_CMD_ID 0x666
 
-/* USER CODE BEGIN Header_Detect_Task */
-/**
-* @brief Function implementing the StartDetectTask thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_Detect_Task */
-void Detect_Task(void const * argument)
+B2B_Chassis_Cmd_t ch_cmd;
+
+void Detect_Task(void const *argument)
 {
-  /* USER CODE BEGIN Detect_Task */
-//  TickType_t systick = 0;
-	
+  uint8_t buf[8];
 
-  /* Infinite loop */
-  for(;;)
+  for (;;)
   {
+    FDCAN3_TxFrame.Header.Identifier = CHASSIS_CMD_ID;
+    B2B_Chassis_Cmd_Encode(&ch_cmd, FDCAN3_TxFrame.Data);
 
-    Remote_Message_Moniter(&remote_ctrl); 
+    Remote_Message_Moniter(&remote_ctrl);
     osDelay(1);
   }
-  /* USER CODE END Detect_Task */
 }
-
-		
-		
-		
-		
-		
-		
-		
-	

@@ -17,6 +17,9 @@
 #include "stdint.h"
 #include "stdbool.h"
 #include "math.h"
+#include "arm_math.h"
+
+// #include "cmsis_os.h" // 下面有这个要不要用（?）
 
 /* ================================================================ macro ================================================================ */
 
@@ -47,6 +50,28 @@
 #define DEG2RAD(Ang) ((Ang) * 0.01745329252f)
 #define RAD2DEG(Ang) ((Ang) * 57.295779513f)
 
+#define LF 0
+#define LB 1
+#define RF 2
+#define RB 3
+
+// 轮子
+#define WL 4
+#define WR 5
+
+#define FRONT 0
+#define BACK 1
+
+#define LEFT 0
+#define RIGHT 1
+
+#define NONE 0
+
+// 做一层 adapter，方便移植
+/// @todo 放到单独一个适配层文件中，比如 math-adapter，这样不同平台移植方便还能硬件优化
+#define SINF(x) arm_sin_f32(x)
+#define COSF(x) arm_cos_f32(x)
+
 /* ================================================================ typedef ================================================================ */
 
 typedef enum
@@ -69,7 +94,7 @@ typedef struct
     float frame_period; // 时间间隔
 } ramp_function_source_t;
 
-typedef __packed struct
+typedef struct
 {
     uint16_t Order;
     uint32_t Count;
@@ -90,6 +115,7 @@ typedef __packed struct
 /* ================================================================ prototype ================================================================ */
 
 float Signf(float value);                                                     // 符号函数
+void Clamp(float *in, float min, float max);                                  // 限幅
 float Clampf(float value, float min, float max);                              // 限幅
 float ClampAbsf(float value, float max);                                      // 绝对值限幅
 float LoopClampf(float Input, float minValue, float maxValue);                // 循环限幅
