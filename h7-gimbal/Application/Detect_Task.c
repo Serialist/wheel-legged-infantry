@@ -11,7 +11,6 @@
 
 #include "cmsis_os.h"
 #include "Detect_Task.h"
-#include "Control_Task.h"
 #include "Remote_Control.h"
 #include "bsp_gpio.h"
 #include "bsp_can.h"
@@ -29,6 +28,7 @@ void Detect_Task(void const *argument)
   {
     FDCAN3_TxFrame.Header.Identifier = CHASSIS_CMD_ID;
     B2B_Chassis_Cmd_Encode(&ch_cmd, FDCAN3_TxFrame.Data);
+    USER_FDCAN_AddMessageToTxFifoQ(&FDCAN3_TxFrame);
 
     Remote_Message_Moniter(&remote_ctrl);
     osDelay(1);

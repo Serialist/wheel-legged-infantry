@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32H723xx,ARM_MATH_CM7,__FPU_PRESENT=1U,ARM_MATH_CHECK</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32H7xx/Include;../Drivers/CMSIS/Include;../Middlewares/ST/ARM/DSP/Inc;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../USB_DEVICE/App;../USB_DEVICE/Target;../Middlewares/ST/STM32_USB_Device_Library/Core/Inc;../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc;../Application/Task/Inc;../Components/Device/Inc;../Components/Controller/Inc;../Components/Algorithm/Inc;../BSP/Inc;../SystemView/SEGGER/Syscalls;../SystemView/Sample/FreeRTOSV10;../SystemView/Sample/FreeRTOSV10/Patch;../SystemView/Config;../SystemView/SEGGER;..\Components\protocol;..\Components\utils</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc;../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32H7xx/Include;../Drivers/CMSIS/Include;../Middlewares/ST/ARM/DSP/Inc;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM4F;../USB_DEVICE/App;../USB_DEVICE/Target;../Middlewares/ST/STM32_USB_Device_Library/Core/Inc;../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc;../Components/Device/Inc;../Components/Controller/Inc;../Components/Algorithm/Inc;../BSP/Inc;../SystemView/SEGGER/Syscalls;../SystemView/Sample/FreeRTOSV10;../SystemView/Sample/FreeRTOSV10/Patch;../SystemView/Config;../SystemView/SEGGER;..\Components\protocol;..\Components\utils;..\Application</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -382,32 +382,37 @@
       </TargetOption>
       <Groups>
         <Group>
-          <GroupName>Application/Task</GroupName>
+          <GroupName>Application</GroupName>
           <Files>
-            <File>
-              <FileName>INS_Task.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Application\Task\Src\INS_Task.c</FilePath>
-            </File>
-            <File>
-              <FileName>Control_Task.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Application\Task\Src\Control_Task.c</FilePath>
-            </File>
             <File>
               <FileName>CAN_Task.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Application\Task\Src\CAN_Task.c</FilePath>
+              <FilePath>..\Application\CAN_Task.c</FilePath>
             </File>
             <File>
               <FileName>Detect_Task.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Application\Task\Src\Detect_Task.c</FilePath>
+              <FilePath>..\Application\Detect_Task.c</FilePath>
             </File>
             <File>
-              <FileName>Config.h</FileName>
+              <FileName>gimbal.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\gimbal.c</FilePath>
+            </File>
+            <File>
+              <FileName>INS_Task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\INS_Task.c</FilePath>
+            </File>
+            <File>
+              <FileName>shoot.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Application\shoot.c</FilePath>
+            </File>
+            <File>
+              <FileName>config.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\Application\Task\Inc\Config.h</FilePath>
+              <FilePath>..\Application\config.h</FilePath>
             </File>
           </Files>
         </Group>

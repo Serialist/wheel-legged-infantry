@@ -26,109 +26,109 @@ void Kalman_Filter_Init(KalmanFilter_Info_TypeDef *KF,uint8_t Xhat_Size,uint8_t 
     Matrix_Init(&KF->ChiSquareTest.ChiSquare_Matrix, 1, 1, (float *)KF->ChiSquareTest.ChiSquare_Data);
 
     /* Initializes the external measure vector */
-    KF->MeasuredVector = (float *)User_malloc(KF->sizeof_float * Z_Size);
+    KF->MeasuredVector = (float *)user_malloc(KF->sizeof_float * Z_Size);
     memset(KF->MeasuredVector, 0, KF->sizeof_float * Z_Size);
 
     /* Initializes the Xhat */
-    KF->Data.Xhat = (float *)User_malloc(KF->sizeof_float * Xhat_Size);
+    KF->Data.Xhat = (float *)user_malloc(KF->sizeof_float * Xhat_Size);
     memset(KF->Data.Xhat, 0, KF->sizeof_float * Xhat_Size);
     Matrix_Init(&KF->Mat.Xhat, KF->Xhat_Size, 1, (float *)KF->Data.Xhat);
 
     /* Initializes the Xhatminus */
-    KF->Data.Xhatminus = (float *)User_malloc(KF->sizeof_float * Xhat_Size);
+    KF->Data.Xhatminus = (float *)user_malloc(KF->sizeof_float * Xhat_Size);
     memset(KF->Data.Xhatminus, 0, KF->sizeof_float * Xhat_Size);
     Matrix_Init(&KF->Mat.Xhatminus, KF->Xhat_Size, 1, (float *)KF->Data.Xhatminus);
 
     /* Initializes the measurement vector */
-    KF->Data.Z = (float *)User_malloc(KF->sizeof_float * Z_Size);
+    KF->Data.Z = (float *)user_malloc(KF->sizeof_float * Z_Size);
     memset(KF->Data.Z, 0, KF->sizeof_float * Z_Size);
     Matrix_Init(&KF->Mat.Z, KF->Z_Size, 1, (float *)KF->Data.Z);
 
     if (KF->U_Size != 0)
     {
 				/* Initializes the external control vector */
-				KF->ControlVector = (float *)User_malloc(KF->sizeof_float * U_Size);
+				KF->ControlVector = (float *)user_malloc(KF->sizeof_float * U_Size);
 				memset(KF->ControlVector, 0, KF->sizeof_float * U_Size);
 
         /* Initializes the control vector */ 
-        KF->Data.U = (float *)User_malloc(KF->sizeof_float * U_Size);
+        KF->Data.U = (float *)user_malloc(KF->sizeof_float * U_Size);
         memset(KF->Data.U, 0, KF->sizeof_float * U_Size);
         Matrix_Init(&KF->Mat.U, KF->U_Size, 1, (float *)KF->Data.U);
 
         /* Initializes the control Matrix */  
-        KF->Data.B = (float *)User_malloc(KF->sizeof_float * Xhat_Size * U_Size);
+        KF->Data.B = (float *)user_malloc(KF->sizeof_float * Xhat_Size * U_Size);
         memset(KF->Data.B, 0, KF->sizeof_float * Xhat_Size * U_Size);
         Matrix_Init(&KF->Mat.B, KF->Xhat_Size, KF->U_Size, (float *)KF->Data.B);
     }
 
     /* Initializes the state transition Matrix */ 
-    KF->Data.A = (float *)User_malloc(KF->sizeof_float * Xhat_Size * Xhat_Size);
+    KF->Data.A = (float *)user_malloc(KF->sizeof_float * Xhat_Size * Xhat_Size);
     memset(KF->Data.A, 0, KF->sizeof_float * Xhat_Size * Xhat_Size);
     Matrix_Init(&KF->Mat.A, KF->Xhat_Size, KF->Xhat_Size, (float *)KF->Data.A);
 
-    KF->Data.AT = (float *)User_malloc(KF->sizeof_float * Xhat_Size * Xhat_Size);
+    KF->Data.AT = (float *)user_malloc(KF->sizeof_float * Xhat_Size * Xhat_Size);
     memset(KF->Data.AT, 0, KF->sizeof_float * Xhat_Size * Xhat_Size);
     Matrix_Init(&KF->Mat.AT, KF->Xhat_Size, KF->Xhat_Size, (float *)KF->Data.AT);
 
     /* Initializes the measurement Matrix */ 
-    KF->Data.H = (float *)User_malloc(KF->sizeof_float * Z_Size * Xhat_Size);
+    KF->Data.H = (float *)user_malloc(KF->sizeof_float * Z_Size * Xhat_Size);
     memset(KF->Data.H, 0, KF->sizeof_float * Z_Size * Xhat_Size);
     Matrix_Init(&KF->Mat.H, KF->Z_Size, KF->Xhat_Size, (float *)KF->Data.H);
 
-    KF->Data.HT = (float *)User_malloc(KF->sizeof_float * Xhat_Size * Z_Size);
+    KF->Data.HT = (float *)user_malloc(KF->sizeof_float * Xhat_Size * Z_Size);
     memset(KF->Data.HT, 0, KF->sizeof_float * Xhat_Size * Z_Size);
     Matrix_Init(&KF->Mat.HT, KF->Xhat_Size, KF->Z_Size, (float *)KF->Data.HT);
 
     /* Initializes the posteriori covariance Matrix */
-    KF->Data.P = (float *)User_malloc(KF->sizeof_float * Xhat_Size * Xhat_Size);
+    KF->Data.P = (float *)user_malloc(KF->sizeof_float * Xhat_Size * Xhat_Size);
     memset(KF->Data.P, 0, KF->sizeof_float * Xhat_Size * Xhat_Size);
     Matrix_Init(&KF->Mat.P, KF->Xhat_Size, KF->Xhat_Size, (float *)KF->Data.P);
 
     /* Initializes the priori covariance Matrix */
-    KF->Data.Pminus = (float *)User_malloc(KF->sizeof_float * Xhat_Size * Xhat_Size);
+    KF->Data.Pminus = (float *)user_malloc(KF->sizeof_float * Xhat_Size * Xhat_Size);
     memset(KF->Data.Pminus, 0, KF->sizeof_float * Xhat_Size * Xhat_Size);
     Matrix_Init(&KF->Mat.Pminus, KF->Xhat_Size, KF->Xhat_Size, (float *)KF->Data.Pminus);
 
     /* Initializes the process noise covariance Matrix */  
-    KF->Data.Q = (float *)User_malloc(KF->sizeof_float * Xhat_Size * Xhat_Size);
+    KF->Data.Q = (float *)user_malloc(KF->sizeof_float * Xhat_Size * Xhat_Size);
     memset(KF->Data.Q, 0, KF->sizeof_float * Xhat_Size * Xhat_Size);
     Matrix_Init(&KF->Mat.Q, KF->Xhat_Size, KF->Xhat_Size, (float *)KF->Data.Q);
 
     /* Initializes the measurement noise covariance Matrix */
-    KF->Data.R = (float *)User_malloc(KF->sizeof_float * Z_Size * Z_Size);
+    KF->Data.R = (float *)user_malloc(KF->sizeof_float * Z_Size * Z_Size);
     memset(KF->Data.R, 0, KF->sizeof_float * Z_Size * Z_Size);
     Matrix_Init(&KF->Mat.R, KF->Z_Size, KF->Z_Size, (float *)KF->Data.R);
 
     /* Initializes the kalman gain */  
-    KF->Data.K = (float *)User_malloc(KF->sizeof_float * Xhat_Size * Z_Size);
+    KF->Data.K = (float *)user_malloc(KF->sizeof_float * Xhat_Size * Z_Size);
     memset(KF->Data.K, 0, KF->sizeof_float * Xhat_Size * Z_Size);
     Matrix_Init(&KF->Mat.K, KF->Xhat_Size, KF->Z_Size, (float *)KF->Data.K);
 
     /* Initializes the K_denominator (K_denominator = H Pminus HT + R) */  
-    KF->Data.K_denominator = (float *)User_malloc(KF->sizeof_float * KF->Xhat_Size * KF->Xhat_Size);
+    KF->Data.K_denominator = (float *)user_malloc(KF->sizeof_float * KF->Xhat_Size * KF->Xhat_Size);
     memset(KF->Data.K_denominator, 0, KF->sizeof_float * KF->Xhat_Size * KF->Xhat_Size);
     Matrix_Init(&KF->Mat.K_denominator, KF->Xhat_Size, KF->Xhat_Size, (float *)KF->Data.K_denominator);
 
     /* Initializes the calculate cache Matrix */
-    KF->Data.Cache_Matrix[0] = (float *)User_malloc(KF->sizeof_float * KF->Xhat_Size * KF->Xhat_Size);
+    KF->Data.Cache_Matrix[0] = (float *)user_malloc(KF->sizeof_float * KF->Xhat_Size * KF->Xhat_Size);
     memset(KF->Data.Cache_Matrix[0],0,KF->sizeof_float * KF->Xhat_Size * KF->Xhat_Size);
     Matrix_Init(&KF->Mat.Cache_Matrix[0], KF->Xhat_Size, KF->Xhat_Size, (float *)KF->Data.Cache_Matrix[0]);
 
-    KF->Data.Cache_Matrix[1] = (float *)User_malloc(KF->sizeof_float * KF->Xhat_Size * KF->Xhat_Size);
+    KF->Data.Cache_Matrix[1] = (float *)user_malloc(KF->sizeof_float * KF->Xhat_Size * KF->Xhat_Size);
     memset(KF->Data.Cache_Matrix[1],0,KF->sizeof_float * KF->Xhat_Size * KF->Xhat_Size);
     Matrix_Init(&KF->Mat.Cache_Matrix[1], KF->Xhat_Size, KF->Xhat_Size, (float *)KF->Data.Cache_Matrix[1]);
 
     /* Initializes the calculate cache vector */
-    KF->Data.Cache_Vector[0] = (float *)User_malloc(KF->sizeof_float * KF->Xhat_Size);
+    KF->Data.Cache_Vector[0] = (float *)user_malloc(KF->sizeof_float * KF->Xhat_Size);
     memset(KF->Data.Cache_Vector[0],0,KF->sizeof_float * KF->Xhat_Size);
     Matrix_Init(&KF->Mat.Cache_Vector[0], KF->Xhat_Size, 1, (float *)KF->Data.Cache_Vector[0]);
 
-    KF->Data.Cache_Vector[1] = (float *)User_malloc(KF->sizeof_float * KF->Xhat_Size);
+    KF->Data.Cache_Vector[1] = (float *)user_malloc(KF->sizeof_float * KF->Xhat_Size);
     memset(KF->Data.Cache_Vector[1],0,KF->sizeof_float * KF->Xhat_Size);
     Matrix_Init(&KF->Mat.Cache_Vector[1], KF->Xhat_Size, 1, (float *)KF->Data.Cache_Vector[1]);
 
     /* Initializes the filter output */
-    KF->Output = (float *)User_malloc(KF->sizeof_float * Xhat_Size);
+    KF->Output = (float *)user_malloc(KF->sizeof_float * Xhat_Size);
     memset(KF->Output, 0, KF->sizeof_float * Xhat_Size);
 }
 

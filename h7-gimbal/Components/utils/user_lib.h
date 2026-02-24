@@ -47,8 +47,13 @@
 #define DEG_CLAMPF(Ang) LoopClampf((Ang), -180.0f, 180.0f) // 角度格式化为-180~180
 #define RAD_CLAMPF(Ang) LoopClampf((Ang), -PI, PI)         // 弧度格式化为-PI~PI
 
+#ifndef DEG2RAD
 #define DEG2RAD(Ang) ((Ang) * 0.01745329252f)
+#endif
+
+#ifndef RAD2DEG
 #define RAD2DEG(Ang) ((Ang) * 57.295779513f)
+#endif
 
 #define LF 0
 #define LB 1

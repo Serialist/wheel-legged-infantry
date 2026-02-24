@@ -14,12 +14,11 @@
 /* Includes ------------------------------------------------------------------*/
 #include "cmsis_os.h"
 #include "CAN_Task.h"
-#include "Control_Task.h"
+#include "gimbal.h"
 #include "INS_Task.h"
 #include "Motor.h"
 #include "bsp_can.h"
 #include "Remote_Control.h"
-#include "Control_Task.h"
 
 /* USER CODE BEGIN Header_CAN_Task */
 /**
@@ -38,10 +37,10 @@ void CAN_Task(void const *argument)
 
     CAN_Task_SysTick = osKernelSysTick();
 
-    FDCAN1_TxFrame.Data[0] = (uint8_t)(Control_Info.SendValue[0] >> 8);
-    FDCAN1_TxFrame.Data[1] = (uint8_t)(Control_Info.SendValue[0]);
-    FDCAN1_TxFrame.Data[2] = (uint8_t)(Control_Info.SendValue[1] >> 8);
-    FDCAN1_TxFrame.Data[3] = (uint8_t)(Control_Info.SendValue[1]);
+    FDCAN1_TxFrame.Data[0] = (uint8_t)(Control_Info.output.yaw >> 8);
+    FDCAN1_TxFrame.Data[1] = (uint8_t)(Control_Info.output.yaw);
+    FDCAN1_TxFrame.Data[2] = (uint8_t)(Control_Info.output.pitch >> 8);
+    FDCAN1_TxFrame.Data[3] = (uint8_t)(Control_Info.output.pitch);
     USER_FDCAN_AddMessageToTxFifoQ(&FDCAN1_TxFrame);
 
     if (CAN_Task_SysTick % 2 == 0)

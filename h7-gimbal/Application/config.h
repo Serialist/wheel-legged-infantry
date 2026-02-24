@@ -22,6 +22,7 @@
 #include "stdlib.h"
 #include "string.h"
 #include "math.h"
+#include "user_lib.h"
 
 /* General physics and mathematics constants ---------------------------------*/
 
@@ -44,29 +45,16 @@
 
 #define GravityAccel 9.718f
 
-#define Angle_to_rad 0.01745329f
-
-#define Rad_to_angle 57.2957732f
-
 /**
  * @brief Euler's Number
  */
 #define Euler_Number 2.718281828459045f
 
-/**
- * @brief radian system rotation degrees system , 180.f/PI
- */
-#define RadiansToDegrees 57.295779513f
-
-/**
- * @brief degrees system rotation radian system , PI/180.f
- */
-#define DegreesToRadians 0.01745329251f
-
 /* Vision reslove constants -------------------------------------------------*/
 
-#define PITCH_MIN_ANGLE -10.f
-#define PITCH_MAX_ANGLE 10.f
+// unit: degree
+#define PITCH_MIN_ANGLE -10.0f
+#define PITCH_MAX_ANGLE 10.0f
 
 /**
  * @brief  Decision Marking mode
