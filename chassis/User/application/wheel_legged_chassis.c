@@ -314,8 +314,8 @@ void Wheel_Leg_Control(void)
 	// 	// tplqrr = tp_offground_pid.Kp * leg_r.theta + tp_offground_pid.Kd * leg_r.d_theta;
 	// }
 
-	tplqrl = PID_Update(&pid_tpl, 0, leg_l.alpha);
-	tplqrr = PID_Update(&pid_tpr, 0, leg_r.alpha);
+	// tplqrl = PID_Update(&pid_tpl, 0, leg_l.alpha);
+	// tplqrr = PID_Update(&pid_tpr, 0, leg_r.alpha);
 
 	/* ================================ ÂÖ ½âËã ================================ */
 
@@ -384,13 +384,13 @@ void Wheel_Leg_Control(void)
 
 uint32_t jump_time = 0;
 // ms
-uint32_t stretch_time = 200;
+uint32_t stretch_time = 100;
 uint32_t shrink_time = 200;
 uint32_t air_time = 200;
 uint32_t end_time = 100;
 // N
-float stretch_force = 150;
-float shrink_force = -150;
+float stretch_force = 300;
+float shrink_force = -200;
 float air_force = 50;
 
 void Jump_FSM(void)
@@ -447,7 +447,7 @@ void Jump_FSM(void)
 	case JPS_AIR:
 	{
 
-		set.left_length = set.right_length = .2f;
+		set.left_length = set.right_length = .15f;
 		leg_force_l = leg_force_r = air_force;
 		if (/* (leg_l.is_offground == false && leg_r.is_offground == false) || */ /* (leg_l.d_L0 + leg_r.d_L0) / 2 */ jump_time >= air_time)
 		{
