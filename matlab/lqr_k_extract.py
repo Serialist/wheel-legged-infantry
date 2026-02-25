@@ -1,10 +1,10 @@
 import datetime
 
-def file_clear():
-    with open("lqr_k.txt", "w") as f:
+def fclear():
+    with open("../chassis/User/module/lqrcoef.h", "w") as f:
         f.write("/// @date " + datetime.datetime.now().strftime('%Y-%m-%d %H:%M') + "\n\n")
 
-def k_extract(step):
+def extrect_coef(step):
     with open("lqr_k.m", "r") as f:
         ls = f.readlines()
     
@@ -26,7 +26,7 @@ def k_extract(step):
         body = "\t{{{0:.15f}, {1:.15f}, {2:.15f}, {3:.15f}}},\n"
         tail = "};\n\n"
 
-        fout = open("lqr_k.txt", "a")
+        fout = open("../chassis/User/module/lqrcoef.h", "a")
 
         fout.write(head)
         for i in range(len(lk)):

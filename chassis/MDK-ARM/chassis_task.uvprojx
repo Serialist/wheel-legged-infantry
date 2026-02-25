@@ -783,6 +783,11 @@
               <FileType>1</FileType>
               <FilePath>..\User\module\lqr.c</FilePath>
             </File>
+            <File>
+              <FileName>lqrcoef.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\User\module\lqrcoef.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

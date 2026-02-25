@@ -58,6 +58,7 @@ VMC_t leg_l, leg_r;
 Robo_Flag_t rbflag;
 
 float turn_t;	// yaw轴补偿
+float f0_roll;	// roll轴补偿
 float tp_alpha; // 劈叉
 float tplqrl;
 float tlqrl;
@@ -117,12 +118,12 @@ void Chassis_PID_Init(void)
 	PID_init(&leglength_pid_l, 400, 0, 9000, 120, 0); // 腿长 left
 	PID_init(&leglength_pid_r, 400, 0, 9000, 120, 0); // 腿长 right
 	PID_init(&yaw_pid, 0.12f, 0, 0.8f, 0, 0);		  // yaw
-	PID_init(&roll_pid, 0.8f, 0, 0, 30.0f, 0);		  // roll
+	PID_init(&roll_pid, .8f, 0, .05f, .2f, 0);		  // roll
 	PID_init(&tp_pid, 10, 0, 2, 3, 0);				  // 劈叉
 
 	// 腿摆角扭矩pid，用于板凳模型
-	PID_init(&pid_tpl, 80, 0, 400, 10, 0);
-	PID_init(&pid_tpr, 80, 0, 400, 10, 0);
+	PID_init(&pid_tpl, 14, 0, 3, 10, 0);
+	PID_init(&pid_tpr, 14, 0, 3, 10, 0);
 
 	PID_init(&tp_offground_pid, 80, 0, 400, 0, 0);
 }
@@ -165,8 +166,8 @@ void Wheel_Leg_Attitude_Calc(void)
 	}
 	else
 	{
-		// rbflag.above = leg_l.is_offground && leg_r.is_offground;
-		rbflag.above = false;
+		rbflag.above = leg_l.is_offground /* || leg_r.is_offground */;
+		// rbflag.above = false;
 	}
 }
 
@@ -221,10 +222,11 @@ uint8_t last_switch = 0;
 
 void Control_Get(void)
 {
-	set.v = rc_ctrl.rc.ch[L_Y] * 3.5f / 660.0f;
+	set.v = rc_ctrl.rc.ch[L_Y] * 4.f / 660.0f;
 	set.yaw -= rc_ctrl.rc.ch[L_X] * 0.001f;
 	set.left_length = set.right_length = (rc_ctrl.rc.ch[R_Y] * 0.01f) / 66 + 0.2f;
-	set.roll = -rc_ctrl.rc.ch[R_X] * 45.0f / 660.0f;
+	// set.roll = -rc_ctrl.rc.ch[R_X] * 30.0f / 660.0f;
+	set.roll = 0;
 	leg_force = rc_ctrl.rc.ch[L_Z] * 50 / 660.0f;
 
 	if (set.v != 0)
@@ -296,26 +298,20 @@ void Wheel_Leg_Control(void)
 	tlqrr = -ur[0];
 	tplqrr = -ur[1];
 
-	// if (rbflag.above)
-	// {
-	// 	for (int i = 0; i < 6; i++)
-	// 	{
-	// 		lqr_k_l[0][i] = 0.0f;
-	// 		lqr_k_r[0][i] = 0.0f;
-	// 		if (i != 0 && i != 1)
-	// 		{
-	// 			lqr_k_l[1][i] = 0.0f;
-	// 			lqr_k_r[1][i] = 0.0f;
-	// 		}
-	// 	}
+	if (rbflag.above)
+	{
+		tlqrl = 0;
+		tlqrr = 0;
+		set.x = ob.x;
+		set.yaw = att.totalyaw;
+		tplqrl = PID_Update(&pid_tpl, 0, leg_l.theta);
+		tplqrr = PID_Update(&pid_tpr, 0, leg_r.theta);
+	}
 
 	// 	// tlqrl = tlqrr = 0;
 	// 	// tplqrl = tp_offground_pid.Kp * leg_l.theta + tp_offground_pid.Kd * leg_l.d_theta;
 	// 	// tplqrr = tp_offground_pid.Kp * leg_r.theta + tp_offground_pid.Kd * leg_r.d_theta;
 	// }
-
-	// tplqrl = PID_Update(&pid_tpl, 0, leg_l.alpha);
-	// tplqrr = PID_Update(&pid_tpr, 0, leg_r.alpha);
 
 	/* ================================ 轮 解算 ================================ */
 
@@ -330,14 +326,16 @@ void Wheel_Leg_Control(void)
 	// set.left_length = set.height / arm_cos_f32(leg_l.theta);
 	// set.right_length = set.height / arm_cos_f32(leg_r.theta);
 
+	f0_roll = PID_Update(&roll_pid, set.roll, att.roll);
+
 	/// @brief 腿推力 PID
 	leg_l.F0 = 55.0f * arm_cos_f32(leg_l.theta) +
-			   PID_Update(&leglength_pid_l, set.left_length, leg_l.L0) +
+			   PID_Update(&leglength_pid_l, set.left_length + f0_roll, leg_l.L0) +
 			   leg_force +
 			   leg_force_l;
 	/// @bug 这里不应该加负号，我怀疑是上面正运动学角度反了
 	leg_r.F0 = -55.0f * arm_cos_f32(leg_r.theta) +
-			   -PID_Update(&leglength_pid_r, set.right_length, leg_r.L0) +
+			   -PID_Update(&leglength_pid_r, set.right_length - f0_roll, leg_r.L0) +
 			   -leg_force +
 			   -leg_force_r;
 

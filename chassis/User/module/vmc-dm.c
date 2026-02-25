@@ -94,7 +94,7 @@ void VMC_5bar_IK(VMC_t *vmc, float tp, float f0)
 	vmc->torque_set[BACK] = vmc->j21 * vmc->F0 + vmc->j22 * vmc->Tp;  // 得到RightBack的输出轴期望力矩，Tp为沿中心轴的力矩
 }
 
-#define OFFGROUND_FN_THRESHOLD 15.0f // 离地支持力阈值
+#define OFFGROUND_FN_THRESHOLD 10.0f // 离地支持力阈值
 #define OFFGROUND_A_RATIO -0.6f		 // 加速度比例
 
 bool OffGround_Detection(VMC_t *leg, float az)

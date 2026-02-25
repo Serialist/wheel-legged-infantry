@@ -4,7 +4,7 @@
 clc;
 clear;
 
-py.lqr_k_extract.file_clear()
+py.lqr_k_extract.fclear()
 
 L0s = 0.12:0.01:0.32;          % L0变化范围
 Ks = zeros(2, 6, length(L0s)); % 存放不同L0对应的K
@@ -28,7 +28,7 @@ for theta_step = 1:length(theta_list)
         L = L0s(step) / 2;
         Lm = L0s(step) / 2;
         mw = 0.334 *2;
-        l = 0.3; % 机体质心到髋关机中心距离
+        l = 0.2; % 机体质心到髋关机中心距离
         mp = 1.482 *2;
         M = (17.5 + 0.68 - mp*2 - mw*2);
         Iw = 0.5 * mw * R ^ 2;
@@ -65,8 +65,11 @@ for theta_step = 1:length(theta_list)
         % R = diag([1 0.25]);
 
         % 新参数仿真试出来的就是不太好使   
-        Q = diag([1750, 100, 50, 25, 8000, 5]);
-        R_ = diag([70 5]);
+        % Q = diag([2000, 75, 25, 25, 8000, 5]);
+        % R_ = diag([80 5]);
+
+        Q = diag([3000, 75, 50, 25, 8000, 5]);
+        R_ = diag([80 5]);
 
         % Q = diag([36  1.5  10  0.5  320  3]);
         % R = diag([1.6  0.1]);
@@ -90,11 +93,12 @@ for theta_step = 1:length(theta_list)
     % 输出到m函数
     matlabFunction(K, 'File', 'lqr_k');
     
-    py.lqr_k_extract.k_extract(theta_step)
+    py.lqr_k_extract.extrect_coef(theta_step)
     
     % 代入L0 = 0.20打印矩阵K 
     len = 0.20;
     fprintf("len = %.2f, theta = %d:\n", len, theta_list(theta_step));
     disp(eval(vpa(subs(K, L0, 0.20))));
-
 end
+
+disp("ready!");
