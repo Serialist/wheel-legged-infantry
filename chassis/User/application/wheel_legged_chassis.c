@@ -57,8 +57,8 @@ Wheel_Leg_Target_t set;
 VMC_t leg_l, leg_r;
 Robo_Flag_t rbflag;
 
-float turn_t; // yaw轴补偿
-float tp_phi; // 劈叉
+float turn_t;	// yaw轴补偿
+float tp_alpha; // 劈叉
 float tplqrl;
 float tlqrl;
 float tplqrr;
@@ -116,9 +116,9 @@ void Chassis_PID_Init(void)
 {
 	PID_init(&leglength_pid_l, 400, 0, 9000, 120, 0); // 腿长 left
 	PID_init(&leglength_pid_r, 400, 0, 9000, 120, 0); // 腿长 right
-	PID_init(&yaw_pid, 0.1f, 0, 0.5f, 0, 0);		  // yaw
+	PID_init(&yaw_pid, 0.12f, 0, 0.8f, 0, 0);		  // yaw
 	PID_init(&roll_pid, 0.8f, 0, 0, 30.0f, 0);		  // roll
-	PID_init(&tp_pid, 1.3, 0, 3, 1.5, 0);			  // 劈叉
+	PID_init(&tp_pid, 10, 0, 2, 3, 0);				  // 劈叉
 
 	// 腿摆角扭矩pid，用于板凳模型
 	PID_init(&pid_tpl, 80, 0, 400, 10, 0);
@@ -248,11 +248,11 @@ void Control_Get(void)
 
 		leglength_pid_l.Kp = 800;
 		leglength_pid_l.Kd = 15000;
-		leglength_pid_l.max_out = 200;
+		leglength_pid_l.max_out = 300;
 
 		leglength_pid_r.Kp = 800;
 		leglength_pid_r.Kd = 15000;
-		leglength_pid_r.max_out = 200;
+		leglength_pid_r.max_out = 300;
 	}
 	else
 	{
@@ -335,13 +335,16 @@ void Wheel_Leg_Control(void)
 			   PID_Update(&leglength_pid_l, set.left_length, leg_l.L0) +
 			   leg_force +
 			   leg_force_l;
+	/// @bug 这里不应该加负号，我怀疑是上面正运动学角度反了
 	leg_r.F0 = -55.0f * arm_cos_f32(leg_r.theta) +
 			   -PID_Update(&leglength_pid_r, set.right_length, leg_r.L0) +
 			   -leg_force +
 			   -leg_force_r;
 
-	leg_l.Tp = tplqrl;
-	leg_r.Tp = tplqrr;
+	tp_alpha = PID_Update(&tp_pid, 0, leg_l.alpha - leg_r.alpha);
+
+	leg_l.Tp = tplqrl + tp_alpha;
+	leg_r.Tp = tplqrr - tp_alpha;
 
 	// leg_r.Tp = tttp;
 	// leg_r.F0 = ttf0;
@@ -363,7 +366,7 @@ void Wheel_Leg_Control(void)
 /* ================================ 发送 ================================ */
 
 /// @brief 限幅
-#define HIP_TORQUE_MAX 30.0f
+#define HIP_TORQUE_MAX 35.0f
 #define HUB_TORQUE_MAX 2.5f
 	Clamp(&set.torque[0], -HIP_TORQUE_MAX, HIP_TORQUE_MAX);
 	Clamp(&set.torque[1], -HIP_TORQUE_MAX, HIP_TORQUE_MAX);
@@ -385,7 +388,7 @@ void Wheel_Leg_Control(void)
 uint32_t jump_time = 0;
 // ms
 uint32_t stretch_time = 100;
-uint32_t shrink_time = 200;
+uint32_t shrink_time = 250;
 uint32_t air_time = 200;
 uint32_t end_time = 100;
 // N
@@ -424,7 +427,7 @@ void Jump_FSM(void)
 	{
 		set.left_length = set.right_length = .4f;
 		leg_force_l = leg_force_r = stretch_force;
-		if (((leg_l.L0 + leg_r.L0) / 2) >= .3f || jump_time >= stretch_time)
+		if (((leg_l.L0 + leg_r.L0) / 2) >= .35f || jump_time >= stretch_time)
 		{
 			jump_state = JPS_SHRINK;
 			jump_time = 0;
