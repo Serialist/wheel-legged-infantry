@@ -55,6 +55,16 @@ DJI_Motor_Info_Typedef frac_motor_r =
 
 };
 
+DJI_Motor_Info_Typedef feed_motor =
+	{
+		.Type = DJI_M2006,
+		.FDCANFrame = {
+			.TxIdentifier = 0x200,
+			.RxIdentifier = 0x203,
+		}
+
+};
+
 //------------------------------------------------------------------------------
 
 /**
