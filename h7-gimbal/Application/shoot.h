@@ -26,6 +26,8 @@ typedef struct
     SHOOT_START,    // 开摩擦轮
     SHOOT_SEMIAUTO, // 半自动（单发，无热量控制）
     SHOOT_FULLAUTO, // 全自动（连发，有热量控制）
+    SHOOT_SINGLE,
+    SHOOT_CONTINUOUS,
     SHOOT_UNLOAD,   // 卸弹
   } state;
 
