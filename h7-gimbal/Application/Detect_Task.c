@@ -28,7 +28,7 @@ void Detect_Task(void const *argument)
   {
     FDCAN3_TxFrame.Header.Identifier = CHASSIS_CMD_ID;
     B2B_Chassis_Cmd_Encode(&ch_cmd, FDCAN3_TxFrame.Data);
-    USER_FDCAN_AddMessageToTxFifoQ(&FDCAN3_TxFrame);
+    // USER_FDCAN_AddMessageToTxFifoQ(&FDCAN3_TxFrame);
 
     Remote_Message_Moniter(&remote_ctrl);
     osDelay(1);

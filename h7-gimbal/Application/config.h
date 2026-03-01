@@ -53,8 +53,8 @@
 /* Vision reslove constants -------------------------------------------------*/
 
 // unit: degree
-#define PITCH_MIN_ANGLE -10.0f
-#define PITCH_MAX_ANGLE 10.0f
+#define PITCH_MIN_ANGLE -20.0f
+#define PITCH_MAX_ANGLE 20.0f
 
 /**
  * @brief  Decision Marking mode
@@ -88,44 +88,13 @@
  */
 #define IMU_Calibration_ENABLE 0U
 
-/**
- * @brief the index of pitch angle update
- */
-#define IMU_ANGLE_INDEX_PITCH 2U
-/**
- * @brief the index of yaw angle update
- */
+#define IMU_ANGLE_INDEX_PITCH 1U
 #define IMU_ANGLE_INDEX_YAW 0U
-/**
- * @brief the index of roll angle update
- */
-#define IMU_ANGLE_INDEX_ROLL 1U
+#define IMU_ANGLE_INDEX_ROLL 2U
 
-/**
- * @brief the index of pitch gyro update
- */
-#define IMU_GYRO_INDEX_PITCH 0U
-/**
- * @brief the index of yaw gyro update
- */
+#define IMU_GYRO_INDEX_PITCH 1U
 #define IMU_GYRO_INDEX_YAW 2U
-/**
- * @brief the index of roll gyro update
- */
-#define IMU_GYRO_INDEX_ROLL 1U
-
-/**
- * @brief the index of pitch accel update
- */
-#define IMU_ACCEL_INDEX_PITCH 0U
-/**
- * @brief the index of yaw accel update
- */
-#define IMU_ACCEL_INDEX_YAW 2U
-/**
- * @brief the index of roll accel update
- */
-#define IMU_ACCEL_INDEX_ROLL 1U
+#define IMU_GYRO_INDEX_ROLL 0U
 
 /* Remote reslove constants -----------------------------------------------*/
 /**

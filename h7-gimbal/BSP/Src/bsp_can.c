@@ -153,8 +153,10 @@ void USER_FDCAN_AddMessageToTxFifoQ(FDCAN_TxFrame_TypeDef *FDCAN_TxFrame)
  */
 static void FDCAN1_RxFifo0RxHandler(uint32_t *Identifier, uint8_t Data[8])
 {
+  DJI_Motor_Info_Update(Identifier, Data, &pitch_motor);
 
-  // DJI_Motor_Info_Update(Identifier, Data, &Chassis_Motor[0]);
+  // DJI_Motor_Info_Update(Identifier, Data, &fr_motor_l);
+  // DJI_Motor_Info_Update(Identifier, Data, &fr_motor_r);
 }
 
 /**

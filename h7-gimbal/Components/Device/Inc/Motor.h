@@ -146,7 +146,7 @@ typedef struct
 
 /* Externs ------------------------------------------------------------------*/
 
-extern DM_Motor_Contorl_Info_Typedef DM_Motor_Contorl_Info[4];
+extern DJI_Motor_Info_Typedef pitch_motor;
 
 extern void DJI_Motor_Info_Update(uint32_t *Identifier, uint8_t *Rx_Buf, DJI_Motor_Info_Typedef *DJI_Motor);
 

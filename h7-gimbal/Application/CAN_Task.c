@@ -20,13 +20,7 @@
 #include "bsp_can.h"
 #include "Remote_Control.h"
 
-/* USER CODE BEGIN Header_CAN_Task */
-/**
- * @brief Function implementing the StartCANTask thread.
- * @param argument: Not used
- * @retval None
- */
-/* USER CODE END Header_CAN_Task */
+extern int16_t ttttt;
 
 void CAN_Task(void const *argument)
 {
@@ -37,10 +31,18 @@ void CAN_Task(void const *argument)
 
     CAN_Task_SysTick = osKernelSysTick();
 
-    FDCAN1_TxFrame.Data[0] = (uint8_t)(Control_Info.output.yaw >> 8);
-    FDCAN1_TxFrame.Data[1] = (uint8_t)(Control_Info.output.yaw);
-    FDCAN1_TxFrame.Data[2] = (uint8_t)(Control_Info.output.pitch >> 8);
-    FDCAN1_TxFrame.Data[3] = (uint8_t)(Control_Info.output.pitch);
+    memset(&FDCAN1_TxFrame.Data, 0, 8);
+    FDCAN1_TxFrame.Header.Identifier = 0x1FF;
+    FDCAN1_TxFrame.Data[4] = (uint8_t)(Control_Info.output.pitch >> 8);
+    FDCAN1_TxFrame.Data[5] = (uint8_t)(Control_Info.output.pitch);
+    USER_FDCAN_AddMessageToTxFifoQ(&FDCAN1_TxFrame);
+
+    memset(&FDCAN1_TxFrame.Data, 0, 8);
+    FDCAN1_TxFrame.Header.Identifier = 0x200;
+    FDCAN1_TxFrame.Data[0] = (uint8_t)(ttttt >> 8);
+    FDCAN1_TxFrame.Data[1] = (uint8_t)(ttttt);
+    FDCAN1_TxFrame.Data[2] = (uint8_t)(ttttt >> 8);
+    FDCAN1_TxFrame.Data[3] = (uint8_t)(ttttt);
     USER_FDCAN_AddMessageToTxFifoQ(&FDCAN1_TxFrame);
 
     if (CAN_Task_SysTick % 2 == 0)
@@ -48,6 +50,7 @@ void CAN_Task(void const *argument)
 
       // 500Hz发送 请保证所有任务osDelay(1)
     }
+
     osDelay(1);
   }
 }

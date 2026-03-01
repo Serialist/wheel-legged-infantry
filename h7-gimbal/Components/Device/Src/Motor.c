@@ -29,13 +29,13 @@ DJI_Motor_Info_Typedef pitch_motor =
 	{
 		.Type = DJI_GM6020,
 		.FDCANFrame = {
-			.TxIdentifier = 0x1ff,
+			.TxIdentifier = 0x1FE,
 			.RxIdentifier = 0x207,
 		}
 
 };
 
-DJI_Motor_Info_Typedef frac_motor_l =
+DJI_Motor_Info_Typedef fr_motor_l =
 	{
 		.Type = DJI_M3508,
 		.FDCANFrame = {
@@ -45,7 +45,7 @@ DJI_Motor_Info_Typedef frac_motor_l =
 
 };
 
-DJI_Motor_Info_Typedef frac_motor_r =
+DJI_Motor_Info_Typedef fr_motor_r =
 	{
 		.Type = DJI_M3508,
 		.FDCANFrame = {
