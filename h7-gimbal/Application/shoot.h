@@ -16,26 +16,26 @@
 
 #define SHOOT_FEEDER_ROTATE_RATIO 1
 
+typedef enum
+{
+  SHOOT_NONE = 0,
+  SHOOT_READY,      // 初始化完成
+  SHOOT_START,      // 开摩擦轮
+  SHOOT_SEMIAUTO,   // 半自动（单发，无热量控制）
+  SHOOT_FULLAUTO,   // 全自动（连发，有热量控制）
+  SHOOT_SINGLE,     // 单发
+  SHOOT_CONTINUOUS, // 连发
+  SHOOT_UNLOAD,     // 退弹
+} Shoot_Status_t;
+
 typedef struct
 {
-
-  enum
-  {
-    SHOOT_NONE = 0,
-    SHOOT_READY,    // 初始化完成
-    SHOOT_START,    // 开摩擦轮
-    SHOOT_SEMIAUTO, // 半自动（单发，无热量控制）
-    SHOOT_FULLAUTO, // 全自动（连发，有热量控制）
-    SHOOT_SINGLE,
-    SHOOT_CONTINUOUS,
-    SHOOT_UNLOAD,   // 卸弹
-  } state;
+  Shoot_Status_t status;
 
   struct
   {
 
-    float farc1;
-    float farc2;
+    float fr;
     float feed_freq;
     float feed_num;
 
@@ -44,23 +44,23 @@ typedef struct
   struct
   {
 
-    float farc1;
-    float farc2;
-    float feed_angle;
+    float frl;
+    float frr;
+    float feed;
 
   } feedback;
 
   struct
   {
 
-    int16_t farc1;
-    int16_t farc2;
-    int16_t ammo_feed;
+    int16_t frl;
+    int16_t frr;
+    int16_t feed;
 
   } output;
 
-} Shoot_Info_Typedef;
+} Shoot_t;
 
-extern Shoot_Info_Typedef shoot_info;
+extern Shoot_t shoot;
 
 #endif // SHOOT_H

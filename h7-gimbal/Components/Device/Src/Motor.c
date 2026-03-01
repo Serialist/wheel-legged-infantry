@@ -40,7 +40,7 @@ DJI_Motor_Info_Typedef fr_motor_l =
 		.Type = DJI_M3508,
 		.FDCANFrame = {
 			.TxIdentifier = 0x200,
-			.RxIdentifier = 0x201,
+			.RxIdentifier = 0x202,
 		}
 
 };
@@ -50,7 +50,7 @@ DJI_Motor_Info_Typedef fr_motor_r =
 		.Type = DJI_M3508,
 		.FDCANFrame = {
 			.TxIdentifier = 0x200,
-			.RxIdentifier = 0x202,
+			.RxIdentifier = 0x201,
 		}
 
 };

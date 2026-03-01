@@ -22,7 +22,6 @@ uint32_t usb_len = 0;
 
 void MiniPC_Transmit_Info(uint8_t *Buff, const uint32_t *Len)
 {
-
   CDC_Transmit_HS(Buff, *Len);
 }
 

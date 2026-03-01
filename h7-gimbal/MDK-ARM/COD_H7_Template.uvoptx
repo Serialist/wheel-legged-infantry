@@ -169,7 +169,7 @@
           <Type>0</Type>
           <LineNumber>3147</LineNumber>
           <EnabledFlag>0</EnabledFlag>
-          <Address>134279044</Address>
+          <Address>134279148</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -185,7 +185,7 @@
           <Type>0</Type>
           <LineNumber>5929</LineNumber>
           <EnabledFlag>0</EnabledFlag>
-          <Address>134250020</Address>
+          <Address>134250124</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -231,7 +231,17 @@
         <Ww>
           <count>6</count>
           <WinNumber>1</WinNumber>
-          <ItemText>ttttt,0x0A</ItemText>
+          <ItemText>\\COD_H7_Template\../Application/shoot.c\ttttt</ItemText>
+        </Ww>
+        <Ww>
+          <count>7</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>fr_motor_l,0x0A</ItemText>
+        </Ww>
+        <Ww>
+          <count>8</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>fr_motor_r,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>
@@ -253,7 +263,12 @@
         <Ww>
           <count>3</count>
           <WinNumber>2</WinNumber>
-          <ItemText>\\COD_H7_Template\../Components/Device/Src/Motor.c\pitch_motor.Data,0x0A</ItemText>
+          <ItemText>fr_l_pid</ItemText>
+        </Ww>
+        <Ww>
+          <count>4</count>
+          <WinNumber>2</WinNumber>
+          <ItemText>fr_r_pid</ItemText>
         </Ww>
       </WatchWindow2>
       <MemoryWindow1>

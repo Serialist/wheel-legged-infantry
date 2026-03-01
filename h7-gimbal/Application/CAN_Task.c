@@ -19,8 +19,7 @@
 #include "Motor.h"
 #include "bsp_can.h"
 #include "Remote_Control.h"
-
-extern int16_t ttttt;
+#include "shoot.h"
 
 void CAN_Task(void const *argument)
 {
@@ -39,10 +38,10 @@ void CAN_Task(void const *argument)
 
     memset(&FDCAN1_TxFrame.Data, 0, 8);
     FDCAN1_TxFrame.Header.Identifier = 0x200;
-    FDCAN1_TxFrame.Data[0] = (uint8_t)(ttttt >> 8);
-    FDCAN1_TxFrame.Data[1] = (uint8_t)(ttttt);
-    FDCAN1_TxFrame.Data[2] = (uint8_t)(ttttt >> 8);
-    FDCAN1_TxFrame.Data[3] = (uint8_t)(ttttt);
+    FDCAN1_TxFrame.Data[0] = (uint8_t)(shoot.output.frr >> 8);
+    FDCAN1_TxFrame.Data[1] = (uint8_t)(shoot.output.frr);
+    FDCAN1_TxFrame.Data[2] = (uint8_t)(shoot.output.frl >> 8);
+    FDCAN1_TxFrame.Data[3] = (uint8_t)(shoot.output.frl);
     USER_FDCAN_AddMessageToTxFifoQ(&FDCAN1_TxFrame);
 
     if (CAN_Task_SysTick % 2 == 0)

@@ -14,12 +14,12 @@
 #include "PID.h"
 #include "Motor.h"
 
-Shoot_Info_Typedef shoot_info;
+Shoot_t shoot;
 
 //                                KP KI KD Alpha Deadband I_MAX Output_MAX
 static float feed_pid_param[7] = {0, 0, 0, 0, 0, 0, 0};
-static float fr_l_pid_param[7] = {0, 0, 0, 0, 0, 0, 0};
-static float fr_r_pid_param[7] = {0, 0, 0, 0, 0, 0, 0};
+static float fr_l_pid_param[7] = {10.f, 0, 0, 0, 0, 0, 5000.f};
+static float fr_r_pid_param[7] = {10.f, 0, 0, 0, 0, 0, 5000.f};
 
 PID_Info_TypeDef feed_pid;
 PID_Info_TypeDef fr_l_pid;
@@ -27,39 +27,20 @@ PID_Info_TypeDef fr_r_pid;
 
 TickType_t shoot_task_tick = 0;
 
-int16_t ttttt = 130;
-
-extern FDCAN_HandleTypeDef hfdcan1;
-FDCAN_TxFrame_TypeDef FDCAN1_TxFrame2 = {
-    .hcan = &hfdcan1,
-    .Header.IdType = FDCAN_STANDARD_ID,
-    .Header.TxFrameType = FDCAN_DATA_FRAME,
-    .Header.DataLength = 8,
-    .Header.ErrorStateIndicator = FDCAN_ESI_ACTIVE,
-    .Header.BitRateSwitch = FDCAN_BRS_OFF,
-    .Header.FDFormat = FDCAN_CLASSIC_CAN,
-    .Header.TxEventFifoControl = FDCAN_NO_TX_EVENTS,
-    .Header.MessageMarker = 0,
-};
-
 void Shoot_Task(void const *argument)
 {
   PID_Init(&feed_pid, PID_POSITION, feed_pid_param);
   PID_Init(&fr_l_pid, PID_POSITION, fr_l_pid_param);
   PID_Init(&fr_r_pid, PID_POSITION, fr_r_pid_param);
 
+  shoot.target.fr = 0;
+
   for (;;)
   {
     shoot_task_tick = osKernelSysTick();
 
-    // PID_Calculate()
-
-    // FDCAN1_TxFrame.Header.Identifier = 0x200;
-    // FDCAN1_TxFrame.Data[0] = (uint8_t)(ttttt >> 8);
-    // FDCAN1_TxFrame.Data[1] = (uint8_t)(ttttt);
-    // FDCAN1_TxFrame.Data[2] = (uint8_t)(ttttt >> 8);
-    // FDCAN1_TxFrame.Data[3] = (uint8_t)(ttttt);
-    // USER_FDCAN_AddMessageToTxFifoQ(&FDCAN1_TxFrame);
+    shoot.output.frl = (int16_t)PID_Calculate(&fr_l_pid, -shoot.target.fr, fr_motor_l.Data.Velocity);
+    shoot.output.frr = (int16_t)PID_Calculate(&fr_r_pid, shoot.target.fr, fr_motor_r.Data.Velocity);
 
     osDelay(1);
   }
