@@ -41,8 +41,8 @@ typedef struct
 
   } output;
 
-} Control_Info_Typedef;
+} Gimbal_t;
 
-extern Control_Info_Typedef Control_Info;
+extern Gimbal_t gimbal;
 
 #endif // CONTROL_TASK_H

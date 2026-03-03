@@ -40,7 +40,7 @@ DJI_Motor_Info_Typedef fr_motor_l =
 		.Type = DJI_M3508,
 		.FDCANFrame = {
 			.TxIdentifier = 0x200,
-			.RxIdentifier = 0x202,
+			.RxIdentifier = 0x201,
 		}
 
 };
@@ -50,7 +50,7 @@ DJI_Motor_Info_Typedef fr_motor_r =
 		.Type = DJI_M3508,
 		.FDCANFrame = {
 			.TxIdentifier = 0x200,
-			.RxIdentifier = 0x201,
+			.RxIdentifier = 0x202,
 		}
 
 };
@@ -271,7 +271,7 @@ float DJI_Motor_Encoder_To_Angle(DJI_Motor_Data_Typedef *Data, float torque_rati
  * @brief  Transmit enable disable save zero position Command to DM motor
  * @param  *FDCAN_TxFrame£ºpointer to the FDCAN_TxFrame_TypeDef.
  * @param  *DM_Motor£ºpointer to the DM_Motor
- * @param  CMD£ºTransmit Command  (DJI_Motor_Type_e)
+ * @param  CMD£ºTransmit Command  (DM_Motor_CMD_Type_e)
  * @retval None
  */
 void DM_Motor_Command(FDCAN_TxFrame_TypeDef *FDCAN_TxFrame, DM_Motor_Info_Typedef *DM_Motor, uint8_t CMD)

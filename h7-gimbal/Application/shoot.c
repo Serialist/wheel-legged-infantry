@@ -1,5 +1,5 @@
 /**
- * @file Control_Task.c
+ * @file Gimbal_Task.c
  * @author Serialist (ba3pt@qq.com)
  * @brief
  * @version 0.1.0
@@ -13,6 +13,10 @@
 #include "cmsis_os.h"
 #include "PID.h"
 #include "Motor.h"
+#include "rm_motor.h"
+#include "control.h"
+
+RM_Motor_Fdb_t fr_motor[2];
 
 Shoot_t shoot;
 
@@ -29,6 +33,19 @@ TickType_t shoot_task_tick = 0;
 
 void Shoot_Task(void const *argument)
 {
+  uint8_t st_can_buf[8];
+  FDCAN_TxHeaderTypeDef st_can_header = {
+      .Identifier = 0x200,
+      .IdType = FDCAN_STANDARD_ID,
+      .TxFrameType = FDCAN_DATA_FRAME,
+      .DataLength = 8,
+      .ErrorStateIndicator = FDCAN_ESI_ACTIVE,
+      .BitRateSwitch = FDCAN_BRS_OFF,
+      .FDFormat = FDCAN_CLASSIC_CAN,
+      .TxEventFifoControl = FDCAN_NO_TX_EVENTS,
+      .MessageMarker = 0,
+  };
+
   PID_Init(&feed_pid, PID_POSITION, feed_pid_param);
   PID_Init(&fr_l_pid, PID_POSITION, fr_l_pid_param);
   PID_Init(&fr_r_pid, PID_POSITION, fr_r_pid_param);
@@ -39,8 +56,16 @@ void Shoot_Task(void const *argument)
   {
     shoot_task_tick = osKernelSysTick();
 
-    shoot.output.frl = (int16_t)PID_Calculate(&fr_l_pid, -shoot.target.fr, fr_motor_l.Data.Velocity);
-    shoot.output.frr = (int16_t)PID_Calculate(&fr_r_pid, shoot.target.fr, fr_motor_r.Data.Velocity);
+    shoot.output.fr[LEFT] = (int16_t)PID_Calculate(&fr_l_pid, -shoot.target.fr, fr_motor[LEFT].speed);
+    shoot.output.fr[RIGHT] = (int16_t)PID_Calculate(&fr_r_pid, shoot.target.fr, fr_motor[RIGHT].speed);
+
+    if (control.status != RBS_RUNNING)
+    {
+      shoot.output.fr[LEFT] = shoot.output.fr[RIGHT] = 0;
+    }
+
+    RM_Motor_Cmd_Encode(shoot.output.fr[LEFT], shoot.output.fr[RIGHT], 0, 0, st_can_buf);
+    USER_FDCAN_Transmit(1, 0x200, st_can_buf);
 
     osDelay(1);
   }

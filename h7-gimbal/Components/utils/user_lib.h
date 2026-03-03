@@ -28,10 +28,9 @@
 #define user_malloc pvPortMalloc
 #else
 #define user_malloc malloc
-#endif /* _CMSIS_OS_H */
-#endif /* user_malloc */
+#endif
+#endif
 
-/* circumference ratio */
 #ifndef PI
 #define PI 3.14159265354f
 #endif
@@ -70,7 +69,14 @@
 #define LEFT 0
 #define RIGHT 1
 
+#ifndef NONE
 #define NONE 0
+#endif
+
+#ifndef NULL
+#define NULL 0
+#endif
+// #define AIMASSIST 1
 
 // 做一层 adapter，方便移植
 /// @todo 放到单独一个适配层文件中，比如 math-adapter，这样不同平台移植方便还能硬件优化

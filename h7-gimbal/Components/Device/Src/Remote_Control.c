@@ -4,12 +4,23 @@
 #include "Remote_Control.h"
 #include "ramp.h"
 
+#define RC_TIMEOUT 0x32U
+
 /* Exported variables ---------------------------------------------------------*/
 /**
  * @brief remote control structure variable
  */
 Remote_Info_Typedef remote_ctrl = {
-    .online_cnt = 0xFAU,
+    .rc.ch[DT7_LX] = 0,
+    .rc.ch[DT7_LY] = 0,
+    .rc.ch[DT7_RX] = 0,
+    .rc.ch[DT7_RY] = 0,
+    .rc.ch[DT7_Z] = 0,
+
+    .rc.s[DT7_SL] = DT7_UP,
+    .rc.s[DT7_SR] = DT7_UP,
+
+    .online_cnt = 250U,
     .rc_lost = true,
 };
 
@@ -88,7 +99,7 @@ void SBUS_TO_RC(volatile const uint8_t *sbus_buf, Remote_Info_Typedef *remote_ct
 void Remote_Message_Moniter(Remote_Info_Typedef *remote_ctrl)
 {
   /* Juege the device status */
-  if (remote_ctrl->online_cnt <= 0x32U)
+  if (remote_ctrl->online_cnt <= RC_TIMEOUT)
   {
     /* clear the data */
     memset(remote_ctrl, 0, sizeof(Remote_Info_Typedef));
@@ -104,4 +115,3 @@ void Remote_Message_Moniter(Remote_Info_Typedef *remote_ctrl)
     remote_ctrl->online_cnt--;
   }
 }
-//------------------------------------------------------------------------------

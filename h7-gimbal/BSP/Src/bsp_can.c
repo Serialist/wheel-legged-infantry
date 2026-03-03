@@ -17,6 +17,27 @@
 #include "bsp_can.h"
 #include "Motor.h"
 #include "Remote_Control.h"
+#include "rm_motor.h"
+
+extern RM_Motor_Fdb_t pitch_motor_fdb, fr_motor[2];
+
+#define FDCAN_MAX_LEN 8
+
+FDCAN_Message_t *msg_list[FDCAN_MAX_LEN];
+uint32_t msg_len = 0;
+
+bool CAN_Add_Device(FDCAN_Message_t *msg)
+{
+  if (msg_len >= FDCAN_MAX_LEN)
+    return false;
+
+  msg_list[msg_len++] = msg;
+  return true;
+}
+
+/**
+ * @brief The structure that contains the Information of FDCAN1 and FDCAN2 Receive.
+ */
 
 /**
  * @brief The structure that contains the Information of FDCAN1 and FDCAN2 Receive.
@@ -27,7 +48,7 @@ FDCAN_RxFrame_TypeDef FDCAN_RxFIFO1Frame;
 /**
  * @brief The structure that contains the Information of FDCAN1 Transmit(CLASSIC_CAN).
  */
-FDCAN_TxFrame_TypeDef FDCAN1_TxFrame = {
+FDCAN_TxFrame_TypeDef fdcan_txframe = {
     .hcan = &hfdcan1,
     .Header.IdType = FDCAN_STANDARD_ID,
     .Header.TxFrameType = FDCAN_DATA_FRAME,
@@ -69,6 +90,17 @@ FDCAN_TxFrame_TypeDef FDCAN3_TxFrame = {
     .Header.MessageMarker = 0,
 };
 
+FDCAN_TxHeaderTypeDef fdcan_tx_header = {
+    .IdType = FDCAN_STANDARD_ID,
+    .TxFrameType = FDCAN_DATA_FRAME,
+    .DataLength = 8,
+    .ErrorStateIndicator = FDCAN_ESI_ACTIVE,
+    .BitRateSwitch = FDCAN_BRS_OFF,
+    .FDFormat = FDCAN_CLASSIC_CAN,
+    .TxEventFifoControl = FDCAN_NO_TX_EVENTS,
+    .MessageMarker = 0,
+};
+
 /**
   * @brief  Configures the FDCAN Filter.
             FDCAN1:CLASSIC_CAN  FDCAN2:FDCAN  FDCAN3:CLASSIC_CAN
@@ -77,6 +109,7 @@ FDCAN_TxFrame_TypeDef FDCAN3_TxFrame = {
   */
 void BSP_FDCAN_Init(void)
 {
+  // CAN1
 
   FDCAN_FilterTypeDef FDCAN1_FilterConfig;
 
@@ -93,7 +126,9 @@ void BSP_FDCAN_Init(void)
 
   HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0); // 打开FIFO0区的新数据接收中断
 
-  HAL_FDCAN_Start(&hfdcan1); // 使能CAN1
+  HAL_FDCAN_Start(&hfdcan1);
+
+  // CAN2
 
   FDCAN_FilterTypeDef FDCAN2_FilterConfig;
 
@@ -110,11 +145,15 @@ void BSP_FDCAN_Init(void)
 
   HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO1_NEW_MESSAGE, 0);
 
-  HAL_FDCAN_EnableTxDelayCompensation(&hfdcan2); // 开启FDCAN的发送延迟补偿
+  // 这两行不用 FDCAN 可以不开
 
-  HAL_FDCAN_ConfigTxDelayCompensation(&hfdcan2, 14, 14); // 设置补偿时间 参数2和参数3都为TimeSeg1的值
+  // HAL_FDCAN_EnableTxDelayCompensation(&hfdcan2); // 开启FDCAN的发送延迟补偿
+
+  // HAL_FDCAN_ConfigTxDelayCompensation(&hfdcan2, 14, 14); // 设置补偿时间 参数2和参数3都为TimeSeg1的值
 
   HAL_FDCAN_Start(&hfdcan2);
+
+  // CAN3
 
   FDCAN_FilterTypeDef FDCAN3_FilterConfig;
 
@@ -145,6 +184,14 @@ void USER_FDCAN_AddMessageToTxFifoQ(FDCAN_TxFrame_TypeDef *FDCAN_TxFrame)
   HAL_FDCAN_AddMessageToTxFifoQ(FDCAN_TxFrame->hcan, &FDCAN_TxFrame->Header, FDCAN_TxFrame->Data);
 }
 
+FDCAN_HandleTypeDef *const canid_map[] = {&hfdcan3, &hfdcan1, &hfdcan2, &hfdcan3};
+
+void USER_FDCAN_Transmit(uint8_t canid, uint32_t id, uint8_t *buf)
+{
+  fdcan_tx_header.Identifier = id;
+  HAL_FDCAN_AddMessageToTxFifoQ(canid_map[canid], &fdcan_tx_header, buf);
+}
+
 /**
  * @brief  Function to converting the FDCAN1 received message to Fifo0.
  * @param  Identifier: Received the identifier.
@@ -153,10 +200,28 @@ void USER_FDCAN_AddMessageToTxFifoQ(FDCAN_TxFrame_TypeDef *FDCAN_TxFrame)
  */
 static void FDCAN1_RxFifo0RxHandler(uint32_t *Identifier, uint8_t Data[8])
 {
+  for (int i = 0; i < msg_len; i++)
+    memcmp(msg_list[i]->data, Data, 8);
+
   DJI_Motor_Info_Update(Identifier, Data, &pitch_motor);
 
   DJI_Motor_Info_Update(Identifier, Data, &fr_motor_l);
   DJI_Motor_Info_Update(Identifier, Data, &fr_motor_r);
+
+  switch (*Identifier)
+  {
+  case GM6020_RX_ID(3):
+    RM_Motor_Fdb_Decode(Data, &pitch_motor_fdb);
+    break;
+
+  case C620_RX_ID(1):
+    RM_Motor_Fdb_Decode(Data, &fr_motor[LEFT]);
+    break;
+
+  case C620_RX_ID(2):
+    RM_Motor_Fdb_Decode(Data, &fr_motor[RIGHT]);
+    break;
+  }
 }
 
 /**

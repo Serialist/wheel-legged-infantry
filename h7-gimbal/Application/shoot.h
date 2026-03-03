@@ -44,8 +44,7 @@ typedef struct
   struct
   {
 
-    float frl;
-    float frr;
+    float fr[2];
     float feed;
 
   } feedback;
@@ -53,8 +52,7 @@ typedef struct
   struct
   {
 
-    int16_t frl;
-    int16_t frr;
+    int16_t fr[2];
     int16_t feed;
 
   } output;
