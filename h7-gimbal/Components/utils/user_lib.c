@@ -12,7 +12,6 @@
 #include "stdlib.h"
 #include "string.h"
 #include "user_lib.h"
-#include "math.h"
 
 // 快速开方
 float Sqrt(float x)
@@ -413,6 +412,19 @@ long long FGcd(long long a, long long b)
 }
 
 /// @brief 限幅
+void Clamp(float *in, float min, float max)
+{
+    if (*in < min)
+    {
+        *in = min;
+    }
+    else if (*in > max)
+    {
+        *in = max;
+    }
+}
+
+/// @brief 限幅
 float Clampf(float value, float min, float max)
 {
     return fminf(fmaxf(value, min), max);
@@ -422,6 +434,13 @@ float Clampf(float value, float min, float max)
 float ClampAbsf(float value, float max)
 {
     return fminf(fmaxf(value, -max), max);
+}
+
+float Modf(float value, float range)
+{
+    if (range == 0)
+        return NAN;
+    return value - floorf(value / range) * range;
 }
 
 /**
@@ -440,6 +459,8 @@ float LoopClampf(float value, float min, float max)
     // a mod b  ==  a-floor(a/b)*b
     float range = max - min;
     return min + value - floorf(value / range) * range;
+
+    // return min + Modf(value - min, max - min);
 
     // 实现 2 （注意 -0 问题）
     // 注意 >= 而不是 >，因为符号位可能产生 -0.0 和 0.0

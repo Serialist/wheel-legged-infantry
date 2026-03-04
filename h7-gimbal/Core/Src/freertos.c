@@ -1,20 +1,20 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * File Name          : freertos.c
-  * Description        : Code for freertos applications
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2024 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * File Name          : freertos.c
+ * Description        : Code for freertos applications
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2024 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
@@ -51,15 +51,18 @@
 osThreadId Start_INS_TaskHandle;
 uint32_t Start_INS_TaskBuffer[ 1024 ];
 osStaticThreadDef_t Start_INS_TaskControlBlock;
-osThreadId Start_Control_TaskHandle;
-uint32_t Start_Control_TaskBuffer[ 1024 ];
-osStaticThreadDef_t Start_Control_TaskControlBlock;
+osThreadId Start_Gimbal_TaskHandle;
+uint32_t Start_Gimbal_TaskBuffer[ 1024 ];
+osStaticThreadDef_t Start_Gimbal_TaskControlBlock;
 osThreadId Start_CAN_TaskHandle;
 uint32_t Start_CAN_TaskBuffer[ 1024 ];
 osStaticThreadDef_t Start_CAN_TaskControlBlock;
-osThreadId Start_Detect_TaskHandle;
-uint32_t Start_Detect_TaskBuffer[ 1024 ];
-osStaticThreadDef_t Start_Detect_TaskControlBlock;
+osThreadId Start_Control_TaskHandle;
+uint32_t Start_Control_TaskBuffer[ 1024 ];
+osStaticThreadDef_t Start_Control_TaskControlBlock;
+osThreadId Start_Shoot_TaskHandle;
+uint32_t Start_Shoot_TaskBuffer[ 1024 ];
+osStaticThreadDef_t Start_Shoot_TaskControlBlock;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -67,9 +70,10 @@ osStaticThreadDef_t Start_Detect_TaskControlBlock;
 /* USER CODE END FunctionPrototypes */
 
 void INS_Task(void const * argument);
-void Control_Task(void const * argument);
+void Gimbal_Task(void const * argument);
 void CAN_Task(void const * argument);
-void Detect_Task(void const * argument);
+void Control_Task(void const * argument);
+void Shoot_Task(void const * argument);
 
 extern void MX_USB_DEVICE_Init(void);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -81,7 +85,7 @@ void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackTy
 static StaticTask_t xIdleTaskTCBBuffer;
 static StackType_t xIdleStack[configMINIMAL_STACK_SIZE];
 
-void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize )
+void vApplicationGetIdleTaskMemory(StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize)
 {
   *ppxIdleTaskTCBBuffer = &xIdleTaskTCBBuffer;
   *ppxIdleTaskStackBuffer = &xIdleStack[0];
@@ -121,17 +125,21 @@ void MX_FREERTOS_Init(void) {
   osThreadStaticDef(Start_INS_Task, INS_Task, osPriorityHigh, 0, 1024, Start_INS_TaskBuffer, &Start_INS_TaskControlBlock);
   Start_INS_TaskHandle = osThreadCreate(osThread(Start_INS_Task), NULL);
 
-  /* definition and creation of Start_Control_Task */
-  osThreadStaticDef(Start_Control_Task, Control_Task, osPriorityAboveNormal, 0, 1024, Start_Control_TaskBuffer, &Start_Control_TaskControlBlock);
-  Start_Control_TaskHandle = osThreadCreate(osThread(Start_Control_Task), NULL);
+  /* definition and creation of Start_Gimbal_Task */
+  osThreadStaticDef(Start_Gimbal_Task, Gimbal_Task, osPriorityAboveNormal, 0, 1024, Start_Gimbal_TaskBuffer, &Start_Gimbal_TaskControlBlock);
+  Start_Gimbal_TaskHandle = osThreadCreate(osThread(Start_Gimbal_Task), NULL);
 
   /* definition and creation of Start_CAN_Task */
   osThreadStaticDef(Start_CAN_Task, CAN_Task, osPriorityNormal, 0, 1024, Start_CAN_TaskBuffer, &Start_CAN_TaskControlBlock);
   Start_CAN_TaskHandle = osThreadCreate(osThread(Start_CAN_Task), NULL);
 
-  /* definition and creation of Start_Detect_Task */
-  osThreadStaticDef(Start_Detect_Task, Detect_Task, osPriorityBelowNormal, 0, 1024, Start_Detect_TaskBuffer, &Start_Detect_TaskControlBlock);
-  Start_Detect_TaskHandle = osThreadCreate(osThread(Start_Detect_Task), NULL);
+  /* definition and creation of Start_Control_Task */
+  osThreadStaticDef(Start_Control_Task, Control_Task, osPriorityBelowNormal, 0, 1024, Start_Control_TaskBuffer, &Start_Control_TaskControlBlock);
+  Start_Control_TaskHandle = osThreadCreate(osThread(Start_Control_Task), NULL);
+
+  /* definition and creation of Start_Shoot_Task */
+  osThreadStaticDef(Start_Shoot_Task, Shoot_Task, osPriorityBelowNormal, 0, 1024, Start_Shoot_TaskBuffer, &Start_Shoot_TaskControlBlock);
+  Start_Shoot_TaskHandle = osThreadCreate(osThread(Start_Shoot_Task), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -141,10 +149,10 @@ void MX_FREERTOS_Init(void) {
 
 /* USER CODE BEGIN Header_INS_Task */
 /**
-  * @brief  Function implementing the StartINS thread.
-  * @param  argument: Not used
-  * @retval None
-  */
+ * @brief  Function implementing the StartINS thread.
+ * @param  argument: Not used
+ * @retval None
+ */
 /* USER CODE END Header_INS_Task */
 __weak void INS_Task(void const * argument)
 {
@@ -152,16 +160,52 @@ __weak void INS_Task(void const * argument)
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN INS_Task */
   /* Infinite loop */
-  for(;;)
+  for (;;)
   {
     osDelay(1);
   }
   /* USER CODE END INS_Task */
 }
 
+/* USER CODE BEGIN Header_Gimbal_Task */
+/**
+* @brief Function implementing the Start_Gimbal_Task thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_Gimbal_Task */
+__weak void Gimbal_Task(void const * argument)
+{
+  /* USER CODE BEGIN Gimbal_Task */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END Gimbal_Task */
+}
+
+/* USER CODE BEGIN Header_CAN_Task */
+/**
+ * @brief Function implementing the StartCAN thread.
+ * @param argument: Not used
+ * @retval None
+ */
+/* USER CODE END Header_CAN_Task */
+__weak void CAN_Task(void const * argument)
+{
+  /* USER CODE BEGIN CAN_Task */
+  /* Infinite loop */
+  for (;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END CAN_Task */
+}
+
 /* USER CODE BEGIN Header_Control_Task */
 /**
-* @brief Function implementing the StartControl thread.
+* @brief Function implementing the Start_Control_Task thread.
 * @param argument: Not used
 * @retval None
 */
@@ -177,40 +221,22 @@ __weak void Control_Task(void const * argument)
   /* USER CODE END Control_Task */
 }
 
-/* USER CODE BEGIN Header_CAN_Task */
+/* USER CODE BEGIN Header_Shoot_Task */
 /**
-* @brief Function implementing the StartCAN thread.
+* @brief Function implementing the Start_Shoot_Task thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_CAN_Task */
-__weak void CAN_Task(void const * argument)
+/* USER CODE END Header_Shoot_Task */
+__weak void Shoot_Task(void const * argument)
 {
-  /* USER CODE BEGIN CAN_Task */
+  /* USER CODE BEGIN Shoot_Task */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END CAN_Task */
-}
-
-/* USER CODE BEGIN Header_Detect_Task */
-/**
-* @brief Function implementing the Start_Detect_Task thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_Detect_Task */
-__weak void Detect_Task(void const * argument)
-{
-  /* USER CODE BEGIN Detect_Task */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END Detect_Task */
+  /* USER CODE END Shoot_Task */
 }
 
 /* Private application code --------------------------------------------------*/

@@ -2,7 +2,7 @@
 #define RLS_H
 
 
-#include "Config.h"
+#include "config.h"
 #include "stdint.h"
 #include "arm_math.h"
 
