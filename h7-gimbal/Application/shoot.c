@@ -16,24 +16,30 @@
 #include "rm_motor.h"
 #include "control.h"
 
-RM_Motor_Fdb_t fr_motor[2];
+// #define SHOOT_FEED_RATIO (2.f / 5.f)
+// #define SHOOT_FEED_ (10)
+
+RM_Motor_Fdb_t fr_motor[2], feed_motor;
 
 Shoot_t shoot;
 
 //                                KP KI KD Alpha Deadband I_MAX Output_MAX
-static float feed_pid_param[7] = {0, 0, 0, 0, 0, 0, 0};
-static float fr_l_pid_param[7] = {10.f, 0, 0, 0, 0, 0, 5000.f};
-static float fr_r_pid_param[7] = {10.f, 0, 0, 0, 0, 0, 5000.f};
+static float feed_pid_param[7] = {25.f, 0, 5.f, 0, 0, 0, 10000.f};
+static float fr_l_pid_param[7] = {20.f, 0, 2.f, 0, 0, 0, 10000.f};
+static float fr_r_pid_param[7] = {20.f, 0, 2.f, 0, 0, 0, 10000.f};
 
 PID_Info_TypeDef feed_pid;
 PID_Info_TypeDef fr_l_pid;
 PID_Info_TypeDef fr_r_pid;
+uint8_t st_can_buf[8];
 
 TickType_t shoot_task_tick = 0;
 
+void (*shoot_control)(void) = Shoot_ZeroForce;
+
 void Shoot_Task(void const *argument)
 {
-  uint8_t st_can_buf[8];
+
   FDCAN_TxHeaderTypeDef st_can_header = {
       .Identifier = 0x200,
       .IdType = FDCAN_STANDARD_ID,
@@ -56,19 +62,35 @@ void Shoot_Task(void const *argument)
   {
     shoot_task_tick = osKernelSysTick();
 
-    shoot.output.fr[LEFT] = (int16_t)PID_Calculate(&fr_l_pid, -shoot.target.fr, fr_motor[LEFT].speed);
-    shoot.output.fr[RIGHT] = (int16_t)PID_Calculate(&fr_r_pid, shoot.target.fr, fr_motor[RIGHT].speed);
-
-    if (control.status != RBS_RUNNING)
-    {
-      shoot.output.fr[LEFT] = shoot.output.fr[RIGHT] = 0;
-    }
-
-    RM_Motor_Cmd_Encode(shoot.output.fr[LEFT], shoot.output.fr[RIGHT], 0, 0, st_can_buf);
-    USER_FDCAN_Transmit(1, 0x200, st_can_buf);
+    shoot_control();
 
     osDelay(1);
   }
+}
+
+void Shoot_ZeroForce(void)
+{
+  RM_Motor_Cmd_Encode(0, 0, 0, 0, st_can_buf);
+
+  USER_FDCAN_Transmit(1, 0x200, st_can_buf);
+  USER_FDCAN_Transmit(2, 0x200, st_can_buf);
+}
+
+void Shoot_Running(void)
+{
+  static float feed_speed;
+  feed_speed = shoot.target.feed_freq * 60 / 10 / 2 * 5 * 36;
+
+  shoot.output.fr[LEFT] = (int16_t)PID_Calculate(&fr_l_pid, -shoot.target.fr, fr_motor[LEFT].speed);
+  shoot.output.fr[RIGHT] = (int16_t)PID_Calculate(&fr_r_pid, shoot.target.fr, fr_motor[RIGHT].speed);
+
+  shoot.output.feed = (int16_t)PID_Calculate(&feed_pid, feed_speed, feed_motor.speed);
+
+  RM_Motor_Cmd_Encode(shoot.output.fr[LEFT], shoot.output.fr[RIGHT], 0, 0, st_can_buf);
+  USER_FDCAN_Transmit(1, 0x200, st_can_buf);
+
+  RM_Motor_Cmd_Encode(shoot.output.feed, 0, 0, 0, st_can_buf);
+  USER_FDCAN_Transmit(2, 0x200, st_can_buf);
 }
 
 //

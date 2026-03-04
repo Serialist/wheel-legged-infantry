@@ -60,5 +60,9 @@ typedef struct
 } Shoot_t;
 
 extern Shoot_t shoot;
+extern void (*shoot_control)(void);
+
+void Shoot_ZeroForce(void);
+void Shoot_Running(void);
 
 #endif // SHOOT_H

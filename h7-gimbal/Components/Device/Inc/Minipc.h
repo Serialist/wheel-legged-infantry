@@ -20,7 +20,7 @@
 #include "stdint.h"
 #include "stdbool.h"
 
-extern void MiniPC_Transmit_Info(uint8_t *Buff, const uint32_t *Len);
-extern void MiniPC_Recvive_Info(uint8_t *Buff, const uint32_t *Len);
+extern void MiniPC_Transmit_Info(uint8_t *Buff, const uint32_t Len);
+extern void MiniPC_Recvive_Info(uint8_t *Buff, const uint32_t Len);
 
 #endif

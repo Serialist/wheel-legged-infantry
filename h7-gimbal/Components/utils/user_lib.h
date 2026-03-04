@@ -133,6 +133,8 @@ float LoopClampf(float Input, float minValue, float maxValue);                //
 float Remapf(float a, float inmin, float intmax, float outmin, float outmax); // 值映射
 float Rampf(float prev_x, float x, float k_min, float k_max, float dt);       // 斜坡函数
 
+float Modf(float value, float range);
+
 float Sqrt(float x);                                      // 快速开方
 long long FPow(long long a, long long b);                 // 快速幂
 long long FPowMod(long long a, long long b, long long p); // 快速幂取模

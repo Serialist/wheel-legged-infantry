@@ -19,7 +19,7 @@
 #include "Remote_Control.h"
 #include "rm_motor.h"
 
-extern RM_Motor_Fdb_t pitch_motor_fdb, fr_motor[2];
+extern RM_Motor_Fdb_t pitch_motor_fdb, fr_motor[2], feed_motor;
 
 #define FDCAN_MAX_LEN 8
 
@@ -242,6 +242,12 @@ static void FDCAN3_RxFifo0RxHandler(uint32_t *Identifier, uint8_t Data[8])
  */
 static void FDCAN2_RxFifo1RxHandler(uint32_t *Identifier, uint8_t Data[8])
 {
+  switch (*Identifier)
+  {
+  case C610_RX_ID(1):
+    RM_Motor_Fdb_Decode(Data, &feed_motor);
+    break;
+  }
 }
 
 /**

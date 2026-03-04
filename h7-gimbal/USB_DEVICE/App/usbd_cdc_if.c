@@ -265,7 +265,7 @@ static int8_t CDC_Receive_HS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 11 */
 
-  MiniPC_Recvive_Info(Buf, Len);
+  MiniPC_Recvive_Info(Buf, *Len);
 
   USBD_CDC_SetRxBuffer(&hUsbDeviceHS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceHS);

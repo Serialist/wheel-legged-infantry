@@ -554,6 +554,11 @@
               <FileType>1</FileType>
               <FilePath>..\Components\protocol\rm_motor.c</FilePath>
             </File>
+            <File>
+              <FileName>upper_lower_comm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Components\protocol\upper_lower_comm.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

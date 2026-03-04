@@ -436,6 +436,13 @@ float ClampAbsf(float value, float max)
     return fminf(fmaxf(value, -max), max);
 }
 
+float Modf(float value, float range)
+{
+    if (range == 0)
+        return NAN;
+    return value - floorf(value / range) * range;
+}
+
 /**
  * @brief 循环限幅函数
  *
@@ -452,6 +459,8 @@ float LoopClampf(float value, float min, float max)
     // a mod b  ==  a-floor(a/b)*b
     float range = max - min;
     return min + value - floorf(value / range) * range;
+
+    // return min + Modf(value - min, max - min);
 
     // 实现 2 （注意 -0 问题）
     // 注意 >= 而不是 >，因为符号位可能产生 -0.0 和 0.0
