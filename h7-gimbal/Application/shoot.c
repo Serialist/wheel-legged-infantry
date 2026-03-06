@@ -39,19 +39,6 @@ void (*shoot_control)(void) = Shoot_ZeroForce;
 
 void Shoot_Task(void const *argument)
 {
-
-  FDCAN_TxHeaderTypeDef st_can_header = {
-      .Identifier = 0x200,
-      .IdType = FDCAN_STANDARD_ID,
-      .TxFrameType = FDCAN_DATA_FRAME,
-      .DataLength = 8,
-      .ErrorStateIndicator = FDCAN_ESI_ACTIVE,
-      .BitRateSwitch = FDCAN_BRS_OFF,
-      .FDFormat = FDCAN_CLASSIC_CAN,
-      .TxEventFifoControl = FDCAN_NO_TX_EVENTS,
-      .MessageMarker = 0,
-  };
-
   PID_Init(&feed_pid, PID_POSITION, feed_pid_param);
   PID_Init(&fr_l_pid, PID_POSITION, fr_l_pid_param);
   PID_Init(&fr_r_pid, PID_POSITION, fr_r_pid_param);
@@ -159,8 +146,8 @@ void Shoot_Running(void)
 //     GetFRMotorData(&shoot);
 //     ShootMode_Set();
 //     // Shoot_Heat_limit(&SHOOT_LIMIT, &shoot);
-//     Shoot_Speed_Set(&shoot); // 拨盘摩擦轮设置
-//     Shoot_Control();         // 拨盘摩擦轮控制
+//     Shoot_Speed_Set(&shoot); // ����Ħ��������
+//     Shoot_Control();         // ����Ħ���ֿ���
 //     Sent_Shoot(fr_set[LEFT],
 //                fr_set[RIGHT],
 //                st_set,
@@ -252,11 +239,11 @@ void Shoot_Running(void)
 //   }
 //   if (shoot.mode == EJECT)
 //   {
-//     // 退单的角度读取
-//     speed->shoot_motor_angle.shoot_ecd_fdb_last = speed->ST_motor_fdb.ecd_fdb; // 结构体获得拨盘的编码器值，退弹时候限角度
-//     GetSTMotor(&(speed->ST_motor_fdb));                                        // 更新返回的编码器值
+//     // �˵��ĽǶȶ�ȡ
+//     speed->shoot_motor_angle.shoot_ecd_fdb_last = speed->ST_motor_fdb.ecd_fdb; // �ṹ���ò��̵ı�����ֵ���˵�ʱ���޽Ƕ�
+//     GetSTMotor(&(speed->ST_motor_fdb));                                        // ���·��صı�����ֵ
 //     speed->shoot_motor_angle.shoot_ecd_fdb_error = speed->ST_motor_fdb.ecd_fdb - speed->shoot_motor_angle.shoot_ecd_fdb_last;
-//     // 退单的角度读取
+//     // �˵��ĽǶȶ�ȡ
 //     if (speed->shoot_motor_angle.shoot_ecd_fdb_error <= -3000)
 //       ecd_circle++;
 //     if (ecd_circle <= 10)
@@ -269,7 +256,7 @@ void Shoot_Running(void)
 //       ecd_circle = 0;
 //     }
 //     speed->shoot_motor_angle.shoot_ecd_fdb_error = 0.0;
-//   }//   //******无力模式*****//
+//   }//   //******����ģʽ*****//
 //   if (shoot.mode == FIRE_STOP)
 //   {
 //     fr_set[LEFT] = 0;
@@ -277,23 +264,23 @@ void Shoot_Running(void)
 //     st_set = 0;
 //   }
 // }
-// 同济源码
+// ͬ��Դ��
 // void source_code(void)
 // {
-//   float a = (float)(ext_robot_status.shooter_barrel_cooling_value);                                               // 冷却速度
-//   float m = (float)(ext_robot_status.shooter_barrel_heat_limit - ext_power_heat_data.shooter_17mm_1_barrel_heat); // 热量上限
+//   float a = (float)(ext_robot_status.shooter_barrel_cooling_value);                                               // ��ȴ�ٶ�
+//   float m = (float)(ext_robot_status.shooter_barrel_heat_limit - ext_power_heat_data.shooter_17mm_1_barrel_heat); // ��������
 //   float d = 10.0f;
 //   if (shoot_time == 0)
 //   {
 //     /**
-//      * 方案二：根据热量上限和冷却决定射击策略，
-//      * 计算得当射击时间为 m（热量上限）+ 1 * a（冷却速率）时，基本可以抹除冷却优先和爆发优的差距，即两者各级对应射速相近
-//      * 当k增大时，差距射击频率差距主要体现在低等级（爆发高，冷却低），等级越高影响越小。爆发模式下各等级射频更加均匀且持续时间更长
-//      * 冷却模式正好相反，低等级射频低，高等级射频高且持续时间短，可灵活选择 m + k * a
+//      * �������������������޺���ȴ����������ԣ�
+//      * ����õ����ʱ��Ϊ m���������ޣ�+ 1 * a����ȴ���ʣ�ʱ����������Ĩ����ȴ���Ⱥͱ����ŵĲ�࣬�����߸�����Ӧ�������
+//      * ��k����ʱ��������Ƶ�ʲ����Ҫ�����ڵ͵ȼ��������ߣ���ȴ�ͣ����ȼ�Խ��Ӱ��ԽС������ģʽ�¸��ȼ���Ƶ���Ӿ����ҳ���ʱ�����
+//      * ��ȴģʽ�����෴���͵ȼ���Ƶ�ͣ��ߵȼ���Ƶ���ҳ���ʱ��̣������ѡ�� m + k * a
 //      */
 //     ShootTime = (m + 2 * a) * 10;
 //     clapmf(&ShootTime, ShootTimeLower, ShootTimeUpper);
-//     // 分级射速
+//     // �ּ�����
 //     if (m < 100)
 //     {
 //       shoot_speed = (10 * m - a - 3 * d) / (d * (ShootTime / 100.0f)) + a / d;

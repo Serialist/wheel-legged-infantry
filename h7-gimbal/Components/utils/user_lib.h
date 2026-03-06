@@ -83,6 +83,8 @@
 #define SINF(x) arm_sin_f32(x)
 #define COSF(x) arm_cos_f32(x)
 
+#define BUFFER_T __attribute__((section(".AXI_SRAM"))) static uint8_t
+
 /* ================================================================ typedef ================================================================ */
 
 typedef enum

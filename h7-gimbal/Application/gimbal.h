@@ -45,4 +45,9 @@ typedef struct
 
 extern Gimbal_t gimbal;
 
+extern void (*gimbal_control)(void);
+
+void Gimbal_ZeroForce(void);
+void Gimbal_Running(void);
+
 #endif // CONTROL_TASK_H
