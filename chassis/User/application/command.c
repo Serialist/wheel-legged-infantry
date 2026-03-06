@@ -40,23 +40,23 @@ void DT7_Get_Command(void);
 
 void Command_Task(void const *argument)
 {
-	void (*get_cmd)(void);
+	// void (*get_cmd)(void);
 
-	switch (cmd_type)
-	{
-	case NONE:
-		get_cmd = Stop_Cmd;
+	// switch (cmd_type)
+	// {
+	// case NONE:
+	// 	get_cmd = Stop_Cmd;
 
-	case CMD_CAN:
-		get_cmd = CAN_Get_Command;
-		break;
-	case CMD_DT7:
-		get_cmd = DT7_Get_Command;
-		break;
+	// case CMD_CAN:
+	// 	get_cmd = CAN_Get_Command;
+	// 	break;
+	// case CMD_DT7:
+	// 	get_cmd = DT7_Get_Command;
+	// 	break;
 
-	default:
-		break;
-	}
+	// default:
+	// 	break;
+	// }
 
 	for (;;)
 	{
@@ -67,7 +67,7 @@ void Command_Task(void const *argument)
 
 void Stop_Cmd(void)
 {
-	set.left_length = set.right_length = 0;
+	// set.length = 0;
 	set.x = ob.x;
 	set.v = ob.v;
 	set.yaw = att.yaw;
@@ -86,7 +86,7 @@ void DT7_Get_Command(void)
 {
 	set.v = rc_ctrl.rc.ch[L_Y] * 3.5f / 660.0f;
 	set.yaw -= rc_ctrl.rc.ch[L_X] * 0.001f;
-	set.left_length = set.right_length = rc_ctrl.rc.ch[R_Y] * 0.1f / 660.0f + 0.15f;
+	// set.length = rc_ctrl.rc.ch[R_Y] * 0.1f / 660.0f + 0.15f;
 	set.roll = -rc_ctrl.rc.ch[R_X] * 45.0f / 660.0f;
 
 	if (set.v != 0)
@@ -105,7 +105,6 @@ void DT7_Get_Command(void)
 		set.v = 0;
 		set.yaw = att.totalyaw;
 		set.roll = 0;
-		set.left_length = set.right_length = 0.2f;
 		set.x = ob.x;
 	}
 

@@ -28,7 +28,7 @@ void MiniPC_Recvive_Info(uint8_t *Buff, const uint32_t Len)
 {
   if (Buff[0] == '\r')
   {
-    strcpy(terminal_buf, "\n\rOK\n\r\n");
+    memcpy(terminal_buf, "\n\rOK\n\r\n", 7);
     CDC_Transmit_HS(terminal_buf, 7);
   }
   else

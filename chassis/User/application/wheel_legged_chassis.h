@@ -62,12 +62,12 @@ typedef enum
 
 typedef struct
 {
-    float x;                         // m   期望位置
-    float v;                         // m/s 期望速度
-    float yaw;                       // rad 期望 yaw
-    float pitch;                     // rad 期望 pitch
-    float roll;                      // rad 期望 roll
-    float left_length, right_length; // m  期望腿长
+    float x;      // m   期望位置
+    float v;      // m/s 期望速度
+    float yaw;    // rad 期望 yaw
+    float pitch;  // rad 期望 pitch
+    float roll;   // rad 期望 roll
+    float length; // m  期望腿长
     float height;
     float torque[6];
 } Wheel_Leg_Target_t;

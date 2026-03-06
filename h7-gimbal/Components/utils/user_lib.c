@@ -13,8 +13,8 @@
 #include "string.h"
 #include "user_lib.h"
 
-// 快速开方
-float Sqrt(float x)
+// 快速开方（快在哪？可见是纯纯的牛顿迭代法）
+float SSqrt(float x)
 {
     float y;
     float delta;
@@ -28,7 +28,7 @@ float Sqrt(float x)
     // initial guess
     y = x / 2;
 
-    // refine
+    // refine 应该可以改，现在 0.001 是最大相对误差
     maxError = x * 0.001f;
 
     do
@@ -40,110 +40,36 @@ float Sqrt(float x)
     return y;
 }
 
-// 快速求平方根倒数
-/*
-float invSqrt(float num)
-{
-    float halfnum = 0.5f * num;
-    float y = num;
-    long i = *(long *)&y;
-    i = 0x5f375a86- (i >> 1); // 此处缺 what the fuck（雾）
-    y = *(float *)&i;
-    y = y * (1.5f - (halfnum * y * y));
-    return y;
-}*/
-
 /**
- * @brief          斜波函数初始化
- * @author         RM
- * @param[in]      斜波函数结构体
- * @param[in]      间隔的时间，单位 s
- * @param[in]      最大值
- * @param[in]      最小值
- * @retval         返回空
+ * @brief 斜波函数初始化
+ *
+ * @param self
+ * @param initial_value
+ * @param kmin
+ * @param kmax
  */
-void ramp_init(ramp_function_source_t *ramp_source_type, float frame_period, float max, float min)
+void Ramp_Init(Ramp_t *self, float initial_value, float kmin, float kmax)
 {
-    ramp_source_type->frame_period = frame_period;
-    ramp_source_type->max_value = max;
-    ramp_source_type->min_value = min;
-    ramp_source_type->input = 0.0f;
-    ramp_source_type->out = 0.0f;
+    self->kmin = kmin;
+    self->kmax = kmax;
+    self->value = initial_value;
 }
 
 /**
- * @brief          斜波函数计算，根据输入的值进行叠加， 输入单位为 /s 即一秒后增加输入的值
- * @author         RM
- * @param[in]      斜波函数结构体
- * @param[in]      输入值
- * @retval         返回空
+ * @brief 斜波函数计算，根据输入的值进行叠加， 输入单位为 /s 即一秒后增加输入的值
+ *
+ * @param self
+ * @param target
+ * @param dt
+ * @return float
  */
-float ramp_calc(ramp_function_source_t *ramp_source_type, float input)
+float Ramp_Update(Ramp_t *self, float target, float dt)
 {
-    ramp_source_type->input = input;
-    ramp_source_type->out += ramp_source_type->input * ramp_source_type->frame_period;
-    if (ramp_source_type->out > ramp_source_type->max_value)
-    {
-        ramp_source_type->out = ramp_source_type->max_value;
-    }
-    else if (ramp_source_type->out < ramp_source_type->min_value)
-    {
-        ramp_source_type->out = ramp_source_type->min_value;
-    }
-    return ramp_source_type->out;
-}
-
-/// @brief 浮点死区
-float float_deadband(float Value, float minValue, float maxValue)
-{
-    if (Value < maxValue && Value > minValue)
-    {
-        Value = 0.0f;
-    }
-    return Value;
-}
-
-/// @brief int16死区
-int16_t int16_deadline(int16_t Value, int16_t minValue, int16_t maxValue)
-{
-    if (Value < maxValue && Value > minValue)
-    {
-        Value = 0;
-    }
-    return Value;
-}
-
-// 限幅函数
-float float_constrain(float Value, float minValue, float maxValue)
-{
-    if (Value < minValue)
-        return minValue;
-    else if (Value > maxValue)
-        return maxValue;
-    else
-        return Value;
-}
-
-// 限幅函数
-int16_t int16_constrain(int16_t Value, int16_t minValue, int16_t maxValue)
-{
-    if (Value < minValue)
-        return minValue;
-    else if (Value > maxValue)
-        return maxValue;
-    else
-        return Value;
-}
-
-int float_rounding(float raw)
-{
-    static int integer;
-    static float decimal;
-    integer = (int)raw;
-    decimal = raw - integer;
-    if (decimal > 0.5f)
-        integer++;
-    return integer;
+    // 输出增量限幅
+    self->value += Clampf(target - self->value, // 增量
+                          self->kmin * dt,      // dt 时间内的最大增量
+                          self->kmax * dt);
+    return self->value;
 }
 
 /**
@@ -152,7 +78,7 @@ int float_rounding(float raw)
  * @param[in]      样本数
  * @retval         返回空
  */
-void OLS_Init(Ordinary_Least_Squares_t *OLS, uint16_t order)
+void OLS_Init(OLS_t *OLS, uint16_t order)
 {
     OLS->Order = order;
     OLS->Count = 0;
@@ -171,7 +97,7 @@ void OLS_Init(Ordinary_Least_Squares_t *OLS, uint16_t order)
  * @param[in]      信号新样本距上一个样本时间间隔
  * @param[in]      信号值
  */
-void OLS_Update(Ordinary_Least_Squares_t *OLS, float deltax, float y)
+void OLS_Update(OLS_t *OLS, float deltax, float y)
 {
     static float temp = 0;
     temp = OLS->x[1];
@@ -214,7 +140,7 @@ void OLS_Update(Ordinary_Least_Squares_t *OLS, float deltax, float y)
  * @param[in]      信号值
  * @retval         返回斜率k
  */
-float OLS_Derivative(Ordinary_Least_Squares_t *OLS, float deltax, float y)
+float OLS_Derivative(OLS_t *OLS, float deltax, float y)
 {
     static float temp = 0;
     temp = OLS->x[1];
@@ -257,7 +183,7 @@ float OLS_Derivative(Ordinary_Least_Squares_t *OLS, float deltax, float y)
  * @param[in]      最小二乘法结构体
  * @retval         返回斜率k
  */
-float Get_OLS_Derivative(Ordinary_Least_Squares_t *OLS)
+float Get_OLS_Derivative(OLS_t *OLS)
 {
     return OLS->k;
 }
@@ -269,7 +195,7 @@ float Get_OLS_Derivative(Ordinary_Least_Squares_t *OLS)
  * @param[in]      信号值
  * @retval         返回平滑输出
  */
-float OLS_Smooth(Ordinary_Least_Squares_t *OLS, float deltax, float y)
+float OLS_Smooth(OLS_t *OLS, float deltax, float y)
 {
     static float temp = 0;
     temp = OLS->x[1];
@@ -313,11 +239,18 @@ float OLS_Smooth(Ordinary_Least_Squares_t *OLS, float deltax, float y)
  * @param[in]      最小二乘法结构体
  * @retval         返回平滑输出
  */
-float Get_OLS_Smooth(Ordinary_Least_Squares_t *OLS)
+float Get_OLS_Smooth(OLS_t *OLS)
 {
     return OLS->k * OLS->x[OLS->Order - 1] + OLS->b;
 }
 
+/**
+ * @brief 斜率跟随
+ *
+ * @param target
+ * @param set
+ * @param acc
+ */
 void slope_following(float *target, float *set, float acc)
 {
     if (*target > *set)
@@ -381,29 +314,31 @@ long long FPowMod(long long a, long long b, long long p)
     return res;
 }
 
-/**
- * @brief 快速平方根
- *
- * @param x
- * @return float
- */
-float FSqrtf(float x)
+/// @brief 快速平方根倒数
+float FiSqrt(float x)
 {
-    float xhalf = 0.5f * x;
-    int i = *(int *)&x;
-    i = 0x5f375a86 - (i >> 1);
-    x = *(float *)&i;
-    x = x * (1.5f - xhalf * x * x);
-    return x;
+    float halfnum = 0.5f * x;
+    float y = x;
+    long i = *(long *)&y;
+    i = 0x5f375a86 - (i >> 1); // 此处缺 what the fuck（雾）
+    y = *(float *)&i;
+    y = y * (1.5f - (halfnum * y * y));
+    return y;
 }
 
-/**
- * @brief 计算最大公约数 greatest common divisor
- *
- * @param a
- * @param b
- * @return long long
- */
+/// @brief 快速平方根
+float FSqrtf(float x)
+{
+    float halfnum = 0.5f * x;
+    float y = x;
+    long i = *(long *)&y;
+    i = 0x5f375a86 - (i >> 1);
+    y = *(float *)&i;
+    y = y * (1.5f - (halfnum * y * y));
+    return 1 / y;
+}
+
+/// @brief 最大公约数 greatest common divisor
 long long FGcd(long long a, long long b)
 {
     if (b == 0)
@@ -485,4 +420,11 @@ float Rampf(float x, float x0, float k_min, float k_max, float dt)
 float Signf(float value)
 {
     return (value >= 0.0f) ? 1.0f : -1.0f;
+}
+
+float Deadzonef(float value, float point, float deadzone)
+{
+    return (value > point)   ? fmaxf(value, point + deadzone)
+           : (value < point) ? fminf(value, point - deadzone)
+                             : ;
 }

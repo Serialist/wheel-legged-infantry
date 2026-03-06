@@ -480,7 +480,7 @@ float Feedforward_Calculate(Feedforward_t *ffc, float ref)
     // calculate feed-forward controller output
     ffc->Output = ffc->c[0] * ffc->Ref + ffc->c[1] * ffc->Ref_dot + ffc->c[2] * ffc->Ref_ddot;
 
-    ffc->Output = float_constrain(ffc->Output, -ffc->MaxOut, ffc->MaxOut);
+    ffc->Output = Clampf(ffc->Output, -ffc->MaxOut, ffc->MaxOut);
 
     ffc->Last_Ref = ffc->Ref;
     ffc->Last_Ref_dot = ffc->Ref_dot;
@@ -564,7 +564,7 @@ float LDOB_Calculate(LDOB_t *ldob, float measure, float u)
     ldob->Disturbance = ldob->Disturbance * ldob->dt / (ldob->LPF_RC + ldob->dt) +
                         ldob->Last_Disturbance * ldob->LPF_RC / (ldob->LPF_RC + ldob->dt);
 
-    ldob->Disturbance = float_constrain(ldob->Disturbance, -ldob->Max_Disturbance, ldob->Max_Disturbance);
+    ldob->Disturbance = Clampf(ldob->Disturbance, -ldob->Max_Disturbance, ldob->Max_Disturbance);
 
     // ÈÅ¶¯Êä³öËÀÇø
     // deadband of disturbance output

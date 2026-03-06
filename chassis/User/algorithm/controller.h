@@ -132,7 +132,7 @@ typedef __packed struct pid_t
     float Derivative_LPF_RC;
 
     uint16_t OLS_Order;
-    Ordinary_Least_Squares_t OLS;
+    OLS_t OLS;
 
     uint32_t DWT_CNT;
     float dt;
@@ -188,9 +188,9 @@ typedef __packed struct
     float Last_Ref_dot;
 
     uint16_t Ref_dot_OLS_Order;
-    Ordinary_Least_Squares_t Ref_dot_OLS;
+    OLS_t Ref_dot_OLS;
     uint16_t Ref_ddot_OLS_Order;
-    Ordinary_Least_Squares_t Ref_ddot_OLS;
+    OLS_t Ref_ddot_OLS;
 
     float Output;
     float MaxOut;
@@ -229,9 +229,9 @@ typedef __packed struct
     float Last_Measure_dot;
 
     uint16_t Measure_dot_OLS_Order;
-    Ordinary_Least_Squares_t Measure_dot_OLS;
+    OLS_t Measure_dot_OLS;
     uint16_t Measure_ddot_OLS_Order;
-    Ordinary_Least_Squares_t Measure_ddot_OLS;
+    OLS_t Measure_ddot_OLS;
 
     float Disturbance;
     float Output;

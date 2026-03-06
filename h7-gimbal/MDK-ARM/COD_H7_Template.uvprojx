@@ -525,11 +525,6 @@
               <FilePath>..\Components\Algorithm\Src\LPF.c</FilePath>
             </File>
             <File>
-              <FileName>Ramp.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Components\Algorithm\Src\Ramp.c</FilePath>
-            </File>
-            <File>
               <FileName>RLS.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Components\Algorithm\Src\RLS.c</FilePath>

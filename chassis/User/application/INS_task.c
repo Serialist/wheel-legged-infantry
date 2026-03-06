@@ -288,7 +288,7 @@ void IMU_Temperature_Ctrl(void)
 {
     PID_Calculate(&TempCtrl, BMI088.Temperature, RefTemp);
 
-    TIM_Set_PWM(&htim10, TIM_CHANNEL_1, float_constrain(float_rounding(TempCtrl.Output), 0, UINT32_MAX));
+    TIM_Set_PWM(&htim10, TIM_CHANNEL_1, Clampf(roundf(TempCtrl.Output), 0, UINT32_MAX));
 }
 
 //------------------------------------functions below are not used in this demo-------------------------------------------------

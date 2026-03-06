@@ -49,7 +49,7 @@ const float vaEstimateKF_H[4] = {1.0f, 0.0f,
                                  0.0f, 1.0f}; // 设置矩阵H为常量
 
 extern INS_t INS;
-extern VMC_t leg_l, leg_r;
+extern VMC_t leg[2];
 extern Wheel_Leg_Target_t set;
 
 float vel_acc[2];
@@ -100,12 +100,12 @@ void observer(void const *argument)
     // 机体速度观测器
 
     // 右
-    wr = motor_vel_r + INS.Gyro[0] + leg_r.d_alpha;                                                                       // 右轮速度
-    vrb = wr * wheelRadius + leg_r.L0 * leg_r.d_theta * arm_cos_f32(leg_r.theta) + leg_r.d_L0 * arm_sin_f32(leg_r.theta); // 右机体速度
+    wr = motor_vel_r + INS.Gyro[0] + leg[RIGHT].d_alpha;                                                                                           // 右轮速度
+    vrb = wr * wheelRadius + leg[RIGHT].L0 * leg[RIGHT].d_theta * arm_cos_f32(leg[RIGHT].theta) + leg[RIGHT].d_L0 * arm_sin_f32(leg[RIGHT].theta); // 右机体速度
 
     // 左
-    wl = motor_vel_l + INS.Gyro[0] + leg_l.d_alpha;                                                                       // 左轮速度
-    vlb = wl * wheelRadius + leg_l.L0 * leg_l.d_theta * arm_cos_f32(leg_l.theta) + leg_l.d_L0 * arm_sin_f32(leg_l.theta); // 左机体速度
+    wl = motor_vel_l + INS.Gyro[0] + leg[LEFT].d_alpha;                                                                                       // 左轮速度
+    vlb = wl * wheelRadius + leg[LEFT].L0 * leg[LEFT].d_theta * arm_cos_f32(leg[LEFT].theta) + leg[LEFT].d_L0 * arm_sin_f32(leg[LEFT].theta); // 左机体速度
 
     // 总体互补滤波
     aver_v = (vrb + vlb) / 2.0f;                                      // 取平均
@@ -126,7 +126,7 @@ void observer(void const *argument)
     // RC_Offline_Detection(&rc_ctrl, TASK_PERIOD_MS);
     // Motor_Offline_Detection(&motor_status, TASK_PERIOD_MS);
     /// @brief 急停判断
-    // if (RC_IS_OFFLINE(&rc_ctrl) || MOTOR_IS_OFFLINE(&motor_status) || (leg_l.theta >= (PI / 2)) || (leg_r.theta >= (PI / 2)))
+    // if (RC_IS_OFFLINE(&rc_ctrl) || MOTOR_IS_OFFLINE(&motor_status) || (leg[LEFT].theta >= (PI / 2)) || (leg[RIGHT].theta >= (PI / 2)))
     // {
     //   robo_status = ROBO_STATUS_EMERGENCY;
     // }

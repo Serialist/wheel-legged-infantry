@@ -35,32 +35,15 @@ void Control_Task(void const *argument)
 
   for (;;)
   {
-    // 检查模式 
+    // 检查模式
     if (remote_ctrl.rc.s[DT7_SR] != DT7_DOWN ||
         remote_ctrl.rc_lost == true)
     {
-      control.status = RBS_ZREOFORCE;
+      Control_ZeroForce();
     }
     else
     {
-      control.status = RBS_RUNNING;
-    }
-
-    // 控制逻辑
-    switch (control.status)
-    {
-    default:
-    case RBS_ZREOFORCE:
-      shoot_control = Shoot_ZeroForce;
-      gimbal_control = Gimbal_ZeroForce;
-      Control_ZeroForce();
-      break;
-
-    case RBS_RUNNING:
-      shoot_control = Shoot_Running;
-      gimbal_control = Gimbal_Running;
       Control_Running();
-      break;
     }
 
     B2B_Chassis_Cmd_Encode(&ch_cmd, control_can_buf);
@@ -73,6 +56,10 @@ void Control_Task(void const *argument)
 
 void Control_ZeroForce(void)
 {
+  control.status = RBS_ZREOFORCE;
+  shoot_control = Shoot_ZeroForce;
+  gimbal_control = Gimbal_ZeroForce;
+
   ch_cmd.vx = 0;
   ch_cmd.vyaw = INS_Info.Yaw_TolAngle;
   shoot.target.feed_freq = 0;
@@ -80,6 +67,10 @@ void Control_ZeroForce(void)
 
 void Control_Running(void)
 {
+  control.status = RBS_RUNNING;
+  shoot_control = Shoot_Running;
+  gimbal_control = Gimbal_Running;
+
   // 底盘控制量
   ch_cmd.vx = remote_ctrl.rc.ch[DT7_LY] * 3.5f / 660.0f;
   ch_cmd.vyaw = remote_ctrl.rc.ch[DT7_RX] * 0.001f;

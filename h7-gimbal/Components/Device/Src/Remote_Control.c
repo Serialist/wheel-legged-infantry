@@ -2,7 +2,6 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "Remote_Control.h"
-#include "ramp.h"
 
 #define RC_TIMEOUT 0x32U
 
