@@ -421,3 +421,24 @@ float Signf(float value)
 {
     return (value >= 0.0f) ? 1.0f : -1.0f;
 }
+
+/**
+ * @brief 死区函数
+ *
+ * @param value 输入
+ * @param min 死区下界
+ * @param max 死区上界
+ * @return float
+ */
+float Deadzonef(float value, float min, float max)
+{
+    if (point - deadzone < value &&
+        value < point + deadzone)
+    {
+        return 0.0f;
+    }
+    else
+    {
+        return value;
+    }
+}
