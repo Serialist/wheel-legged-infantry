@@ -62,14 +62,16 @@ typedef enum
 
 typedef struct
 {
-    float x;      // m   期望位置
-    float v;      // m/s 期望速度
-    float yaw;    // rad 期望 yaw
-    float pitch;  // rad 期望 pitch
-    float roll;   // rad 期望 roll
-    float length; // m  期望腿长
-    float height;
-    float torque[6];
+    float x;             // m   期望位置
+    float v;             // m/s 期望速度
+    float yaw;           // rad 期望 yaw
+    float pitch;         // rad 期望 pitch
+    float roll;          // rad 期望 roll
+    float length;        // m  期望腿长
+    float height;        // m  期望机体离地高度
+    float f0_force;      // N 推力前馈，用于跳跃等
+    float hip_torque[4]; // N*m 关节扭矩
+    float hub_torque[2]; // N*m 轮毂扭矩
 } Wheel_Leg_Target_t;
 
 extern Robo_Status_t robo_status;

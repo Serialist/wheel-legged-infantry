@@ -61,8 +61,6 @@ float wr, wl = 0.0f;          // wheel 轮毂速度
 float vrb = 0.0f, vlb = 0.0f; // vehicle
 float aver_v = 0.0f;
 
-float position_increment = 0;
-
 Observer_t ob;
 
 /* ================================================================ prototype ================================================================ */
@@ -112,26 +110,9 @@ void observer(void const *argument)
     xvEstimateKF_Update(&vaEstimateKF, INS.MotionAccel_n[1], aver_v); // ins 加速度 轮毂反馈速度 融合滤波
 
     // 原地自转的过程中v_filter和x_filter应该都是为0
-    // chassis.state.v_filter = vel_acc[0]; // 得到卡尔曼滤波后的速度
     ob.v = vel_acc[0];
 
-    position_increment = ob.v * (TASK_PERIOD_MS * 0.001f);
-
-    // chassis.state.x_filter += position_increment;
-    ob.x += position_increment;
-
-    /* ================================================================ 安全检测 ================================================================ */
-
-    /// @brief 检测
-    // RC_Offline_Detection(&rc_ctrl, TASK_PERIOD_MS);
-    // Motor_Offline_Detection(&motor_status, TASK_PERIOD_MS);
-    /// @brief 急停判断
-    // if (RC_IS_OFFLINE(&rc_ctrl) || MOTOR_IS_OFFLINE(&motor_status) || (leg[LEFT].theta >= (PI / 2)) || (leg[RIGHT].theta >= (PI / 2)))
-    // {
-    //   robo_status = ROBO_STATUS_EMERGENCY;
-    // }
-
-    /* ================================================================ / 安全检测 ================================================================ */
+    ob.x += ob.v * (TASK_PERIOD_MS * 0.001f);
 
     // 精确周期控制
     vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(TASK_PERIOD_MS));

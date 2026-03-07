@@ -29,7 +29,7 @@ typedef enum
 	CMD_CAN,
 	CMD_DT7,
 	CMD_FSI6,
-	CMD_UPPER_COMPUTER,
+	CMD_UPPER,
 } Command_Type_t;
 
 Command_Type_t cmd_type = CMD_DT7;
