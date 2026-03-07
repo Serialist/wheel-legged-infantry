@@ -40,7 +40,7 @@
 osThreadId commandTaskHandle;
 osThreadId observerTaskHandle;
 osThreadId chassisTaskHandle;
-osThreadId imuTaskHandle;
+osThreadId insTaskHandle;
 osThreadId updateTaskHandle;
 
 /* USER CODE END PTD */
@@ -67,7 +67,7 @@ osThreadId updateTaskHandle;
 
 void observer(void const *argument);
 void update_task(void const *argument);
-extern void INS_task(void const *argument);
+void INS_task(void const *argument);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /* GetIdleTaskMemory prototype (linked to static allocation support) */
@@ -143,8 +143,8 @@ void MX_FREERTOS_Init(void)
   osThreadDef(chassisTask, Chassis_Task, osPriorityHigh, 0, 512);
   chassisTaskHandle = osThreadCreate(osThread(chassisTask), NULL);
 
-  osThreadDef(imuTask, INS_task, osPriorityRealtime, 0, 1024);
-  imuTaskHandle = osThreadCreate(osThread(imuTask), NULL);
+  osThreadDef(insTask, INS_task, osPriorityRealtime, 0, 1024);
+  insTaskHandle = osThreadCreate(osThread(insTask), NULL);
 
   osThreadDef(commandTask, Command_Task, osPriorityHigh, 0, 512);
   commandTaskHandle = osThreadCreate(osThread(commandTask), NULL);

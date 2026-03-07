@@ -426,16 +426,16 @@ float Signf(float value)
  * @brief 死区函数
  *
  * @param value 输入
- * @param min 死区下界
- * @param max 死区上界
+ * @param point 死区点
+ * @param deadzone 死区大小
  * @return float
  */
-float Deadzonef(float value, float min, float max)
+float Deadzonef(float value, float point, float deadzone)
 {
-    if (point - deadzone < value &&
-        value < point + deadzone)
+    if ((point - deadzone) < value &&
+        value < (point + deadzone))
     {
-        return 0.0f;
+        return point;
     }
     else
     {

@@ -40,9 +40,9 @@
 
 extern Motor_AK_RxData_t ak10[4];
 
-Robo_Status_t robo_status;
-Robo_Attitude_t att;
-JUMP_State_t jump_state = JPS_NONE;
+Robo_Status_t robo_status;			// 机器人模式
+Robo_Attitude_t att;				// 现在姿态
+JUMP_State_t jump_state = JPS_NONE; // 跳跃状态机
 
 PID_Typedef pid_tpl = {0},
 			pid_tpr = {0},
@@ -54,24 +54,25 @@ PID_Typedef pid_tpl = {0},
 			tp_pid = {0},
 			tp_offground_pid = {0};
 
-Wheel_Leg_Target_t set;
-VMC_t leg[2];
-Robo_Flag_t rbflag;
-Ramp_t ramp_leg_length, v_ramp;
+Wheel_Leg_Target_t set; // 目标值
+VMC_t leg[2];			// 腿解算
+Robo_Flag_t rbflag;		// 机器人状态
+Ramp_t ramp_leg_length, // 腿长斜坡函数
+	v_ramp;				// 速度斜坡函数
 
 float turn_t;	// yaw轴补偿
 float f0_roll;	// roll轴补偿
 float tp_alpha; // 劈叉
-float tplqrl;
-float tlqrl;
-float tplqrr;
-float tlqrr;
-float leg_force_l = 0;
-float leg_force_r = 0;
+
+// lqr 输出
+float tplqrl, tlqrl, tplqrr, tlqrr;
+
+// 对腿施加外力
 float leg_force = 0;
 
-// 状态变量和控制量
+// 状态变量
 float xl[6], ul[2];
+// 控制量
 float xr[6], ur[2];
 
 // debug variable
@@ -331,13 +332,11 @@ void Wheel_Leg_Control(void)
 	/// @brief 腿推力 PID
 	leg[LEFT].F0 = 55.0f * arm_cos_f32(leg[LEFT].theta) +
 				   PID_Update(leg_pid[LEFT], set.length + f0_roll, leg[LEFT].L0) +
-				   leg_force +
-				   leg_force_l;
+				   leg_force;
 	/// @bug 这里不应该加负号，我怀疑是上面正运动学角度反了
 	leg[RIGHT].F0 = -55.0f * arm_cos_f32(leg[RIGHT].theta) +
 					-PID_Update(leg_pid[RIGHT], set.length - f0_roll, leg[RIGHT].L0) +
-					-leg_force +
-					-leg_force_r;
+					-leg_force;
 
 	tp_alpha = PID_Update(&tp_pid, 0, leg[LEFT].alpha - leg[RIGHT].alpha);
 
@@ -394,7 +393,7 @@ void Jump_FSM(void)
 	{
 	case JPS_NONE:
 	{
-		leg_force_l = leg_force_r = 0;
+		leg_force = 0;
 		if (robo_status == RBS_JUMP)
 		{
 			jump_state = JPS_INIT;
@@ -419,7 +418,7 @@ void Jump_FSM(void)
 	case JPS_STRETCH:
 	{
 		set.length = Ramp_Update(&jump_f_ramp, .35f, .003f); // 斜坡函数
-		leg_force_l = leg_force_r = stretch_force;
+		leg_force = stretch_force;
 		if (((leg[LEFT].L0 + leg[RIGHT].L0) / 2) >= .35f || jump_time >= stretch_time)
 		{
 			Ramp_Init(&jump_f_ramp, leg[LEFT].L0, -(.25f / 200.f), 0);
@@ -433,7 +432,7 @@ void Jump_FSM(void)
 	case JPS_SHRINK:
 	{
 		set.length = Ramp_Update(&jump_f_ramp, .13f, .003f); // 斜坡函数
-		leg_force_l = leg_force_r = shrink_force;
+		leg_force = shrink_force;
 		if (((leg[LEFT].L0 + leg[RIGHT].L0) / 2) <= .15f || jump_time >= shrink_time)
 		{
 			jump_state = JPS_AIR;
@@ -446,7 +445,7 @@ void Jump_FSM(void)
 	{
 
 		set.length = .15f;
-		leg_force_l = leg_force_r = air_force;
+		leg_force = air_force;
 		if (/* (leg[LEFT].is_offground == false && leg[RIGHT].is_offground == false) || */ /* (leg[LEFT].d_L0 + leg[RIGHT].d_L0) / 2 */ jump_time >= air_time)
 		{
 			jump_state = JPS_END;
