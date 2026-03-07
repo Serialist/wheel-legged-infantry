@@ -18,8 +18,8 @@
 #define HIP_LB_ID 0x04
 #define HIP_RF_ID 0x01
 #define HIP_RB_ID 0x02
-#define HUB_L_ID 0x207
-#define HUB_R_ID 0x206
+#define HUB_L_ID 0x201
+#define HUB_R_ID 0x202
 #define B2B_CHASSIS_CMD_ID 0x666
 
 typedef struct
