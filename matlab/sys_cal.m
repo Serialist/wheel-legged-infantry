@@ -11,6 +11,8 @@ Ks = zeros(2, 6, length(L0s)); % 存放不同L0对应的K
 theta_list = [0 15 30 45 60];
 % theta_list = [0];
 
+K_data = zeros(2, 6, length(theta_list), length(L0s), "double"); % 储存所有K
+
 for theta_step = 1:length(theta_list)
     
     theta_t = deg2rad(theta_list(theta_step));
@@ -57,7 +59,7 @@ for theta_step = 1:length(theta_list)
         B = vpa(subs(Jb, [theta dtheta x x1 phi phi1 Tp T], [theta_t 0 0 0 0 0 0 0]));
 
         % 离散化
-        [G, H] = c2d(eval(A), eval(B), 0.005);
+        [G, H] = c2d(double(A), double(B), 0.005);
         
         % 定义权重矩阵Q, R
         % PSO 参数
@@ -68,14 +70,20 @@ for theta_step = 1:length(theta_list)
         % Q = diag([2000, 75, 25, 25, 8000, 5]);
         % R_ = diag([80 5]);
 
-        Q = diag([3000, 75, 50, 25, 8000, 5]);
-        R_ = diag([80 5]);
+        % 这版不错，比较均衡
+        % Q = diag([5000, 100, 200, 20, 8000, 5]);
+        % R_ = diag([300 10]);
 
-        % Q = diag([36  1.5  10  0.5  320  3]);
-        % R = diag([1.6  0.1]);
+        % 就这样吧
+        % @date 2026-03-08
+        Q = diag([5000, 100, 500, 20, 10000, 5]);
+        R_ = diag([80 60]);
     
         % 求解反馈矩阵K
-        Ks(:,:,step)=dlqr(G,H,Q,R_);
+        K_val = dlqr(G, H, Q, R_);
+        K_val_numeric = double(real(K_val)); 
+        Ks(:,:,step) = K_val_numeric;
+        K_data(:,:,theta_step, step) = K_val_numeric;
     
     end
     
@@ -101,4 +109,25 @@ for theta_step = 1:length(theta_list)
     disp(eval(vpa(subs(K, L0, 0.20))));
 end
 
-disp("ready!");
+disp("计算完成");
+
+%% 显示K矩阵变化图像
+state_names = {'\theta', 'd\theta', 'x', 'dx', 'phi', 'dphi'};
+control_names = {'T (Wheel Torque)', 'Tp (Swing Torque)'};
+colors = lines(length(theta_list)); % 自动生成对比颜色
+
+% for u_idx = 1:2
+%     figure('Name', ['Control Gain for ' control_names{u_idx}], 'Color', 'w');
+%     for x_idx = 1:6
+%         subplot(2, 3, x_idx);
+%         hold on; grid on;
+%         for t_idx = 1:length(theta_list)
+%             plot(L0s, squeeze(K_data(u_idx, x_idx, t_idx, :)), 'LineWidth', 1.5, ...
+%                 'Color', colors(t_idx, :), 'DisplayName', [num2str(theta_list(t_idx)) '°']);
+%         end
+%         title(['K(' num2str(u_idx) ',' num2str(x_idx) ') - ' state_names{x_idx}]);
+%         xlabel('L0 (m)'); ylabel('Gain Value');
+%         if x_idx == 1, legend('Location', 'best'); end
+%     end
+% end
+% disp("图像生成");

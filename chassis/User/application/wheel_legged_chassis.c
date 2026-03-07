@@ -95,7 +95,7 @@ void Chassis_Task(void const *argument)
 	Motor_Enable();
 	set.length = 0.13f;
 	Ramp_Init(&ramp_leg_length, .1f, -0.0005f, 0.0005f);
-	Ramp_Init(&v_ramp, 0, -10.f, 10.f);
+	Ramp_Init(&v_ramp, 0, -15.f, 5.f);
 
 	for (;;)
 	{
@@ -106,7 +106,7 @@ void Chassis_Task(void const *argument)
 		/* ================ 控制 ================ */
 
 		Control_Get();
-		Jump_FSM();
+		// Jump_FSM();
 		Wheel_Leg_Control();
 
 		/* ================ 电机指令 ================ */
@@ -117,8 +117,8 @@ void Chassis_Task(void const *argument)
 
 void Chassis_PID_Init(void)
 {
-	PID_init(&length_pid[LEFT], 600, 0, 12000, 120, 0);		   // 腿长 left
-	PID_init(&length_pid[RIGHT], 600, 0, 12000, 120, 0);	   // 腿长 right
+	PID_init(&length_pid[LEFT], 700, 0, 12000, 120, 0);		   // 腿长 left
+	PID_init(&length_pid[RIGHT], 700, 0, 12000, 120, 0);	   // 腿长 right
 	PID_init(&jump_length_pid[LEFT], 1000, 0, 25000, 0, 300);  // jump 腿长 left
 	PID_init(&jump_length_pid[RIGHT], 1000, 0, 25000, 0, 300); // jump 腿长 right
 	PID_init(&yaw_pid, 0.12f, 0, 0.8f, 0, 0);				   // yaw
@@ -209,11 +209,12 @@ float aaa;
 
 void Control_Get(void)
 {
-	set.v = Ramp_Update(&v_ramp, rc_ctrl.rc.ch[L_Y] * 3.5f / 660.0f, 0.003f);
+	set.v = Signf(rc_ctrl.rc.ch[L_Y]) * Ramp_Update(&v_ramp, fabsf(rc_ctrl.rc.ch[L_Y] * 3.f / 660.0f), 0.003f);
 	set.yaw -= rc_ctrl.rc.ch[L_X] * 0.0015f;
-	set.length = Ramp_Update(&ramp_leg_length,
-							 Remapf((float)rc_ctrl.rc.ch[R_Y], -660.0f, 660.0f, 0.1f, 0.35f),
-							 3);
+	set.length = Clampf(Ramp_Update(&ramp_leg_length,
+									Remapf(Clampf((float)rc_ctrl.rc.ch[R_Y], -100.f, 660.f), -100.0f, 660.0f, 0.1f, 0.35f),
+									3),
+						.1f, .35f);
 	// set.roll = -rc_ctrl.rc.ch[R_X] * 30.0f / 660.0f;
 	set.roll = 0;
 	set.f0_force = rc_ctrl.rc.ch[L_Z] * 50 / 660.0f;
@@ -228,13 +229,13 @@ void Control_Get(void)
 		leg_pid[LEFT] = &length_pid[LEFT];
 		leg_pid[RIGHT] = &length_pid[RIGHT];
 	}
-	else if (rc_ctrl.rc.s[S_L] == DOWN && jump_state == JPS_NONE)
-	{
-		robo_status = RBS_JUMP;
+	// else if (rc_ctrl.rc.s[S_L] == DOWN && jump_state == JPS_NONE)
+	// {
+	// 	robo_status = RBS_JUMP;
 
-		leg_pid[LEFT] = &jump_length_pid[LEFT];
-		leg_pid[RIGHT] = &jump_length_pid[RIGHT];
-	}
+	// 	leg_pid[LEFT] = &jump_length_pid[LEFT];
+	// 	leg_pid[RIGHT] = &jump_length_pid[RIGHT];
+	// }
 	else
 	{
 		set.v = 0;
@@ -253,16 +254,16 @@ void Control_Get(void)
  *************************************************/
 void Wheel_Leg_Control(void)
 {
-	xl[0] = leg[LEFT].theta;
+	xl[0] = leg[LEFT].theta + .08f;
 	xl[1] = leg[LEFT].d_theta;
-	xl[2] = (ob.x - set.x - 2.f);
+	xl[2] = (ob.x - set.x - .8f);
 	xl[3] = (ob.v - set.v);
 	xl[4] = att.pitch;
 	xl[5] = att.vpitch;
 
-	xr[0] = leg[RIGHT].theta;
+	xr[0] = leg[RIGHT].theta + .08f;
 	xr[1] = leg[RIGHT].d_theta;
-	xr[2] = (ob.x - set.x - 1.5f);
+	xr[2] = (ob.x - set.x - .8f);
 	xr[3] = (ob.v - set.v);
 	xr[4] = att.pitch;
 	xr[5] = att.vpitch;
@@ -285,11 +286,6 @@ void Wheel_Leg_Control(void)
 		tplqrl = PID_Update(&pid_tpl, 0, leg[LEFT].theta);
 		tplqrr = PID_Update(&pid_tpr, 0, leg[RIGHT].theta);
 	}
-
-	// 	// tlqrl = tlqrr = 0;
-	// 	// tplqrl = tp_offground_pid.Kp * leg[LEFT].theta + tp_offground_pid.Kd * leg[LEFT].d_theta;
-	// 	// tplqrr = tp_offground_pid.Kp * leg[RIGHT].theta + tp_offground_pid.Kd * leg[RIGHT].d_theta;
-	// }
 
 	/* ================================ 轮 解算 ================================ */
 

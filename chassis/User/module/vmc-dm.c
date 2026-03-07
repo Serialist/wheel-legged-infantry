@@ -76,7 +76,6 @@ void VMC_5bar_FK(VMC_t *vmc, float phi1, float phi4, float pitch, float dpitch, 
 
 	vmc->last_d_L0 = vmc->d_L0;
 	vmc->last_L0 = vmc->L0;
-
 }
 
 // 计算期望的关节输出力矩
@@ -92,6 +91,16 @@ void VMC_5bar_IK(VMC_t *vmc, float tp, float f0)
 
 	vmc->torque_set[FRONT] = vmc->j11 * vmc->F0 + vmc->j12 * vmc->Tp; // 得到RightFront的输出轴期望力矩，F0为五连杆机构末端沿腿的推力
 	vmc->torque_set[BACK] = vmc->j21 * vmc->F0 + vmc->j22 * vmc->Tp;  // 得到RightBack的输出轴期望力矩，Tp为沿中心轴的力矩
+
+	if (vmc->phi1 < vmc->phi2)
+	{
+		vmc->torque_set[FRONT] = -vmc->torque_set[FRONT];
+	}
+
+	if (vmc->phi3 < vmc->phi4)
+	{
+		vmc->torque_set[BACK] = -vmc->torque_set[BACK];
+	}
 }
 
 #define OFFGROUND_FN_THRESHOLD 10.0f // 离地支持力阈值
