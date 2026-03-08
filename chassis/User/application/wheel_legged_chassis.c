@@ -94,6 +94,7 @@ void Chassis_Task(void const *argument)
 	VMC_Init(&leg[RIGHT]);
 	Motor_Enable();
 	set.length = 0.13f;
+
 	Ramp_Init(&ramp_leg_length, .1f, -0.0005f, 0.0005f);
 	Ramp_Init(&v_ramp, 0, -15.f, 5.f);
 
@@ -177,7 +178,7 @@ void Wheel_Leg_Attitude_Calc(void)
 
 void Chassis_Motor_Transmit(void)
 {
-	if (rc_ctrl.rc.s[S_L] == UP)
+	if (rc_ctrl.rc.s[S_L] != DOWN)
 	{
 		set.hip_torque[LF] = 0;
 		set.hip_torque[LB] = 0;
@@ -301,17 +302,17 @@ void Wheel_Leg_Control(void)
 	// set.length = set.height / arm_cos_f32(leg[LEFT].theta);
 	// set.right_length = set.height / arm_cos_f32(leg[RIGHT].theta);
 
-	// f0_roll = PID_Update(&roll_pid, set.roll, att.roll);
-	f0_roll = 0;
+	f0_roll = PID_Update(&roll_pid, set.roll, att.roll);
+	// f0_roll = 0;
 
 	/// @brief 腿推力 PID
-	leg[LEFT].F0 = -55.0f * arm_cos_f32(leg[LEFT].theta) +
-				   -PID_Update(leg_pid[LEFT], set.length + f0_roll, leg[LEFT].L0) +
-				   -set.f0_force;
+	leg[LEFT].F0 = 55.0f * arm_cos_f32(leg[LEFT].theta) +
+				   PID_Update(&length_pid[LEFT], Clampf(set.length + f0_roll, 0.1f, 0.35f), leg[LEFT].L0) +
+				   set.f0_force;
 	/// @bug 这里不应该加负号，我怀疑是上面正运动学角度反了
-	leg[RIGHT].F0 = -55.0f * arm_cos_f32(leg[RIGHT].theta) +
-					-PID_Update(leg_pid[RIGHT], set.length - f0_roll, leg[RIGHT].L0) +
-					-set.f0_force;
+	leg[RIGHT].F0 = 55.0f * arm_cos_f32(leg[RIGHT].theta) +
+					PID_Update(&length_pid[RIGHT], Clampf(set.length - f0_roll, 0.1f, 0.35f), leg[RIGHT].L0) +
+					set.f0_force;
 
 	tp_alpha = PID_Update(&tp_pid, 0, leg[LEFT].alpha - leg[RIGHT].alpha);
 
@@ -323,17 +324,17 @@ void Wheel_Leg_Control(void)
 
 	/// @brief 正 VMC
 	VMC_5bar_IK(&leg[LEFT],
-				leg[LEFT].Tp,
+				-leg[LEFT].Tp,
 				leg[LEFT].F0);
 	VMC_5bar_IK(&leg[RIGHT],
-				leg[RIGHT].Tp,
+				-leg[RIGHT].Tp,
 				leg[RIGHT].F0);
 
 	/// @brief 发送 buf
-	set.hip_torque[LF] = -leg[LEFT].torque_set[FRONT]; // left 反转
-	set.hip_torque[LB] = -leg[LEFT].torque_set[BACK];
-	set.hip_torque[RF] = leg[RIGHT].torque_set[FRONT];
-	set.hip_torque[RB] = leg[RIGHT].torque_set[BACK];
+	set.hip_torque[LF] = leg[LEFT].torque_set[FRONT]; // left 反转
+	set.hip_torque[LB] = leg[LEFT].torque_set[BACK];
+	set.hip_torque[RF] = -leg[RIGHT].torque_set[FRONT];
+	set.hip_torque[RB] = -leg[RIGHT].torque_set[BACK];
 
 /* ================================ 发送 ================================ */
 
