@@ -8,7 +8,7 @@ py.lqr_k_extract.fclear()
 
 L0s = 0.12:0.01:0.32;          % L0变化范围
 Ks = zeros(2, 6, length(L0s)); % 存放不同L0对应的K
-theta_list = [0 15 30 45 60];
+theta_list = 0;
 % theta_list = [0];
 
 K_data = zeros(2, 6, length(theta_list), length(L0s), "double"); % 储存所有K
@@ -76,8 +76,8 @@ for theta_step = 1:length(theta_list)
 
         % 就这样吧
         % @date 2026-03-08
-        Q = diag([5000, 100, 500, 20, 10000, 5]);
-        R_ = diag([80 60]);
+        Q = diag([1500, 30, 2500, 5, 10000, 20]);
+        R_ = diag([50 10]);
     
         % 求解反馈矩阵K
         K_val = dlqr(G, H, Q, R_);

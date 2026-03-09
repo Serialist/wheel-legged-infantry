@@ -122,7 +122,7 @@ void Chassis_PID_Init(void)
 	PID_init(&length_pid[RIGHT], 700, 0, 12000, 120, 0);	   // Õ»≥§ right
 	PID_init(&jump_length_pid[LEFT], 1000, 0, 25000, 0, 300);  // jump Õ»≥§ left
 	PID_init(&jump_length_pid[RIGHT], 1000, 0, 25000, 0, 300); // jump Õ»≥§ right
-	PID_init(&yaw_pid, 0.12f, 0, 0.8f, 0, 0);				   // yaw
+	PID_init(&yaw_pid, 0.15f, 0, 1.2f, 0, 0);				   // yaw
 	PID_init(&roll_pid, .8f, 0, .05f, .2f, 0);				   // roll
 	PID_init(&tp_pid, 10, 0, 2, 3, 0);						   // ≈¸≤Ê
 
@@ -256,16 +256,16 @@ void Control_Get(void)
  *************************************************/
 void Wheel_Leg_Control(void)
 {
-	xl[0] = leg[LEFT].theta + .08f;
+	xl[0] = leg[LEFT].theta;
 	xl[1] = leg[LEFT].d_theta;
-	xl[2] = (ob.x - set.x - .8f);
+	xl[2] = (ob.x - set.x + 0.2f);
 	xl[3] = (ob.v - set.v);
 	xl[4] = att.pitch;
 	xl[5] = att.vpitch;
 
-	xr[0] = leg[RIGHT].theta + .08f;
+	xr[0] = leg[RIGHT].theta;
 	xr[1] = leg[RIGHT].d_theta;
-	xr[2] = (ob.x - set.x - .8f);
+	xr[2] = (ob.x - set.x + 0.2f);
 	xr[3] = (ob.v - set.v);
 	xr[4] = att.pitch;
 	xr[5] = att.vpitch;

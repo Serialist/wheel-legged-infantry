@@ -12,7 +12,7 @@
 #include "lqr.h"
 #include "lqrcoef.h"
 
-float (*lqr_k_coef[])[12][4] = {&lqr_coe1, &lqr_coe2, &lqr_coe3, &lqr_coe4, &lqr_coe5};
+float (*lqr_k_coef[])[12][4] = {&lqr_coe1};
 float (*lqr_coe)[12][4] = &lqr_coe1;
 float k[2][6];
 
@@ -38,11 +38,11 @@ void LQR_Control(float *x, float *u, float len)
 	float k_[6][2];
 
 	// 选择系数
-	int8_t coef_idx = (int)roundf(fabsf(x[0]) / (PI / 12)); // 选择系数
-	coef_idx = coef_idx < 0	  ? 0
-			   : coef_idx > 4 ? 4
-							  : coef_idx; // 限幅
-	lqr_coe = lqr_k_coef[coef_idx];
+	// int8_t coef_idx = (int)roundf(fabsf(x[0]) / (PI / 12)); // 选择系数
+	// coef_idx = coef_idx < 0	  ? 0
+	// 		   : coef_idx > 4 ? 4
+	// 						  : coef_idx; // 限幅
+	// lqr_coe = lqr_k_coef[coef_idx];
 
 	// 计算 k
 	for (i = 0; i < 6; i++)
