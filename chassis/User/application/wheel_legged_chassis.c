@@ -125,13 +125,14 @@ void Chassis_Task(void const *argument)
 
 void Chassis_PID_Init(void)
 {
-	PID_init(&length_pid[LEFT], 700, 0, 12000, 120, 0);		   // 腿长 left
-	PID_init(&length_pid[RIGHT], 700, 0, 12000, 120, 0);	   // 腿长 right
-	PID_init(&jump_length_pid[LEFT], 1000, 0, 25000, 0, 300);  // jump 腿长 left
-	PID_init(&jump_length_pid[RIGHT], 1000, 0, 25000, 0, 300); // jump 腿长 right
-	PID_init(&yaw_pid, 0.15f, 0, 1.2f, 0, 0);				   // yaw
-	PID_init(&roll_pid, .8f, 0, .05f, .2f, 0);				   // roll
-	PID_init(&tp_pid, 10, 0, 2, 3, 0);						   // 劈叉
+	PID_init(&length_pid[LEFT], 700, 0, 12000, 120, 0);	 // 腿长 left
+	PID_init(&length_pid[RIGHT], 700, 0, 12000, 120, 0); // 腿长 right
+	/// @bug 跳跃谨记减少 pd！！！否则速度会被阻尼掉
+	PID_init(&jump_length_pid[LEFT], 1000, 0, 1000, 0, 300);  // jump 腿长 left
+	PID_init(&jump_length_pid[RIGHT], 1000, 0, 1000, 0, 300); // jump 腿长 right
+	PID_init(&yaw_pid, 0.15f, 0, 1.2f, 0, 0);				  // yaw
+	PID_init(&roll_pid, .8f, 0, .05f, .2f, 0);				  // roll
+	PID_init(&tp_pid, 10, 0, 2, 3, 0);						  // 劈叉
 
 	// 腿摆角扭矩pid，用于板凳模型
 	PID_init(&pid_tpl, 14, 0, 3, 10, 0);
@@ -425,7 +426,6 @@ void Jump_FSM(void)
 
 	case JPS_AIR:
 	{
-
 		set.length = .15f;
 		set.f0_force = air_force;
 		if (/* (leg[LEFT].is_offground == false && leg[RIGHT].is_offground == false) || */ /* (leg[LEFT].d_L0 + leg[RIGHT].d_L0) / 2 */ jump_time >= air_time)
@@ -438,7 +438,7 @@ void Jump_FSM(void)
 
 	case JPS_END:
 	{
-		if ((leg[LEFT].is_offground == false && leg[RIGHT].is_offground == false) || jump_time >= end_time)
+		if (rbflag.above == false || jump_time >= end_time)
 		{
 			jump_state = JPS_NONE;
 			jump_time = 0;
