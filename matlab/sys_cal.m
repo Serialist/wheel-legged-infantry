@@ -8,8 +8,8 @@ py.lqr_k_extract.fclear()
 
 L0s = 0.12:0.01:0.32;          % L0变化范围
 Ks = zeros(2, 6, length(L0s)); % 存放不同L0对应的K
-theta_list = 0;
-% theta_list = [0];
+% theta_list = 0;
+theta_list = [0 15 30 45 60];
 
 K_data = zeros(2, 6, length(theta_list), length(L0s), "double"); % 储存所有K
 
@@ -30,7 +30,7 @@ for theta_step = 1:length(theta_list)
         L = L0s(step) / 2;
         Lm = L0s(step) / 2;
         mw = 0.334 *2;
-        l = 0.2; % 机体质心到髋关机中心距离
+        l = 0.1; % 机体质心到髋关机中心距离
         mp = 1.482 *2;
         M = (17.5 + 0.68 - mp*2 - mw*2);
         Iw = 0.5 * mw * R ^ 2;
@@ -74,10 +74,15 @@ for theta_step = 1:length(theta_list)
         % Q = diag([5000, 100, 200, 20, 8000, 5]);
         % R_ = diag([300 10]);
 
-        % 就这样吧
-        % @date 2026-03-08
-        Q = diag([1500, 30, 2500, 5, 10000, 20]);
-        R_ = diag([50 10]);
+        % 这个参数非常好，我就不改了(ᗜ‸ᗜ)
+        % 不过还是有一点点问题
+        % 位移可以再改一点
+        % 其实pitch和theta的K权重差不多是正确的（k21和k25）
+        % 但是当theta过大，可能出现pitch倾翻，严重甚至可能翻车？建议加入快倒地的检测
+        % 不过说不定pitch是可以把自己拉回来的，可能加大Q66（dpitch）有用
+        % @date 2026-03-10
+        Q = diag([6000, 100, 2000, 5, 8000, 20]);
+        R_ = diag([50 5]);
     
         % 求解反馈矩阵K
         K_val = dlqr(G, H, Q, R_);

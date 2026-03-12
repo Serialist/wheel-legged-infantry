@@ -74,6 +74,7 @@ float xr[6], ur[2];
 
 // debug variable
 float t1 = 0, t2 = 0;
+// float kjump[4] = {2000.f, 25000.f, 250.f, 0.0007f};
 
 /* ================================================================ prototype ================================================================ */
 
@@ -100,6 +101,12 @@ void Chassis_Task(void const *argument)
 
 	for (;;)
 	{
+		// leg_pid[LEFT]->Kp = leg_pid[RIGHT]->Kp = kjump[0];
+		// leg_pid[LEFT]->Kd = leg_pid[RIGHT]->Kd = kjump[1];
+		// leg_pid[LEFT]->max_out = leg_pid[RIGHT]->max_out = kjump[2];
+		// ramp_leg_length.kmin = -kjump[3];
+		// ramp_leg_length.kmax = kjump[3];
+
 		/* ================ 状态更新 ================ */
 
 		Wheel_Leg_Attitude_Calc();
@@ -214,9 +221,9 @@ void Control_Get(void)
 	set.v = Signf(rc_ctrl.rc.ch[L_Y]) * Ramp_Update(&v_ramp, fabsf(rc_ctrl.rc.ch[L_Y] * 3.f / 660.0f), 0.003f);
 	set.yaw -= rc_ctrl.rc.ch[L_X] * 0.0015f;
 	set.length = Clampf(Ramp_Update(&ramp_leg_length,
-									Remapf(Clampf((float)rc_ctrl.rc.ch[R_Y], -100.f, 660.f), -100.0f, 660.0f, 0.1f, 0.35f),
+									Remapf(Clampf((float)rc_ctrl.rc.ch[R_Y], -100.f, 660.f), -100.0f, 660.0f, 0.15f, 0.35f),
 									3),
-						.1f, .35f);
+						.15f, .35f);
 	// set.roll = -rc_ctrl.rc.ch[R_X] * 30.0f / 660.0f;
 	set.roll = 0;
 	set.f0_force = rc_ctrl.rc.ch[L_Z] * 50 / 660.0f;
@@ -309,7 +316,6 @@ void Wheel_Leg_Control(void)
 	leg[LEFT].F0 = 55.0f * arm_cos_f32(leg[LEFT].theta) +
 				   PID_Update(&length_pid[LEFT], Clampf(set.length + f0_roll, 0.1f, 0.35f), leg[LEFT].L0) +
 				   set.f0_force;
-	/// @bug 这里不应该加负号，我怀疑是上面正运动学角度反了
 	leg[RIGHT].F0 = 55.0f * arm_cos_f32(leg[RIGHT].theta) +
 					PID_Update(&length_pid[RIGHT], Clampf(set.length - f0_roll, 0.1f, 0.35f), leg[RIGHT].L0) +
 					set.f0_force;

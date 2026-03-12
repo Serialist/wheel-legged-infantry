@@ -82,9 +82,6 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 
-
-
-
   robo_status = RBS_INIT;
 
   /* USER CODE END 1 */
