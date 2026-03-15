@@ -37,7 +37,7 @@ void LQR_Control(float *x, float *u, float len)
 	int i, j, n;
 	float k_[6][2];
 
-	// 选择系数
+	// 根据 theta 选择系数
 	int8_t coef_idx = (int)roundf(fabsf(x[0]) / (PI / 12)); // 选择系数
 	coef_idx = coef_idx < 0	  ? 0
 			   : coef_idx > 4 ? 4

@@ -2,7 +2,8 @@ import datetime
 
 def fclear():
     with open("../chassis/User/module/lqrcoef.h", "w") as f:
-        f.write("/// @date " + datetime.datetime.now().strftime('%Y-%m-%d %H:%M') + "\n\n")
+        f.write("/// @date " + datetime.datetime.now().strftime('%Y-%m-%d %H:%M') + "\n")
+        f.write("\n#ifndef LQRCOEF_H\n#define LQRCOEF_H\n\n")
 
 def extrect_coef(step):
     with open("lqr_k.m", "r") as f:
@@ -38,3 +39,7 @@ def extrect_coef(step):
         fout.write(tail)
 
         fout.close()
+
+def ftail():
+    with open("../chassis/User/module/lqrcoef.h", "a") as f:
+        f.write("#endif /* LQRCOEF_H */ \n")

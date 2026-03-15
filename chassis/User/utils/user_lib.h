@@ -31,16 +31,26 @@
 #endif
 #endif
 
+#ifndef MAT
+#define MAT arm_matrix_instance_f32
+#define MAT_INIT arm_mat_init_f32
+#define MAT_ADD arm_mat_add_f32
+#define MAT_SUB arm_mat_sub_f32
+#define MAT_MULT arm_mat_mult_f32
+#define MAT_TRANS arm_mat_trans_f32
+#define MAT_INVERSE arm_mat_inverse_f32
+#endif
+
 #ifndef PI
 #define PI 3.14159265354f
 #endif
 
 #ifndef MIN
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MIN(a, b) ((a) <= (b) ? (a) : (b))
 #endif
 
 #ifndef MAX
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define MAX(a, b) ((a) >= (b) ? (a) : (b))
 #endif
 
 #define DEG_CLAMPF(Ang) LoopClampf((Ang), -180.0f, 180.0f) // 角度格式化为-180~180
@@ -130,6 +140,7 @@ typedef struct
 } Ramp_t;
 
 void Ramp_Init(Ramp_t *self, float initial_value, float kmin, float kmax); // 斜波函数初始化
+void Ramp_Reset(Ramp_t *self, float value);                                // 重置
 float Ramp_Update(Ramp_t *self, float target, float dt);                   // 斜波函数计算
 
 /* ================================ OLS Ordinary Least Squares 最小二乘法 ================================ */

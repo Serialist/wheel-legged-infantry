@@ -654,16 +654,6 @@
           <GroupName>User/algorithm</GroupName>
           <Files>
             <File>
-              <FileName>AHRS_middleware.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\User\algorithm\AHRS_middleware.c</FilePath>
-            </File>
-            <File>
-              <FileName>AHRS.lib</FileName>
-              <FileType>4</FileType>
-              <FilePath>..\User\algorithm\AHRS.lib</FilePath>
-            </File>
-            <File>
               <FileName>arm_cortexM4lf_math.lib</FileName>
               <FileType>4</FileType>
               <FilePath>..\User\algorithm\arm_cortexM4lf_math.lib</FilePath>

@@ -26,12 +26,9 @@
 #include "bsp_can.h"
 #include "pid.h"
 #include "INS_task.h"
-#include "bsp_dwt.h"
 #include "dt7.h"
 #include "user_lib.h"
 #include "vmc-dm.h"
-#include "debug.h"
-#include "filter.h"
 #include "motor.h"
 
 /* ================================================================ micro ================================================================ */
@@ -64,6 +61,8 @@ float turn_t;	// yaw轴补偿
 float f0_roll;	// roll轴补偿
 float tp_alpha; // 劈叉
 
+float leg_length_ff = 55.f; // 腿长前馈
+
 // lqr 输出
 float tplqrl, tlqrl, tplqrr, tlqrr;
 
@@ -78,7 +77,6 @@ float t1 = 0, t2 = 0;
 
 /* ================================================================ prototype ================================================================ */
 
-void Chassis_PID_Init(void);
 void Chassis_Motor_Transmit(void);
 void Wheel_Leg_Control(void);
 void Wheel_Leg_Attitude_Calc(void);
@@ -90,14 +88,29 @@ void Jump_FSM(void);
 
 void Chassis_Task(void const *argument)
 {
-	Chassis_PID_Init();
 	VMC_Init(&leg[LEFT]);
 	VMC_Init(&leg[RIGHT]);
-	Motor_Enable();
-	set.length = 0.13f;
+
+	PID_init(&length_pid[LEFT], 700, 0, 12000, 120, 0);	 // 腿长 left
+	PID_init(&length_pid[RIGHT], 700, 0, 12000, 120, 0); // 腿长 right
+	/// @bug 跳跃谨记减少 pd！！！否则速度会被阻尼掉
+	PID_init(&jump_length_pid[LEFT], 1000, 0, 1000, 0, 300);  // jump 腿长 left
+	PID_init(&jump_length_pid[RIGHT], 1000, 0, 1000, 0, 300); // jump 腿长 right
+	PID_init(&yaw_pid, 0.15f, 0, 1.2f, 0, 0);				  // yaw
+	PID_init(&roll_pid, .8f, 0, .05f, .2f, 0);				  // roll
+	PID_init(&tp_pid, 10, 0, 2, 3, 0);						  // 劈叉
+
+	// 腿摆角扭矩pid，用于板凳模型
+	PID_init(&pid_tpl, 14, 0, 3, 10, 0);
+	PID_init(&pid_tpr, 14, 0, 3, 10, 0);
+
+	PID_init(&tp_offground_pid, 80, 0, 400, 0, 0);
 
 	Ramp_Init(&ramp_leg_length, .1f, -0.0005f, 0.0005f);
 	Ramp_Init(&v_ramp, 0, -15.f, 5.f);
+
+	Motor_Enable();
+	set.length = 0.13f;
 
 	for (;;)
 	{
@@ -114,31 +127,13 @@ void Chassis_Task(void const *argument)
 		/* ================ 控制 ================ */
 
 		Control_Get();
-		// Jump_FSM();
+		Jump_FSM();
 		Wheel_Leg_Control();
 
 		/* ================ 电机指令 ================ */
 
 		Chassis_Motor_Transmit();
 	}
-}
-
-void Chassis_PID_Init(void)
-{
-	PID_init(&length_pid[LEFT], 700, 0, 12000, 120, 0);	 // 腿长 left
-	PID_init(&length_pid[RIGHT], 700, 0, 12000, 120, 0); // 腿长 right
-	/// @bug 跳跃谨记减少 pd！！！否则速度会被阻尼掉
-	PID_init(&jump_length_pid[LEFT], 1000, 0, 1000, 0, 300);  // jump 腿长 left
-	PID_init(&jump_length_pid[RIGHT], 1000, 0, 1000, 0, 300); // jump 腿长 right
-	PID_init(&yaw_pid, 0.15f, 0, 1.2f, 0, 0);				  // yaw
-	PID_init(&roll_pid, .8f, 0, .05f, .2f, 0);				  // roll
-	PID_init(&tp_pid, 10, 0, 2, 3, 0);						  // 劈叉
-
-	// 腿摆角扭矩pid，用于板凳模型
-	PID_init(&pid_tpl, 14, 0, 3, 10, 0);
-	PID_init(&pid_tpr, 14, 0, 3, 10, 0);
-
-	PID_init(&tp_offground_pid, 80, 0, 400, 0, 0);
 }
 
 /************************
@@ -222,9 +217,9 @@ void Control_Get(void)
 	set.v = Signf(rc_ctrl.rc.ch[L_Y]) * Ramp_Update(&v_ramp, fabsf(rc_ctrl.rc.ch[L_Y] * 3.f / 660.0f), 0.003f);
 	set.yaw -= rc_ctrl.rc.ch[L_X] * 0.0015f;
 	set.length = Clampf(Ramp_Update(&ramp_leg_length,
-									Remapf(Clampf((float)rc_ctrl.rc.ch[R_Y], -100.f, 660.f), -100.0f, 660.0f, 0.15f, 0.35f),
+									Remapf(Clampf((float)rc_ctrl.rc.ch[R_Y], -100.f, 660.f), -100.0f, 660.0f, 0.13f, 0.35f),
 									3),
-						.15f, .35f);
+						.13f, .35f);
 	// set.roll = -rc_ctrl.rc.ch[R_X] * 30.0f / 660.0f;
 	set.roll = 0;
 	set.f0_force = rc_ctrl.rc.ch[L_Z] * 50 / 660.0f;
@@ -314,10 +309,10 @@ void Wheel_Leg_Control(void)
 	// f0_roll = 0;
 
 	/// @brief 腿推力 PID
-	leg[LEFT].F0 = 55.0f * arm_cos_f32(leg[LEFT].theta) +
+	leg[LEFT].F0 = leg_length_ff * arm_cos_f32(leg[LEFT].theta) +
 				   PID_Update(&length_pid[LEFT], Clampf(set.length + f0_roll, 0.1f, 0.35f), leg[LEFT].L0) +
 				   set.f0_force;
-	leg[RIGHT].F0 = 55.0f * arm_cos_f32(leg[RIGHT].theta) +
+	leg[RIGHT].F0 = leg_length_ff * arm_cos_f32(leg[RIGHT].theta) +
 					PID_Update(&length_pid[RIGHT], Clampf(set.length - f0_roll, 0.1f, 0.35f), leg[RIGHT].L0) +
 					set.f0_force;
 

@@ -114,6 +114,8 @@ for theta_step = 1:length(theta_list)
     disp(eval(vpa(subs(K, L0, 0.20))));
 end
 
+py.lqr_k_extract.ftail();
+
 disp("计算完成");
 
 %% 显示K矩阵变化图像

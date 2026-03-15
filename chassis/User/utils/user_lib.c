@@ -13,7 +13,7 @@
 #include "string.h"
 #include "user_lib.h"
 
-// 快速开方（快在哪？可见是纯纯的牛顿迭代法）
+// 快速开方（牛顿迭代法）
 float SSqrt(float x)
 {
     float y;
@@ -53,6 +53,11 @@ void Ramp_Init(Ramp_t *self, float initial_value, float kmin, float kmax)
     self->kmin = kmin;
     self->kmax = kmax;
     self->value = initial_value;
+}
+
+void Ramp_Reset(Ramp_t *self, float value)
+{
+    self->value = value;
 }
 
 /**

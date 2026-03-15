@@ -27,3 +27,4 @@ other：
 
 > [轮腿平衡步兵总结 - 机械设计篇 | 闲居](https://xianmengxi.github.io/2023/08/19/lun-tui-ping-heng-bu-bing-zong-jie-ji-jie-she-ji-pian/)
 
+一般kd是kp的百分之10到15
