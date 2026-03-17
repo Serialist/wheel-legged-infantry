@@ -42,7 +42,7 @@ typedef struct
 {
     bool offground_l;
     bool offground_r;
-    bool above;
+    bool offground;
     bool fallen;
 } Robo_Flag_t;
 
