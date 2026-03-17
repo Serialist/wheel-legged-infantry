@@ -38,24 +38,25 @@
 extern Motor_AK_RxData_t ak10[4];
 
 Robo_Status_t robo_status;			// 机器人模式
-Robo_Attitude_t att;				// 现在姿态
+Robo_Attitude_t att;				// 机体姿态
 JUMP_State_t jump_state = JPS_NONE; // 跳跃状态机
 
-PID_Typedef pid_tpl = {0},
-			pid_tpr = {0},
-			*leg_pid[2],
-			length_pid[2] = {0},
-			jump_length_pid[2] = {0},
-			yaw_pid = {0},
-			roll_pid = {0},
-			tp_pid = {0},
-			tp_offground_pid = {0};
+PID_Typedef
+	pid_tpl = {0},			  // 离地关节 pid
+	pid_tpr = {0},			  // 离地关节 pid
+	length_pid[2] = {0},	  // 腿长 pid
+	jump_length_pid[2] = {0}, // 跳跃腿长 pid
+	yaw_pid = {0},			  // yaw 旋转 pid
+	roll_pid = {0},			  // roll 轴补偿 pid
+	tp_pid = {0},			  // 劈叉 pid
+	tp_offground_pid = {0};	  // 跳起
 
 Wheel_Leg_Target_t set; // 目标值
-VMC_t leg[2];			// 腿解算
+VMC_t leg[2];			// 腿 VMC 解算
 Robo_Flag_t rbflag;		// 机器人状态
-Ramp_t ramp_leg_length, // 腿长斜坡函数
-	v_ramp;				// 速度斜坡函数
+Ramp_t
+	ramp_leg_length, // 腿长斜坡函数
+	v_ramp;			 // 速度斜坡函数
 
 float turn_t;	// yaw轴补偿
 float f0_roll;	// roll轴补偿
@@ -114,11 +115,6 @@ void Chassis_Task(void const *argument)
 
 	for (;;)
 	{
-		// leg_pid[LEFT]->Kp = leg_pid[RIGHT]->Kp = kjump[0];
-		// leg_pid[LEFT]->Kd = leg_pid[RIGHT]->Kd = kjump[1];
-		// leg_pid[LEFT]->max_out = leg_pid[RIGHT]->max_out = kjump[2];
-		// ramp_leg_length.kmin = -kjump[3];
-		// ramp_leg_length.kmax = kjump[3];
 
 		/* ================ 状态更新 ================ */
 
@@ -170,12 +166,12 @@ void Wheel_Leg_Attitude_Calc(void)
 
 	if (jump_state != JPS_NONE && jump_state != JPS_INIT)
 	{
-		rbflag.above = true;
+		rbflag.offground = true;
 	}
 	else
 	{
-		// rbflag.above = leg[LEFT].is_offground /* || leg[RIGHT].is_offground */;
-		rbflag.above = false;
+		// rbflag.offground = leg[LEFT].is_offground /* || leg[RIGHT].is_offground */;
+		rbflag.offground = false;
 	}
 }
 
@@ -230,16 +226,11 @@ void Control_Get(void)
 	if (rc_ctrl.rc.s[S_L] == MID || last_switch == DOWN) // 正常行驶
 	{
 		robo_status = RBS_RUN;
-
-		leg_pid[LEFT] = &length_pid[LEFT];
-		leg_pid[RIGHT] = &length_pid[RIGHT];
 	}
 	// else if (rc_ctrl.rc.s[S_L] == DOWN && jump_state == JPS_NONE)
 	// {
 	// 	robo_status = RBS_JUMP;
 
-	// 	leg_pid[LEFT] = &jump_length_pid[LEFT];
-	// 	leg_pid[RIGHT] = &jump_length_pid[RIGHT];
 	// }
 	else
 	{
@@ -282,7 +273,7 @@ void Wheel_Leg_Control(void)
 	tlqrr = -ur[0];
 	tplqrr = -ur[1];
 
-	if (rbflag.above)
+	if (rbflag.offground)
 	{
 		tlqrl = 0;
 		tlqrr = 0;
@@ -295,7 +286,7 @@ void Wheel_Leg_Control(void)
 	/* ================================ 轮 解算 ================================ */
 
 	turn_t = yaw_pid.Kp * (set.yaw - att.totalyaw) - yaw_pid.Kd * att.vyaw; // 这样计算更稳一点
-	if (rbflag.above)
+	if (rbflag.offground)
 		turn_t = 0;
 	set.hub_torque[LEFT] = -(tlqrl - turn_t); // left 反转
 	set.hub_torque[RIGHT] = tlqrr + turn_t;
@@ -325,6 +316,7 @@ void Wheel_Leg_Control(void)
 	// leg[RIGHT].F0 = ttf0;
 
 	/// @brief 正 VMC
+	/// @bug tp 不知道为什么是负的
 	VMC_5bar_IK(&leg[LEFT],
 				-leg[LEFT].Tp,
 				leg[LEFT].F0);
@@ -433,7 +425,7 @@ void Jump_FSM(void)
 
 	case JPS_END:
 	{
-		if (rbflag.above == false || jump_time >= end_time)
+		if (rbflag.offground == false || jump_time >= end_time)
 		{
 			jump_state = JPS_NONE;
 			jump_time = 0;

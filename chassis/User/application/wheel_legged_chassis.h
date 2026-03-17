@@ -14,6 +14,8 @@
 
 #include "user_lib.h"
 
+// 电机 CAN ID
+
 #define HIP_LF_ID 0x03
 #define HIP_LB_ID 0x04
 #define HIP_RF_ID 0x01
@@ -22,6 +24,7 @@
 #define HUB_R_ID 0x202
 #define B2B_CHASSIS_CMD_ID 0x666
 
+// 机体姿态
 typedef struct
 {
     float x, y, z;
@@ -34,14 +37,16 @@ typedef struct
     float vyaw, vpitch, vroll; // 机体角速度
 } Robo_Attitude_t;
 
+// 机器人事件标志
 typedef struct
 {
-    bool above_left;
-    bool above_right;
+    bool offground_l;
+    bool offground_r;
     bool above;
     bool fallen;
 } Robo_Flag_t;
 
+// 机器人状态
 typedef enum
 {
     RBS_NONE,
@@ -50,6 +55,7 @@ typedef enum
     RBS_JUMP
 } Robo_Status_t;
 
+// 跳跃状态机
 typedef enum
 {
     JPS_NONE,
@@ -60,6 +66,7 @@ typedef enum
     JPS_END
 } JUMP_State_t;
 
+// 目标值
 typedef struct
 {
     float x;             // m   期望位置
