@@ -26,10 +26,14 @@ for theta_step = 1:length(theta_list)
         syms T Tp Nf t;
         
         % 机器人结构参数
-        R = 0.0775;
+        R = 0.066;
         L = L0s(step) / 2;
         Lm = L0s(step) / 2;
-        mw = 0.334 *2;
+        mw = 0.334 * 2 + 
+        
+        
+        
+        ;
         l = 0.1; % 机体质心到髋关机中心距离
         mp = 1.482 *2;
         M = (17.5 + 0.68 - mp*2 - mw*2);

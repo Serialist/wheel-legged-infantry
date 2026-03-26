@@ -46,6 +46,8 @@ PID_Typedef
 	pid_tpr = {0},			  // ÀëµØ¹Ø½Ú pid
 	length_pid[2] = {0},	  // ÍÈ³¤ pid
 	jump_length_pid[2] = {0}, // ÌøÔ¾ÍÈ³¤ pid
+	damping_pid[2] = {0},	  // ×èÄá pid
+	land_pid[2] = {0},		  // ÂäµØ»º³å pid
 	yaw_pid = {0},			  // yaw Ðý×ª pid
 	roll_pid = {0},			  // roll Öá²¹³¥ pid
 	tp_pid = {0},			  // Åü²æ pid
@@ -62,27 +64,36 @@ float turn_t;	// yawÖá²¹³¥
 float f0_roll;	// rollÖá²¹³¥
 float tp_alpha; // Åü²æ
 
-float leg_length_ff = 55.f; // ÍÈ³¤Ç°À¡
+float leg_ff = 55.f;			// ÍÈ³¤Ç°À¡
+float offground_leg_ff = -15.f; // ÀëµØÍÈÇ°À¡
+float shrink_ff = -15.f;
 
 // lqr Êä³ö
-float tplqrl, tlqrl, tplqrr, tlqrr;
+float
+	tplqrl,
+	tlqrl,
+	tplqrr,
+	tlqrr;
 
-// ×´Ì¬±äÁ¿
-float xl[6], ul[2];
-// ¿ØÖÆÁ¿
-float xr[6], ur[2];
+// ×´Ì¬Á¿
+float
+	xl[6],
+	xr[6];
+float
+	ul[2],
+	ur[2];
 
 // debug variable
 float t1 = 0, t2 = 0;
-// float kjump[4] = {2000.f, 25000.f, 250.f, 0.0007f};
 
 /* ================================================================ prototype ================================================================ */
 
-void Chassis_Motor_Transmit(void);
-void Wheel_Leg_Control(void);
+void Motor_Enable(void);
 void Wheel_Leg_Attitude_Calc(void);
 void Control_Get(void);
-void Motor_Enable(void);
+void Wheel_Leg_Control(void);
+void Yaw_Control(void);
+void Chassis_Motor_Transmit(void);
 void Jump_FSM(void);
 
 /* ================================================================ function ================================================================ */
@@ -92,14 +103,23 @@ void Chassis_Task(void const *argument)
 	VMC_Init(&leg[LEFT]);
 	VMC_Init(&leg[RIGHT]);
 
-	PID_init(&length_pid[LEFT], 700, 0, 12000, 120, 0);	 // ÍÈ³¤ left
-	PID_init(&length_pid[RIGHT], 700, 0, 12000, 120, 0); // ÍÈ³¤ right
+	PID_init(&length_pid[LEFT], 700, 0, 12000, 100, 0);	 // ÍÈ³¤ left
+	PID_init(&length_pid[RIGHT], 700, 0, 12000, 100, 0); // ÍÈ³¤ right
+
 	/// @bug ÌøÔ¾½÷¼Ç¼õÉÙ pd£¡£¡£¡·ñÔòËÙ¶È»á±»×èÄáµô
-	PID_init(&jump_length_pid[LEFT], 1000, 0, 1000, 0, 300);  // jump ÍÈ³¤ left
-	PID_init(&jump_length_pid[RIGHT], 1000, 0, 1000, 0, 300); // jump ÍÈ³¤ right
-	PID_init(&yaw_pid, 0.15f, 0, 1.2f, 0, 0);				  // yaw
-	PID_init(&roll_pid, .8f, 0, .05f, .2f, 0);				  // roll
-	PID_init(&tp_pid, 10, 0, 2, 3, 0);						  // Åü²æ
+	// jump ÍÈ³¤
+	PID_init(&jump_length_pid[LEFT], 1300, 0, 60, 300, 0);
+	PID_init(&jump_length_pid[RIGHT], 1300, 0, 60, 300, 0);
+	// »º³å
+	PID_init(&damping_pid[LEFT], 1000, 0, 20000, 300, 0);
+	PID_init(&damping_pid[RIGHT], 1000, 0, 20000, 300, 0);
+	// ÂäµØ»º³å
+	PID_init(&land_pid[LEFT], 500, 0, 10000, 150, 0);
+	PID_init(&land_pid[RIGHT], 500, 0, 10000, 150, 0);
+
+	PID_init(&yaw_pid, 0.15, 0, 1.2, 0, 0); // yaw
+	PID_init(&roll_pid, .8, 0, .05, .2, 0); // roll
+	PID_init(&tp_pid, 10, 0, 2, 3, 0);		// Åü²æ
 
 	// ÍÈ°Ú½ÇÅ¤¾Øpid£¬ÓÃÓÚ°åµÊÄ£ÐÍ
 	PID_init(&pid_tpl, 14, 0, 3, 10, 0);
@@ -107,7 +127,7 @@ void Chassis_Task(void const *argument)
 
 	PID_init(&tp_offground_pid, 80, 0, 400, 0, 0);
 
-	Ramp_Init(&ramp_leg_length, .1f, -0.0005f, 0.0005f);
+	Ramp_Init(&ramp_leg_length, .1f, -0.0008f, 0.0008f);
 	Ramp_Init(&v_ramp, 0, -15.f, 5.f);
 
 	Motor_Enable();
@@ -123,8 +143,15 @@ void Chassis_Task(void const *argument)
 		/* ================ ¿ØÖÆ ================ */
 
 		Control_Get();
+
 		Jump_FSM();
 		Wheel_Leg_Control();
+
+		// LQR_Control();
+		// Yaw_Control();
+		// Roll_Control();
+		// LegLength_Control();
+		// VMC_IK();
 
 		/* ================ µç»úÖ¸Áî ================ */
 
@@ -148,6 +175,7 @@ void Motor_Enable(void)
 // debug variable
 float ttphi1 = 0, ttphi4 = 0, tttp = 0, ttf0 = 0;
 
+// ÍÈÕý½â
 void Wheel_Leg_Attitude_Calc(void)
 {
 	VMC_5bar_FK(&leg[LEFT],
@@ -177,7 +205,7 @@ void Wheel_Leg_Attitude_Calc(void)
 
 void Chassis_Motor_Transmit(void)
 {
-	if (rc_ctrl.rc.s[S_L] != DOWN)
+	if (rc_ctrl.rc.s[S_L] == UP)
 	{
 		set.hip_torque[LF] = 0;
 		set.hip_torque[LB] = 0;
@@ -208,17 +236,24 @@ uint8_t last_switch = 0;
 
 float aaa;
 
+#define LEG_LEN_CMD rc_ctrl.rc.ch[R_Y]
+#define V_CMD rc_ctrl.rc.ch[L_Y]
+#define YAW_CMD rc_ctrl.rc.ch[L_X]
+// #define ROLL_CMD rc_ctrl.rc.ch[R_X]
+
 void Control_Get(void)
 {
-	set.v = Signf(rc_ctrl.rc.ch[L_Y]) * Ramp_Update(&v_ramp, fabsf(rc_ctrl.rc.ch[L_Y] * 3.f / 660.0f), 0.003f);
-	set.yaw -= rc_ctrl.rc.ch[L_X] * 0.0015f;
-	set.length = Clampf(Ramp_Update(&ramp_leg_length,
-									Remapf(Clampf((float)rc_ctrl.rc.ch[R_Y], -100.f, 660.f), -100.0f, 660.0f, 0.13f, 0.35f),
-									3),
-						.13f, .35f);
+
+	set.v = Signf(V_CMD) * Ramp_Update(&v_ramp, fabsf(V_CMD * 3.f / 660.0f), 0.003f);
+	set.yaw -= YAW_CMD * 0.0023f;
+
+	// deadzone
+	set.length = LEG_LEN_CMD > 10	 ? Remapf((float)LEG_LEN_CMD, 10.f, 660.f, 0.15f, 0.35f)
+				 : LEG_LEN_CMD < -10 ? Remapf(Clampf((float)LEG_LEN_CMD, -220.f, -10.f), -220.f, -10.f, .1f, .15f)
+									 : 0.15f;
+
 	// set.roll = -rc_ctrl.rc.ch[R_X] * 30.0f / 660.0f;
 	set.roll = 0;
-	set.f0_force = rc_ctrl.rc.ch[L_Z] * 50 / 660.0f;
 
 	if (set.v != 0)
 		set.x = ob.x;
@@ -227,11 +262,10 @@ void Control_Get(void)
 	{
 		robo_status = RBS_RUN;
 	}
-	// else if (rc_ctrl.rc.s[S_L] == DOWN && jump_state == JPS_NONE)
-	// {
-	// 	robo_status = RBS_JUMP;
-
-	// }
+	else if (rc_ctrl.rc.s[S_L] == DOWN && jump_state == JPS_NONE)
+	{
+		robo_status = RBS_JUMP;
+	}
 	else
 	{
 		set.v = 0;
@@ -252,14 +286,14 @@ void Wheel_Leg_Control(void)
 {
 	xl[0] = leg[LEFT].theta;
 	xl[1] = leg[LEFT].d_theta;
-	xl[2] = (ob.x - set.x + 0.2f);
+	xl[2] = (ob.x - set.x - 0.25f);
 	xl[3] = (ob.v - set.v);
 	xl[4] = att.pitch;
 	xl[5] = att.vpitch;
 
 	xr[0] = leg[RIGHT].theta;
 	xr[1] = leg[RIGHT].d_theta;
-	xr[2] = (ob.x - set.x + 0.2f);
+	xr[2] = (ob.x - set.x - 0.25f);
 	xr[3] = (ob.v - set.v);
 	xr[4] = att.pitch;
 	xr[5] = att.vpitch;
@@ -300,12 +334,19 @@ void Wheel_Leg_Control(void)
 	// f0_roll = 0;
 
 	/// @brief ÍÈÍÆÁ¦ PID
-	leg[LEFT].F0 = leg_length_ff * arm_cos_f32(leg[LEFT].theta) +
-				   PID_Update(&length_pid[LEFT], Clampf(set.length + f0_roll, 0.1f, 0.35f), leg[LEFT].L0) +
-				   set.f0_force;
-	leg[RIGHT].F0 = leg_length_ff * arm_cos_f32(leg[RIGHT].theta) +
-					PID_Update(&length_pid[RIGHT], Clampf(set.length - f0_roll, 0.1f, 0.35f), leg[RIGHT].L0) +
-					set.f0_force;
+	if (jump_state == JPS_NONE)
+	{
+		leg[LEFT].F0 = leg_ff * COSF(leg[LEFT].theta) +
+					   PID_Update(&length_pid[LEFT], Clampf(set.length + f0_roll, 0.1f, 0.35f), leg[LEFT].L0);
+
+		leg[RIGHT].F0 = leg_ff * COSF(leg[RIGHT].theta) +
+						PID_Update(&length_pid[RIGHT], Clampf(set.length - f0_roll, 0.1f, 0.35f), leg[RIGHT].L0);
+	}
+	else
+	{
+		leg[LEFT].F0 = set.jump_f0[LEFT];
+		leg[RIGHT].F0 = set.jump_f0[RIGHT];
+	}
 
 	tp_alpha = PID_Update(&tp_pid, 0, leg[LEFT].alpha - leg[RIGHT].alpha);
 
@@ -333,8 +374,8 @@ void Wheel_Leg_Control(void)
 /* ================================ ·¢ËÍ ================================ */
 
 /// @brief ÏÞ·ù
-#define HIP_TORQUE_MAX 35.0f
-#define HUB_TORQUE_MAX 2.5f
+#define HIP_TORQUE_MAX 20.0f
+#define HUB_TORQUE_MAX 2.f
 	Clampfp(&set.hip_torque[LF], -HIP_TORQUE_MAX, HIP_TORQUE_MAX);
 	Clampfp(&set.hip_torque[LB], -HIP_TORQUE_MAX, HIP_TORQUE_MAX);
 	Clampfp(&set.hip_torque[RF], -HIP_TORQUE_MAX, HIP_TORQUE_MAX);
@@ -345,25 +386,28 @@ void Wheel_Leg_Control(void)
 }
 
 uint32_t jump_time = 0;
-// ms
+// ³¬Ê±´¦Àí
+uint32_t init_time = 2000;
 uint32_t stretch_time = 100;
-uint32_t shrink_time = 250;
-uint32_t air_time = 200;
-uint32_t end_time = 100;
-// N
-float stretch_force = 300;
-float shrink_force = -200;
-float air_force = 50;
+uint32_t stretch_damping_time = 20;
+uint32_t shrink_time = 100;
+uint32_t shrink_damping_time = 20;
+uint32_t land_time = 120;
 
 Ramp_t jump_f_ramp;
+float leg_len = 0;
+float d_leg_len = 0;
 
 void Jump_FSM(void)
 {
+	leg_len = (leg[LEFT].L0 + leg[RIGHT].L0) * .5f;
+	d_leg_len = (leg[LEFT].d_L0 - leg[RIGHT].d_L0) * .5f;
+
 	switch (jump_state)
 	{
+		// ¿ÕÏÐ
 	case JPS_NONE:
 	{
-		set.f0_force = 0;
 		if (robo_status == RBS_JUMP)
 		{
 			jump_state = JPS_INIT;
@@ -372,12 +416,22 @@ void Jump_FSM(void)
 	}
 	break;
 
+		// ¶×ÏÂ×¼±¸
 	case JPS_INIT:
 	{
 		set.length = .1f;
-		if (jump_time >= 500)
+
+		set.jump_f0[LEFT] = leg_ff * COSF(leg[LEFT].theta) +
+							PID_Update(&length_pid[LEFT], Clampf(set.length + f0_roll, 0.1f, 0.35f), leg[LEFT].L0);
+
+		set.jump_f0[RIGHT] = leg_ff * COSF(leg[RIGHT].theta) +
+							 PID_Update(&length_pid[RIGHT], Clampf(set.length - f0_roll, 0.1f, 0.35f), leg[RIGHT].L0);
+
+		if (jump_time >= init_time)
 		{
-			Ramp_Init(&jump_f_ramp, leg[LEFT].L0, 0, (.25f / 200.f));
+			Ramp_Init(&jump_f_ramp, leg_len, 0, (.25f / stretch_time));
+			PID_clear(&length_pid[LEFT]);
+			PID_clear(&length_pid[RIGHT]);
 
 			jump_state = JPS_STRETCH;
 			jump_time = 0;
@@ -385,13 +439,46 @@ void Jump_FSM(void)
 	}
 	break;
 
+		// ÉìÍÈ
 	case JPS_STRETCH:
 	{
-		set.length = Ramp_Update(&jump_f_ramp, .35f, .003f); // Ð±ÆÂº¯Êý
-		set.f0_force = stretch_force;
-		if (((leg[LEFT].L0 + leg[RIGHT].L0) / 2) >= .35f || jump_time >= stretch_time)
+		set.length = .33f;
+		// set.length = Ramp_Update(&jump_f_ramp, .35f, .003f); // Ð±ÆÂº¯Êý
+
+		set.jump_f0[LEFT] = leg_ff * COSF(leg[LEFT].theta) +
+							PID_Update(&jump_length_pid[LEFT], set.length, leg[LEFT].L0);
+
+		set.jump_f0[RIGHT] = leg_ff * COSF(leg[RIGHT].theta) +
+							 PID_Update(&jump_length_pid[RIGHT], set.length, leg[RIGHT].L0);
+
+		if (leg_len >= set.length ||
+			jump_time >= stretch_time)
 		{
-			Ramp_Init(&jump_f_ramp, leg[LEFT].L0, -(.25f / 200.f), 0);
+			Ramp_Init(&jump_f_ramp, leg[LEFT].L0, -(.25f / shrink_time), 0);
+			PID_clear(&jump_length_pid[LEFT]);
+			PID_clear(&jump_length_pid[RIGHT]);
+
+			jump_state = JPS_STRETCH_DAMPING;
+			jump_time = 0;
+		}
+	}
+	break;
+
+	// ÉìÍÈ»º³å
+	case JPS_STRETCH_DAMPING:
+	{
+		set.length = .33f;
+
+		set.jump_f0[LEFT] = offground_leg_ff * COSF(leg[LEFT].theta) +
+							PID_Update(&damping_pid[LEFT], set.length, leg[LEFT].L0);
+
+		set.jump_f0[RIGHT] = offground_leg_ff * COSF(leg[RIGHT].theta) +
+							 PID_Update(&damping_pid[RIGHT], set.length, leg[RIGHT].L0);
+
+		if (jump_time >= stretch_damping_time)
+		{
+			PID_clear(&damping_pid[LEFT]);
+			PID_clear(&damping_pid[RIGHT]);
 
 			jump_state = JPS_SHRINK;
 			jump_time = 0;
@@ -399,40 +486,75 @@ void Jump_FSM(void)
 	}
 	break;
 
+		// ËõÍÈ
 	case JPS_SHRINK:
 	{
-		set.length = Ramp_Update(&jump_f_ramp, .13f, .003f); // Ð±ÆÂº¯Êý
-		set.f0_force = shrink_force;
-		if (((leg[LEFT].L0 + leg[RIGHT].L0) / 2) <= .15f || jump_time >= shrink_time)
+		set.length = .15f;
+		// set.length = Ramp_Update(&jump_f_ramp, .15f, .003f); // Ð±ÆÂº¯Êý
+
+		set.jump_f0[LEFT] = shrink_ff * COSF(leg[LEFT].theta) +
+							PID_Update(&jump_length_pid[LEFT], set.length, leg[LEFT].L0);
+
+		set.jump_f0[RIGHT] = shrink_ff * COSF(leg[RIGHT].theta) +
+							 PID_Update(&jump_length_pid[RIGHT], set.length, leg[RIGHT].L0);
+
+		if (leg_len <= set.length ||
+			jump_time >= shrink_time)
 		{
-			jump_state = JPS_AIR;
+			PID_clear(&jump_length_pid[LEFT]);
+			PID_clear(&jump_length_pid[RIGHT]);
+
+			jump_state = JPS_SHRINK_DAMPING;
 			jump_time = 0;
 		}
 	}
 	break;
 
-	case JPS_AIR:
+	// »º³å
+	case JPS_SHRINK_DAMPING:
 	{
 		set.length = .15f;
-		set.f0_force = air_force;
-		if (/* (leg[LEFT].is_offground == false && leg[RIGHT].is_offground == false) || */ /* (leg[LEFT].d_L0 + leg[RIGHT].d_L0) / 2 */ jump_time >= air_time)
+
+		set.jump_f0[LEFT] = offground_leg_ff * COSF(leg[LEFT].theta) +
+							PID_Update(&damping_pid[LEFT], set.length, leg[LEFT].L0);
+
+		set.jump_f0[RIGHT] = offground_leg_ff * COSF(leg[RIGHT].theta) +
+							 PID_Update(&damping_pid[RIGHT], set.length, leg[RIGHT].L0);
+
+		if (jump_time >= shrink_damping_time)
 		{
-			jump_state = JPS_END;
+			PID_clear(&damping_pid[LEFT]);
+			PID_clear(&damping_pid[RIGHT]);
+
+			jump_state = JPS_LAND;
 			jump_time = 0;
 		}
 	}
 	break;
 
-	case JPS_END:
+		// ½áÊø
+	case JPS_LAND:
 	{
-		if (rbflag.offground == false || jump_time >= end_time)
+		set.length = .15f;
+
+		set.jump_f0[LEFT] = offground_leg_ff * COSF(leg[LEFT].theta) +
+							PID_Update(&land_pid[LEFT], set.length, leg[LEFT].L0);
+
+		set.jump_f0[RIGHT] = offground_leg_ff * COSF(leg[RIGHT].theta) +
+							 PID_Update(&land_pid[RIGHT], set.length, leg[RIGHT].L0);
+
+		if (rbflag.offground == false ||
+			jump_time >= land_time)
 		{
+			PID_clear(&land_pid[LEFT]);
+
 			jump_state = JPS_NONE;
 			jump_time = 0;
 		}
 	}
 	break;
 	}
+
 	jump_time += 3;
 }
 
@@ -564,3 +686,14 @@ void Jump_FSM(void)
 // 	SetAimTorVMC(&VMCTor_Aim_L, tor_len_l + tor_balance.force_l, tor_synch_l + tor_balance.tor_l, tor_balance.tor_wheel_l + tor_yaw);
 // 	SetAimTorVMC(&VMCTor_Aim_R, tor_len_r + tor_balance.force_r, tor_synch_r + tor_balance.tor_r, tor_balance.tor_wheel_r - tor_yaw);
 // }
+
+/// @brief yaw ¿ØÖÆ
+void Yaw_Control(void)
+{
+	// Ramp_Update(&yaw_ramp, att.totalyaw, set.yaw, (.25f / 100.f));
+	// PID_Update(&yaw_pid, att.totalyaw, set.yaw);
+}
+
+void LQR_Control_(void)
+{
+}

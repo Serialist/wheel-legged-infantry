@@ -58,12 +58,13 @@ typedef enum
 // 跳跃状态机
 typedef enum
 {
-    JPS_NONE,
-    JPS_INIT,
-    JPS_STRETCH,
-    JPS_SHRINK,
-    JPS_AIR,
-    JPS_END
+    JPS_NONE,            // 默认状态
+    JPS_INIT,            // 蹲下
+    JPS_STRETCH,         // 跳
+    JPS_STRETCH_DAMPING, // 伸腿缓冲
+    JPS_SHRINK,          // 收腿
+    JPS_SHRINK_DAMPING,  // 收腿缓冲
+    JPS_LAND             // 缓冲落地
 } JUMP_State_t;
 
 // 目标值
@@ -76,7 +77,7 @@ typedef struct
     float roll;          // rad 期望 roll
     float length;        // m  期望腿长
     float height;        // m  期望机体离地高度
-    float f0_force;      // N 推力前馈，用于跳跃等
+    float jump_f0[2];    // N 推力前馈，用于跳跃等
     float hip_torque[4]; // N*m 关节扭矩
     float hub_torque[2]; // N*m 轮毂扭矩
 } Wheel_Leg_Target_t;

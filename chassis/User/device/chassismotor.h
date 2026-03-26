@@ -22,7 +22,7 @@
 #define Kd_MIN 0
 #define Kd_MAX 5.0f
 
-#define wheelRadius 0.077f
+#define wheelRadius 0.066f
 
 typedef struct
 {
