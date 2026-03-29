@@ -98,12 +98,21 @@ void observer(void const *argument)
     // 机体速度观测器
 
     // 右
-    wr = motor_vel_r + INS.Gyro[0] + leg[RIGHT].d_alpha;                                                                                           // 右轮速度
-    vrb = wr * wheelRadius + leg[RIGHT].L0 * leg[RIGHT].d_theta * arm_cos_f32(leg[RIGHT].theta) + leg[RIGHT].d_L0 * arm_sin_f32(leg[RIGHT].theta); // 右机体速度
+    wr =                    // 右轮速度
+        motor_vel_r +       // 轮毂反馈速度
+        INS.Gyro[0] +       // 机体角速度
+        leg[RIGHT].d_alpha; // 腿速度
+    vrb = wr * wheelRadius +
+          leg[RIGHT].L0 * leg[RIGHT].d_theta * arm_cos_f32(leg[RIGHT].theta) +
+          leg[RIGHT].d_L0 * arm_sin_f32(leg[RIGHT].theta); // 右机体速度
 
     // 左
-    wl = motor_vel_l + INS.Gyro[0] + leg[LEFT].d_alpha;                                                                                       // 左轮速度
-    vlb = wl * wheelRadius + leg[LEFT].L0 * leg[LEFT].d_theta * arm_cos_f32(leg[LEFT].theta) + leg[LEFT].d_L0 * arm_sin_f32(leg[LEFT].theta); // 左机体速度
+    wl = motor_vel_l +
+         INS.Gyro[0] +
+         leg[LEFT].d_alpha; // 左轮速度
+    vlb = wl * wheelRadius +
+          leg[LEFT].L0 * leg[LEFT].d_theta * arm_cos_f32(leg[LEFT].theta) +
+          leg[LEFT].d_L0 * arm_sin_f32(leg[LEFT].theta); // 左机体速度
 
     // 总体互补滤波
     aver_v = (vrb + vlb) / 2.0f;                                      // 取平均

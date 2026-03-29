@@ -14,6 +14,9 @@
 
 #include "user_lib.h"
 
+#define U_T 0
+#define U_TP 1
+
 void LQR_Control(float *x, float *u, float len);
 
 #endif

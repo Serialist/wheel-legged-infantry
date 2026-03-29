@@ -298,3 +298,21 @@ void Motor_AK_MIT_Decode(Motor_AK_RxData_t *data, uint8_t buf[8], float pMax, fl
   data->torque = i;
   data->temp = Temp - 40;
 }
+
+// 古代的 ak10 mit 模式接受代码
+// int id = can_rx_data[0]; // 驱动 ID 号
+// int p_int = (can_rx_data[1] << 8) | (can_rx_data[2]);
+// int v_int = (can_rx_data[3] << 4) | (can_rx_data[4] >> 4);
+// int i_int = ((can_rx_data[4] & 0xF) << 8) | (can_rx_data[5]);
+// int T_int = can_rx_data[6];
+// float p = Uint_To_Float(p_int, P_MIN, P_MAX, 16);
+// float v = Uint_To_Float(v_int, V_MIN, V_MAX, 12);
+// float i = Uint_To_Float(i_int, -T_MAX, T_MAX, 12);
+// float Temp = T_int;
+// if (id == HIP_RF_ID)
+// {
+// 	motorAK10[RF].angle = p;
+// 	motorAK10[RF].motor_ctrlspd = v;
+// 	motorAK10[RF].motor_ctrltor = i;
+// 	motorAK10[RF].motor_ctrltemp = Temp - 40;
+// }

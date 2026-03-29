@@ -1,7 +1,7 @@
 /**
  * @file lqr.c
  * @author Serialist (ba3pt@qq.com)
- * @brief
+ * @brief 王洪玺建模 LQR K 拟合函数
  * @version 0.1.0
  * @date 2026-02-19
  *

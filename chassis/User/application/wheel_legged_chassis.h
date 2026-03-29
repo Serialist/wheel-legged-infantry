@@ -14,14 +14,16 @@
 
 #include "user_lib.h"
 
-// 电机 CAN ID
-
+// CAN ID
+// 关节
 #define HIP_LF_ID 0x03
 #define HIP_LB_ID 0x04
 #define HIP_RF_ID 0x01
 #define HIP_RB_ID 0x02
+// 轮毂
 #define HUB_L_ID 0x201
 #define HUB_R_ID 0x202
+// 板间通信
 #define B2B_CHASSIS_CMD_ID 0x666
 
 // 机体姿态
@@ -51,9 +53,11 @@ typedef enum
 {
     RBS_NONE,
     RBS_INIT,
+    RBS_READY,
     RBS_RUN,
-    RBS_JUMP
-} Robo_Status_t;
+    RBS_JUMP,
+    RBS_STOP
+} Robo_State_t;
 
 // 跳跃状态机
 typedef enum
@@ -82,8 +86,9 @@ typedef struct
     float hub_torque[2]; // N*m 轮毂扭矩
 } Wheel_Leg_Target_t;
 
-extern Robo_Status_t robo_status;
+extern Robo_State_t rbstate;
 extern Robo_Flag_t rbflag;
+extern Motor_AK_RxData_t ak10[4];
 
 void Chassis_Task(void const *argument);
 
