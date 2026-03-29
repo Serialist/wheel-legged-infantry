@@ -16,9 +16,12 @@
 #include "motor.h"
 #include "b2b.h"
 
+uint8_t can_rx_data[8];
+
 B2B_Chassis_Cmd_t ch_cmd;
 
-uint8_t can_rx_data[8];
+extern Motor_AK_RxData_t ak10[4];
+
 void can_filter_init(void)
 {
 

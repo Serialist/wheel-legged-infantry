@@ -52,11 +52,12 @@ typedef struct
 typedef enum
 {
     RBS_NONE,
-    RBS_INIT,
-    RBS_READY,
-    RBS_RUN,
-    RBS_JUMP,
-    RBS_STOP
+    RBS_INIT,  // 初始化
+    RBS_READY, // 待命
+    RBS_ERROR, // 错误
+    RBS_RUN,   // 运行
+    RBS_JUMP,  // 跳跃
+    RBS_STOP   // 停止
 } Robo_State_t;
 
 // 跳跃状态机
@@ -88,7 +89,6 @@ typedef struct
 
 extern Robo_State_t rbstate;
 extern Robo_Flag_t rbflag;
-extern Motor_AK_RxData_t ak10[4];
 
 void Chassis_Task(void const *argument);
 

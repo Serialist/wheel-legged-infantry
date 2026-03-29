@@ -81,7 +81,7 @@ void observer(void const *argument)
 
   xLastWakeTime = xTaskGetTickCount();
   // 等待加速度收敛
-  while (INS.ins_flag == 0)
+  while (INS.ready == false)
   {
     osDelay(1);
   }

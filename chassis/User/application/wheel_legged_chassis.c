@@ -55,9 +55,7 @@ PID_Typedef
 	roll_pid = {0}, // roll 轴补偿 pid
 	tp_pid = {0};	// 劈叉 pid
 
-Ramp_t
-	ramp_leg_length, // 腿长斜坡
-	v_ramp;			 // 速度斜坡
+Ramp_t ramp_leg_length; // 腿长斜坡
 
 Robo_Attitude_t att;	// 机体姿态
 Wheel_Leg_Target_t set; // 目标值
@@ -93,6 +91,7 @@ void Wheel_Leg_Control(void);
 void Yaw_Control(void);
 void Chassis_Motor_Transmit(void);
 void Jump_FSM(void);
+void Chassis_Zero(void);
 
 /* ================================================================ function ================================================================ */
 
@@ -124,12 +123,8 @@ void Chassis_Task(void const *argument)
 	PID_init(&pid_tpr, 14, 0, 3, 10, 0);
 
 	Ramp_Init(&ramp_leg_length, .1f, -0.0008f, 0.0008f);
-	Ramp_Init(&v_ramp, 0, -15.f, 5.f);
 
 	set.length = 0.13f;
-
-	while (INS.ins_flag == 0)
-		osDelay(1);
 
 	Motor_Enable();
 
@@ -142,9 +137,18 @@ void Chassis_Task(void const *argument)
 
 		/* ================ 控制 ================ */
 
-		Control_Get();
+		switch (rbstate)
+		{
+		case RBS_RUN:
+		case RBS_JUMP:
+			Jump_FSM();
+			Wheel_Leg_Control();
+			break;
 
-		Jump_FSM();
+		default:
+			Chassis_Zero();
+			break;
+		}
 
 		// LQR_Control();
 		// Yaw_Control();
@@ -169,6 +173,16 @@ void Motor_Enable(void)
 		AK_Motor_MIT_Enable(a);
 		osDelay(1);
 	}
+}
+
+void Chassis_Zero(void)
+{
+	set.hip_torque[LF] = 0;
+	set.hip_torque[LB] = 0;
+	set.hip_torque[RF] = 0;
+	set.hip_torque[RB] = 0;
+	set.hub_torque[LEFT] = 0;
+	set.hub_torque[RIGHT] = 0;
 }
 
 // debug variable
@@ -204,16 +218,6 @@ void Wheel_Leg_Attitude_Calc(void)
 
 void Chassis_Motor_Transmit(void)
 {
-	if (rc_ctrl.rc.s[S_L] == RBS_STOP)
-	{
-		set.hip_torque[LF] = 0;
-		set.hip_torque[LB] = 0;
-		set.hip_torque[RF] = 0;
-		set.hip_torque[RB] = 0;
-		set.hub_torque[LEFT] = 0;
-		set.hub_torque[RIGHT] = 0;
-	}
-
 	/// @brief 用 3508
 	RM_Motor_Transmit(&hcan1, M3508_TX_ID_1,
 					  HEXROLL_TORQUE_TO_CURRENT(set.hub_torque[LEFT]),

@@ -738,6 +738,11 @@
               <FileType>1</FileType>
               <FilePath>..\User\protocol\b2b.c</FilePath>
             </File>
+            <File>
+              <FileName>superpower.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\User\protocol\superpower.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

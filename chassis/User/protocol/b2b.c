@@ -58,3 +58,19 @@ void B2B_Chassis_Cmd_Decode(uint8_t *buf, B2B_Chassis_Cmd_t *data)
 }
 
 #undef SCALE_FACTOR
+
+// Command_Encode(Command_t *self, uint8_t *buf)
+// {
+// 	buf[0] = (self->move << 4) |
+// 			 (self->rot & 0x0F);
+// 	buf[1] = (self->leg << 4) |
+// 			 (self->shoot & 0x0F);
+// }
+
+// Command_Decode(Command_t *self, uint8_t *buf)
+// {
+// 	self->move = buf[0] >> 4;
+// 	self->rot = buf[0] & 0x0F;
+// 	self->leg = buf[1] >> 4;
+// 	self->shoot = buf[1] & 0x0F;
+// }

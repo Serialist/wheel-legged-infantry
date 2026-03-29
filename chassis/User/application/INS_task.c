@@ -126,7 +126,7 @@ void INS_Task(void)
         }
         if (ins_time > 3000.0f)
         {
-            INS.ins_flag = 1; // 四元数基本收敛，加速度也基本收敛，可以开始底盘任务
+            INS.ready = true; // 四元数基本收敛，加速度也基本收敛，可以开始底盘任务
             // 获取最终数据
             INS.Yaw = QEKF_INS.Yaw;
             INS.Pitch = QEKF_INS.Pitch;

@@ -223,162 +223,142 @@
         <Ww>
           <count>12</count>
           <WinNumber>1</WinNumber>
-          <ItemText>tlqrl</ItemText>
+          <ItemText>ak10_send_status</ItemText>
         </Ww>
         <Ww>
           <count>13</count>
           <WinNumber>1</WinNumber>
-          <ItemText>tplqrl</ItemText>
+          <ItemText>busy_flag</ItemText>
         </Ww>
         <Ww>
           <count>14</count>
           <WinNumber>1</WinNumber>
-          <ItemText>ak10_send_status</ItemText>
+          <ItemText>rbflag</ItemText>
         </Ww>
         <Ww>
           <count>15</count>
           <WinNumber>1</WinNumber>
-          <ItemText>busy_flag</ItemText>
+          <ItemText>roll_pid</ItemText>
         </Ww>
         <Ww>
           <count>16</count>
           <WinNumber>1</WinNumber>
-          <ItemText>rbflag</ItemText>
+          <ItemText>ramp_leg_length</ItemText>
         </Ww>
         <Ww>
           <count>17</count>
           <WinNumber>1</WinNumber>
-          <ItemText>roll_pid</ItemText>
+          <ItemText>v_ramp</ItemText>
         </Ww>
         <Ww>
           <count>18</count>
           <WinNumber>1</WinNumber>
-          <ItemText>ramp_leg_length</ItemText>
+          <ItemText>leg_ff</ItemText>
         </Ww>
         <Ww>
           <count>19</count>
           <WinNumber>1</WinNumber>
-          <ItemText>v_ramp</ItemText>
+          <ItemText>offground_leg_ff</ItemText>
         </Ww>
         <Ww>
           <count>20</count>
           <WinNumber>1</WinNumber>
-          <ItemText>leg_ff</ItemText>
-        </Ww>
-        <Ww>
-          <count>21</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>offground_leg_ff</ItemText>
-        </Ww>
-        <Ww>
-          <count>22</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>shrink_ff</ItemText>
+          <ItemText>INS.ready</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>
         <Ww>
           <count>0</count>
           <WinNumber>2</WinNumber>
-          <ItemText>\\gimbal_task\../User/board/bsp_can.c\ak10</ItemText>
+          <ItemText>ob</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>2</WinNumber>
-          <ItemText>ob</ItemText>
+          <ItemText>xl</ItemText>
         </Ww>
         <Ww>
           <count>2</count>
           <WinNumber>2</WinNumber>
-          <ItemText>xl</ItemText>
+          <ItemText>ul</ItemText>
         </Ww>
         <Ww>
           <count>3</count>
           <WinNumber>2</WinNumber>
-          <ItemText>ul</ItemText>
+          <ItemText>xr</ItemText>
         </Ww>
         <Ww>
           <count>4</count>
           <WinNumber>2</WinNumber>
-          <ItemText>k</ItemText>
+          <ItemText>ur</ItemText>
         </Ww>
         <Ww>
           <count>5</count>
           <WinNumber>2</WinNumber>
-          <ItemText>xr</ItemText>
+          <ItemText>init_time,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>6</count>
           <WinNumber>2</WinNumber>
-          <ItemText>ur</ItemText>
+          <ItemText>stretch_time,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>7</count>
           <WinNumber>2</WinNumber>
-          <ItemText>init_time,0x0A</ItemText>
+          <ItemText>stretch_damping_time,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>8</count>
           <WinNumber>2</WinNumber>
-          <ItemText>stretch_time,0x0A</ItemText>
+          <ItemText>shrink_time,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>9</count>
           <WinNumber>2</WinNumber>
-          <ItemText>stretch_damping_time,0x0A</ItemText>
+          <ItemText>shrink_damping_time,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>10</count>
           <WinNumber>2</WinNumber>
-          <ItemText>shrink_time,0x0A</ItemText>
+          <ItemText>land_time,0x0A</ItemText>
         </Ww>
         <Ww>
           <count>11</count>
           <WinNumber>2</WinNumber>
-          <ItemText>shrink_damping_time,0x0A</ItemText>
+          <ItemText>length_pid</ItemText>
         </Ww>
         <Ww>
           <count>12</count>
           <WinNumber>2</WinNumber>
-          <ItemText>land_time,0x0A</ItemText>
+          <ItemText>jump_length_pid</ItemText>
         </Ww>
         <Ww>
           <count>13</count>
           <WinNumber>2</WinNumber>
-          <ItemText>length_pid</ItemText>
+          <ItemText>damping_pid</ItemText>
         </Ww>
         <Ww>
           <count>14</count>
           <WinNumber>2</WinNumber>
-          <ItemText>jump_length_pid</ItemText>
+          <ItemText>land_pid</ItemText>
         </Ww>
         <Ww>
           <count>15</count>
           <WinNumber>2</WinNumber>
-          <ItemText>damping_pid</ItemText>
+          <ItemText>jump_state</ItemText>
         </Ww>
         <Ww>
           <count>16</count>
           <WinNumber>2</WinNumber>
-          <ItemText>land_pid</ItemText>
+          <ItemText>rbstate</ItemText>
         </Ww>
         <Ww>
           <count>17</count>
           <WinNumber>2</WinNumber>
-          <ItemText>jump_state</ItemText>
-        </Ww>
-        <Ww>
-          <count>18</count>
-          <WinNumber>2</WinNumber>
-          <ItemText>robo_status</ItemText>
-        </Ww>
-        <Ww>
-          <count>19</count>
-          <WinNumber>2</WinNumber>
           <ItemText>leg_len</ItemText>
         </Ww>
         <Ww>
-          <count>20</count>
+          <count>18</count>
           <WinNumber>2</WinNumber>
           <ItemText>jump_time,0x0A</ItemText>
         </Ww>
@@ -1161,7 +1141,7 @@
 
   <Group>
     <GroupName>User/application</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -1281,6 +1261,18 @@
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
+    <File>
+      <GroupNumber>8</GroupNumber>
+      <FileNumber>65</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\User\protocol\superpower.c</PathWithFileName>
+      <FilenameWithoutPath>superpower.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
   </Group>
 
   <Group>
@@ -1291,7 +1283,7 @@
     <RteFlg>0</RteFlg>
     <File>
       <GroupNumber>9</GroupNumber>
-      <FileNumber>65</FileNumber>
+      <FileNumber>66</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1303,7 +1295,7 @@
     </File>
     <File>
       <GroupNumber>9</GroupNumber>
-      <FileNumber>66</FileNumber>
+      <FileNumber>67</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1317,13 +1309,13 @@
 
   <Group>
     <GroupName>User/module</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
     <File>
       <GroupNumber>10</GroupNumber>
-      <FileNumber>67</FileNumber>
+      <FileNumber>68</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1335,7 +1327,7 @@
     </File>
     <File>
       <GroupNumber>10</GroupNumber>
-      <FileNumber>68</FileNumber>
+      <FileNumber>69</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1347,7 +1339,7 @@
     </File>
     <File>
       <GroupNumber>10</GroupNumber>
-      <FileNumber>69</FileNumber>
+      <FileNumber>70</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1359,7 +1351,7 @@
     </File>
     <File>
       <GroupNumber>10</GroupNumber>
-      <FileNumber>70</FileNumber>
+      <FileNumber>71</FileNumber>
       <FileType>5</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1379,7 +1371,7 @@
     <RteFlg>0</RteFlg>
     <File>
       <GroupNumber>11</GroupNumber>
-      <FileNumber>71</FileNumber>
+      <FileNumber>72</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1391,7 +1383,7 @@
     </File>
     <File>
       <GroupNumber>11</GroupNumber>
-      <FileNumber>72</FileNumber>
+      <FileNumber>73</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1403,7 +1395,7 @@
     </File>
     <File>
       <GroupNumber>11</GroupNumber>
-      <FileNumber>73</FileNumber>
+      <FileNumber>74</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1415,7 +1407,7 @@
     </File>
     <File>
       <GroupNumber>11</GroupNumber>
-      <FileNumber>74</FileNumber>
+      <FileNumber>75</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1427,7 +1419,7 @@
     </File>
     <File>
       <GroupNumber>11</GroupNumber>
-      <FileNumber>75</FileNumber>
+      <FileNumber>76</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1439,7 +1431,7 @@
     </File>
     <File>
       <GroupNumber>11</GroupNumber>
-      <FileNumber>76</FileNumber>
+      <FileNumber>77</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1459,7 +1451,7 @@
     <RteFlg>0</RteFlg>
     <File>
       <GroupNumber>12</GroupNumber>
-      <FileNumber>77</FileNumber>
+      <FileNumber>78</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1471,7 +1463,7 @@
     </File>
     <File>
       <GroupNumber>12</GroupNumber>
-      <FileNumber>78</FileNumber>
+      <FileNumber>79</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1483,7 +1475,7 @@
     </File>
     <File>
       <GroupNumber>12</GroupNumber>
-      <FileNumber>79</FileNumber>
+      <FileNumber>80</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1495,7 +1487,7 @@
     </File>
     <File>
       <GroupNumber>12</GroupNumber>
-      <FileNumber>80</FileNumber>
+      <FileNumber>81</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1507,7 +1499,7 @@
     </File>
     <File>
       <GroupNumber>12</GroupNumber>
-      <FileNumber>81</FileNumber>
+      <FileNumber>82</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1519,7 +1511,7 @@
     </File>
     <File>
       <GroupNumber>12</GroupNumber>
-      <FileNumber>82</FileNumber>
+      <FileNumber>83</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1531,7 +1523,7 @@
     </File>
     <File>
       <GroupNumber>12</GroupNumber>
-      <FileNumber>83</FileNumber>
+      <FileNumber>84</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1543,7 +1535,7 @@
     </File>
     <File>
       <GroupNumber>12</GroupNumber>
-      <FileNumber>84</FileNumber>
+      <FileNumber>85</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1555,7 +1547,7 @@
     </File>
     <File>
       <GroupNumber>12</GroupNumber>
-      <FileNumber>85</FileNumber>
+      <FileNumber>86</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -1567,7 +1559,7 @@
     </File>
     <File>
       <GroupNumber>12</GroupNumber>
-      <FileNumber>86</FileNumber>
+      <FileNumber>87</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
