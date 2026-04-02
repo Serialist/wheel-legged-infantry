@@ -211,7 +211,7 @@ void Wheel_Leg_Attitude_Calc(void)
 	}
 	else
 	{
-		// rbflag.offground = leg[LEFT].is_offground /* || leg[RIGHT].is_offground */;
+		// rbflag.offground = leg[LEFT].is_offground || leg[RIGHT].is_offground;
 		rbflag.offground = false;
 	}
 }
@@ -233,6 +233,14 @@ void Chassis_Motor_Transmit(void)
 	AK_Motor_MIT_Transmit(HIP_RF_ID, 0, 0, 0, 0, set.hip_torque[RF]);
 	AK_Motor_MIT_Transmit(HIP_RB_ID, 0, 0, 0, 0, set.hip_torque[RB]);
 	osDelay(1);
+
+	// MIT模式下发送
+	// AK_Motor_MIT_Transmit(HIP_LF_ID, 0, 0, 0, 0, 0);
+	// AK_Motor_MIT_Transmit(HIP_LB_ID, 0, 0, 0, 0, 0);
+	// osDelay(1);
+	// AK_Motor_MIT_Transmit(HIP_RF_ID, 0, 0, 0, 0, 0);
+	// AK_Motor_MIT_Transmit(HIP_RB_ID, 0, 0, 0, 0,);
+	// osDelay(1);
 }
 
 /***********************************************
@@ -244,7 +252,7 @@ void Wheel_Leg_Control(void)
 {
 	xl[0] = leg[LEFT].theta;
 	xl[1] = leg[LEFT].d_theta;
-	xl[2] = (ob.x - set.x - 0.25f);
+	xl[2] = (ob.x - set.x);
 	xl[3] = (ob.v - set.v);
 	xl[4] = att.pitch;
 	xl[5] = att.vpitch;
@@ -253,7 +261,7 @@ void Wheel_Leg_Control(void)
 	LQR_Control(xr, ur, leg[RIGHT].L0);
 	xr[0] = leg[RIGHT].theta;
 	xr[1] = leg[RIGHT].d_theta;
-	xr[2] = (ob.x - set.x - 0.25f);
+	xr[2] = (ob.x - set.x);
 	xr[3] = (ob.v - set.v);
 	xr[4] = att.pitch;
 	xr[5] = att.vpitch;
@@ -295,11 +303,22 @@ void Wheel_Leg_Control(void)
 	/// @brief 腿推力 PID
 	if (jump_state == JPS_NONE)
 	{
-		leg[LEFT].F0 = leg_ff * COSF(leg[LEFT].theta) +
-					   PID_Update(&length_pid[LEFT], Clampf(set.length + len_roll, 0.1f, 0.35f), leg[LEFT].L0);
+		if (rbflag.offground)
+		{
+			leg[LEFT].F0 = leg_ff * COSF(leg[LEFT].theta) +
+						   PID_Update(&length_pid[LEFT], Clampf(set.length, 0.1f, 0.35f), leg[LEFT].L0);
 
-		leg[RIGHT].F0 = leg_ff * COSF(leg[RIGHT].theta) +
-						PID_Update(&length_pid[RIGHT], Clampf(set.length - len_roll, 0.1f, 0.35f), leg[RIGHT].L0);
+			leg[RIGHT].F0 = leg_ff * COSF(leg[RIGHT].theta) +
+							PID_Update(&length_pid[RIGHT], Clampf(set.length, 0.1f, 0.35f), leg[RIGHT].L0);
+		}
+		else
+		{
+			leg[LEFT].F0 = leg_ff * COSF(leg[LEFT].theta) +
+						   PID_Update(&length_pid[LEFT], Clampf(set.length + len_roll, 0.1f, 0.35f), leg[LEFT].L0);
+
+			leg[RIGHT].F0 = leg_ff * COSF(leg[RIGHT].theta) +
+							PID_Update(&length_pid[RIGHT], Clampf(set.length - len_roll, 0.1f, 0.35f), leg[RIGHT].L0);
+		}
 	}
 	else
 	{
@@ -347,10 +366,10 @@ void Wheel_Leg_Control(void)
 uint32_t jump_time = 0;
 // 超时处理
 uint32_t init_time = 2000;
-uint32_t stretch_time = 100;
-uint32_t stretch_damping_time = 20;
-uint32_t shrink_time = 100;
-uint32_t shrink_damping_time = 20;
+uint32_t stretch_time = 120;
+uint32_t stretch_damping_time = 10;
+uint32_t shrink_time = 80;
+uint32_t shrink_damping_time = 10;
 uint32_t land_time = 120;
 
 Ramp_t jump_f_ramp;

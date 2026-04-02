@@ -4,8 +4,8 @@
 *                         www.segger.com                             *
 **********************************************************************
 
-File          : E:/serialist/workspace/robomaster/project/wheel_legged_dev/chassis/chassis.jdebug
-Created       : 11 Mar 2026 22:32
+File          : E:/serialist/workspace/robomaster/project/wheel_legged_dev-ch/chassis/chassis.jdebug
+Created       : 29 Mar 2026 20:51
 Ozone Version : V3.24
 */
 
@@ -22,19 +22,19 @@ void OnProjectLoad (void) {
   //
   // Dialog-generated settings
   //
-  Project.AddPathSubstitute ("E:/serialist/workspace/robomaster/project/wheel_legged_dev/chassis", "$(ProjectDir)");
-  Project.AddPathSubstitute ("e:/serialist/workspace/robomaster/project/wheel_legged_dev/chassis", "$(ProjectDir)");
+  Project.AddPathSubstitute ("E:/serialist/workspace/robomaster/project/wheel_legged_dev-ch/chassis", "$(ProjectDir)");
+  Project.AddPathSubstitute ("e:/serialist/workspace/robomaster/project/wheel_legged_dev-ch/chassis", "$(ProjectDir)");
   Project.SetDevice ("STM32F427II");
   Project.SetHostIF ("USB", "");
   Project.SetTargetIF ("SWD");
   Project.SetTIFSpeed ("4 MHz");
   Project.AddSvdFile ("$(InstallDir)/Config/CPU/Cortex-M4F.svd");
-  Project.AddSvdFile ("$(InstallDir)/Config/Peripherals/STM32F407IG.svd");
+  Project.AddSvdFile ("$(InstallDir)/Config/CPU/Cortex-M4.svd");
   //
   // User settings
   //
   File.Open ("$(ProjectDir)/MDK-ARM/gimbal_task/gimbal_task.axf");
-  Edit.SysVar (VAR_HSS_SPEED, FREQ_10_KHZ);
+  Edit.SysVar (VAR_HSS_SPEED, 1000000);
 }
 
 /*********************************************************************

@@ -19,8 +19,6 @@
 
 Ramp_t v_ramp; // 速度斜坡
 
-uint8_t last_switch = 0;
-
 extern B2B_Chassis_Cmd_t ch_cmd;
 extern RC_ctrl_t rc_ctrl;
 extern Wheel_Leg_Target_t set;
@@ -36,14 +34,14 @@ void Command_Task(void const *argument)
 
 	rbstate = RBS_INIT;
 
-	for (int i = 0;; i++)
+	for (uint32_t i = 0;; i++)
 	{
-		if (INS.ready == true)
+		if (INS.ready == true && ob.v != 0)
 		{
 			rbstate = RBS_READY;
 			break;
 		}
-		else if (i > 1000)
+		else if (i > 10000)
 		{
 			rbstate = RBS_ERROR;
 			break;
@@ -53,7 +51,7 @@ void Command_Task(void const *argument)
 
 	/* ================================ 自己初始化 ================================ */
 
-	Ramp_Init(&v_ramp, 0, -15.f, 5.f);
+	Ramp_Init(&v_ramp, 0, -3.f, 3.f);
 
 	rbstate = RBS_READY;
 
@@ -64,6 +62,7 @@ void Command_Task(void const *argument)
 		if (rc_ctrl.rc.s[S_L] == UP)
 		{
 			rbstate = RBS_STOP;
+			jump_state = JPS_NONE;
 			Cmd_Reset();
 		}
 		// 正常行驶
@@ -79,8 +78,6 @@ void Command_Task(void const *argument)
 			rbstate = RBS_JUMP;
 			Cmd_Get();
 		}
-
-		last_switch = rc_ctrl.rc.s[S_L];
 
 		osDelay(1);
 	}
@@ -117,7 +114,9 @@ void Command_Task(void const *argument)
 /// @brief 获取控制量
 void Cmd_Get(void)
 {
-	set.v = Signf(V_CMD) * Ramp_Update(&v_ramp, fabsf(V_CMD * 3.f / 660.0f), 0.003f);
+	set.v = Ramp_Update(&v_ramp, (V_CMD * 2.f / 660.0f), 0.003f);
+
+	// set.x += V_CMD / 660 * 0.02f;
 
 	set.yaw -= YAW_CMD * 0.0005f;
 
@@ -126,7 +125,7 @@ void Cmd_Get(void)
 									 : 0.15f; // deadzone
 
 	// set.roll = -ROLL_CMD * 30.0f / 660.0f;
-	set.roll = 0;
+	set.roll = 0.1;
 
 	if (set.v != 0)
 		set.x = ob.x;
