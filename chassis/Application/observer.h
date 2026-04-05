@@ -14,7 +14,7 @@
 
 /**************************************************************** include ****************************************************************/
 
-#include "struct_typedef.h"
+#include "user_lib.h"
 #include "stdint.h"
 #include "INS_task.h"
 #include "wheel_legged_chassis.h"
