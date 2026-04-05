@@ -1065,20 +1065,20 @@
   </Group>
 
   <Group>
-    <GroupName>User/algorithm</GroupName>
-    <tvExp>0</tvExp>
+    <GroupName>Application</GroupName>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
     <File>
       <GroupNumber>6</GroupNumber>
       <FileNumber>50</FileNumber>
-      <FileType>4</FileType>
+      <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\User\algorithm\arm_cortexM4lf_math.lib</PathWithFileName>
-      <FilenameWithoutPath>arm_cortexM4lf_math.lib</FilenameWithoutPath>
+      <PathWithFileName>..\Application\command.c</PathWithFileName>
+      <FilenameWithoutPath>command.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -1089,8 +1089,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\User\algorithm\controller.c</PathWithFileName>
-      <FilenameWithoutPath>controller.c</FilenameWithoutPath>
+      <PathWithFileName>..\Application\INS_task.c</PathWithFileName>
+      <FilenameWithoutPath>INS_task.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -1101,8 +1101,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\User\algorithm\filter.c</PathWithFileName>
-      <FilenameWithoutPath>filter.c</FilenameWithoutPath>
+      <PathWithFileName>..\Application\observer.c</PathWithFileName>
+      <FilenameWithoutPath>observer.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -1113,8 +1113,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\User\algorithm\pid.c</PathWithFileName>
-      <FilenameWithoutPath>pid.c</FilenameWithoutPath>
+      <PathWithFileName>..\Application\update_task.c</PathWithFileName>
+      <FilenameWithoutPath>update_task.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -1125,31 +1125,31 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\User\algorithm\kalman_filter.c</PathWithFileName>
-      <FilenameWithoutPath>kalman_filter.c</FilenameWithoutPath>
-      <RteFlg>0</RteFlg>
-      <bShared>0</bShared>
-    </File>
-    <File>
-      <GroupNumber>6</GroupNumber>
-      <FileNumber>55</FileNumber>
-      <FileType>1</FileType>
-      <tvExp>0</tvExp>
-      <tvExpOptDlg>0</tvExpOptDlg>
-      <bDave2>0</bDave2>
-      <PathWithFileName>..\User\algorithm\QuaternionEKF.c</PathWithFileName>
-      <FilenameWithoutPath>QuaternionEKF.c</FilenameWithoutPath>
+      <PathWithFileName>..\Application\wheel_legged_chassis.c</PathWithFileName>
+      <FilenameWithoutPath>wheel_legged_chassis.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
   </Group>
 
   <Group>
-    <GroupName>User/application</GroupName>
-    <tvExp>1</tvExp>
+    <GroupName>User/algorithm</GroupName>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
+    <File>
+      <GroupNumber>7</GroupNumber>
+      <FileNumber>55</FileNumber>
+      <FileType>4</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\User\algorithm\arm_cortexM4lf_math.lib</PathWithFileName>
+      <FilenameWithoutPath>arm_cortexM4lf_math.lib</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
     <File>
       <GroupNumber>7</GroupNumber>
       <FileNumber>56</FileNumber>
@@ -1157,8 +1157,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\User\application\INS_task.c</PathWithFileName>
-      <FilenameWithoutPath>INS_task.c</FilenameWithoutPath>
+      <PathWithFileName>..\User\algorithm\controller.c</PathWithFileName>
+      <FilenameWithoutPath>controller.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -1169,8 +1169,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\User\application\update_task.c</PathWithFileName>
-      <FilenameWithoutPath>update_task.c</FilenameWithoutPath>
+      <PathWithFileName>..\User\algorithm\filter.c</PathWithFileName>
+      <FilenameWithoutPath>filter.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -1181,8 +1181,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\User\application\observer.c</PathWithFileName>
-      <FilenameWithoutPath>observer.c</FilenameWithoutPath>
+      <PathWithFileName>..\User\algorithm\pid.c</PathWithFileName>
+      <FilenameWithoutPath>pid.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -1193,8 +1193,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\User\application\wheel_legged_chassis.c</PathWithFileName>
-      <FilenameWithoutPath>wheel_legged_chassis.c</FilenameWithoutPath>
+      <PathWithFileName>..\User\algorithm\kalman_filter.c</PathWithFileName>
+      <FilenameWithoutPath>kalman_filter.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -1205,8 +1205,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\User\application\command.c</PathWithFileName>
-      <FilenameWithoutPath>command.c</FilenameWithoutPath>
+      <PathWithFileName>..\User\algorithm\QuaternionEKF.c</PathWithFileName>
+      <FilenameWithoutPath>QuaternionEKF.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
