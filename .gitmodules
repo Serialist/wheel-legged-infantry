@@ -1,0 +1,3 @@
+[submodule "chassis/User"]
+	path = chassis/User
+	url = git@github.com:Serialist/robo-lib.git
