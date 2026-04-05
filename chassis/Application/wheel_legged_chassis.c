@@ -408,8 +408,8 @@ void Jump_FSM(void)
 		if (jump_time >= init_time)
 		{
 			Ramp_Init(&jump_f_ramp, leg_len, 0, (.25f / stretch_time));
-			PID_clear(&length_pid[LEFT]);
-			PID_clear(&length_pid[RIGHT]);
+			PID_Clear(&length_pid[LEFT]);
+			PID_Clear(&length_pid[RIGHT]);
 
 			jump_state = JPS_STRETCH;
 			jump_time = 0;
@@ -433,8 +433,8 @@ void Jump_FSM(void)
 			jump_time >= stretch_time)
 		{
 			Ramp_Init(&jump_f_ramp, leg[LEFT].L0, -(.25f / shrink_time), 0);
-			PID_clear(&jump_length_pid[LEFT]);
-			PID_clear(&jump_length_pid[RIGHT]);
+			PID_Clear(&jump_length_pid[LEFT]);
+			PID_Clear(&jump_length_pid[RIGHT]);
 
 			jump_state = JPS_STRETCH_DAMPING;
 			jump_time = 0;
@@ -455,8 +455,8 @@ void Jump_FSM(void)
 
 		if (jump_time >= stretch_damping_time)
 		{
-			PID_clear(&damping_pid[LEFT]);
-			PID_clear(&damping_pid[RIGHT]);
+			PID_Clear(&damping_pid[LEFT]);
+			PID_Clear(&damping_pid[RIGHT]);
 
 			jump_state = JPS_SHRINK;
 			jump_time = 0;
@@ -479,8 +479,8 @@ void Jump_FSM(void)
 		if (leg_len <= set.length ||
 			jump_time >= shrink_time)
 		{
-			PID_clear(&jump_length_pid[LEFT]);
-			PID_clear(&jump_length_pid[RIGHT]);
+			PID_Clear(&jump_length_pid[LEFT]);
+			PID_Clear(&jump_length_pid[RIGHT]);
 
 			jump_state = JPS_SHRINK_DAMPING;
 			jump_time = 0;
@@ -501,8 +501,8 @@ void Jump_FSM(void)
 
 		if (jump_time >= shrink_damping_time)
 		{
-			PID_clear(&damping_pid[LEFT]);
-			PID_clear(&damping_pid[RIGHT]);
+			PID_Clear(&damping_pid[LEFT]);
+			PID_Clear(&damping_pid[RIGHT]);
 
 			jump_state = JPS_LAND;
 			jump_time = 0;
@@ -524,7 +524,7 @@ void Jump_FSM(void)
 		if (rbflag.offground == false ||
 			jump_time >= land_time)
 		{
-			PID_clear(&land_pid[LEFT]);
+			PID_Clear(&land_pid[LEFT]);
 
 			jump_state = JPS_NONE;
 			jump_time = 0;
