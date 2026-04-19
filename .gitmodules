@@ -1,0 +1,3 @@
+[submodule "ch/dmh7"]
+	path = ch/dmh7
+	url = git@github.com:serialist/dmh7-temp
