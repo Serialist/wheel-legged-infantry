@@ -19,7 +19,26 @@
 
 /* ================================================================ include ================================================================ */
 
-#if 0
+#include "ptpid.hpp"
+
+pt::PID
+	pid_tpl(14, 0, 3, 10, 0), // 离地关节 pid
+	pid_tpr(14, 0, 3, 10, 0), // 离地关节 pid
+
+	length_pid[2]{{700, 0, 12000, 100, 0},
+				  {700, 0, 12000, 100, 0}}, // 腿长 pid
+	jump_length_pid[2]{{1300, 0, 60, 300, 0},
+					   {1300, 0, 60, 300, 0}}, // 跳跃 pid
+	damping_pid[2]{{1000, 0, 20000, 300, 0},
+				   {1000, 0, 20000, 300, 0}}, // 阻尼 pid
+	land_pid[2]{{500, 0, 10000, 150, 0},
+				{500, 0, 10000, 150, 0}}, // 落地缓冲 pid
+
+	yaw_pid(0.15, 0, 1.2, 0, 0),	// yaw 旋转 pid
+	roll_pid(0.8, 0, 0.05, 0.2, 0), // roll 轴补偿 pid
+	tp_pid(10, 0, 2, 3, 0);			// 劈叉 pid
+
+#ifdef AAAAAAAAA
 
 #include "chassis.h"
 #include "observer.h"
@@ -43,18 +62,22 @@ Robo_State_t rbstate;				// 机器人模式
 Robo_Flag_t rbflag;					// 机器人状态
 JUMP_State_t jump_state = JPS_NONE; // 跳跃状态机
 
-PID_Typedef
-	pid_tpl = {0}, // 离地关节 pid
-	pid_tpr = {0}, // 离地关节 pid
+pt::PID
+	pid_tpl(14, 0, 3, 10, 0), // 离地关节 pid
+	pid_tpr(14, 0, 3, 10, 0), // 离地关节 pid
 
-	length_pid[2] = {0},	  // 腿长 pid
-	jump_length_pid[2] = {0}, // 跳跃 pid
-	damping_pid[2] = {0},	  // 阻尼 pid
-	land_pid[2] = {0},		  // 落地缓冲 pid
+	length_pid{{700, 0, 12000, 100, 0},
+			   {700, 0, 12000, 100, 0}}, // 腿长 pid
+	jump_length_pid{{1300, 0, 60, 300, 0},
+					{1300, 0, 60, 300, 0}}, // 跳跃 pid
+	damping_pid{{1000, 0, 20000, 300, 0},
+				{1000, 0, 20000, 300, 0}}, // 阻尼 pid
+	land_pid{{500, 0, 10000, 150, 0},
+			 {500, 0, 10000, 150, 0}}, // 落地缓冲 pid
 
-	yaw_pid = {0},	// yaw 旋转 pid
-	roll_pid = {0}, // roll 轴补偿 pid
-	tp_pid = {0};	// 劈叉 pid
+	yaw_pid(0.15, 0, 1.2, 0, 0), // yaw 旋转 pid
+	roll_pid(.8, 0, .05, .2, 0), // roll 轴补偿 pid
+	tp_pid(10, 0, 2, 3, 0);		 // 劈叉 pid
 
 Ramp_t ramp_leg_length; // 腿长斜坡
 

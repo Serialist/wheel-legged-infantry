@@ -16,13 +16,6 @@
 #ifndef ROBOT_CONFIG_H
 #define ROBOT_CONFIG_H
 
-/* Includes ------------------------------------------------------------------*/
-#include "stdint.h"
-#include "stdbool.h"
-#include "stdlib.h"
-#include "string.h"
-#include "math.h"
-
 #define BOARD_DM_MC02
 
 /// @brief 0: referee-system 1: image-trans

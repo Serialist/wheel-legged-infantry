@@ -14,7 +14,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "cmsis_os.h"
-#include "INS_Task.h"
+#include "INS_Task.hpp"
 #include "bmi088.h"
 #include "lpf.h"
 #include "pid.h"

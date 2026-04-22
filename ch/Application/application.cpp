@@ -9,12 +9,11 @@
  *
  */
 
-#include "application.h"
 #include "task-tool.h"
 
 // TASK_DEFINE(Chassis_Task, osPriorityHigh, 2048);
 
-void Application_Init(void)
+extern "C" void Application_Init(void)
 {
 	// TASK_CREATE(Chassis_Task);
 }

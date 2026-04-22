@@ -1,0 +1,25 @@
+/**
+ * @file observer.h
+ * @author Serialist (ba3pt@chd.edu.cn)
+ * @brief
+ * @version 0.1.0
+ * @date 2026-01-22
+ *
+ * @copyright Copyright (c) Serialist 2026
+ *
+ */
+
+#ifndef OBSERVER_H
+#define OBSERVER_H
+
+#include "utils.h"
+
+typedef struct
+{
+	float x;
+	float v;
+} Observer_t;
+
+extern Observer_t ob;
+
+#endif

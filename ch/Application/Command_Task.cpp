@@ -1,27 +1,31 @@
 /**
- * @file Control_Task.c
+ * @file Command_Task.c
  * @author Serialist (ba3pt@qq.com)
  * @brief
  * @version 0.1.0
- * @date 2026-04-20
+ * @date 2026-04-21
  *
  * @copyright Copyright (c) Serialist 2026
  *
  */
 
-#include "Command_Task.h"
 #include "cmsis_os.h"
 #include "bsp_uart.h"
 #include "Remote_Control.h"
-#include "arm_math.h"
+#include "Command_Task.hpp"
+#include "rm_motor.h"
 
-void Control_Task(void const *argument)
+extern RM_Motor_Feedback_t gm6020;
+
+void Command_Task(void const *argument)
 {
 	TickType_t Control_Task_SysTick = 0;
 
 	for (;;)
 	{
 		Control_Task_SysTick = osKernelSysTick();
+
+		RM_Motor_Control_Transmit(BSP_PORT2, GM6020_TX_V_ID_1, (RM_Motor_Control_t){0, 0, 0, 0});
 
 		USART_Vofa_Justfloat_Transmit(0, 0.f, 0.f);
 
