@@ -14,7 +14,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "cmsis_os.h"
-#include "INS_Task.hpp"
+#include "ins-task.hpp"
 #include "bmi088.h"
 #include "lpf.h"
 #include "pid.h"
@@ -98,7 +98,7 @@ static void BMI088_Temp_Control(float temp);
  * @retval None
  */
 /* USER CODE END Header_INS_Task */
-void INS_Task(void const *argument)
+extern "C" void INS_Task(void const *argument)
 {
 	/* USER CODE BEGIN INS_Task */
 	TickType_t INS_Task_SysTick = 0;

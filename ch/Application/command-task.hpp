@@ -9,8 +9,8 @@
  * 
 */
 
-#ifndef CONTROL_TASK_H
-#define CONTROL_TASK_H
+#ifndef COMMAND_TASK_H
+#define COMMAND_TASK_H
 
 #include "utils.h"
 

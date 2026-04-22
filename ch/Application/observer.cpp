@@ -78,7 +78,7 @@ void xvEstimateKF_Update(KalmanFilter_t *EstimateKF, float acc, float vel);
  *
  * @param argument
  ********************************/
-void observer(void const *argument)
+extern "C" void Observer_Task(void const *argument)
 {
 	TickType_t xLastWakeTime;
 

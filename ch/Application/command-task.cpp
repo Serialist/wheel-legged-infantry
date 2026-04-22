@@ -12,12 +12,12 @@
 #include "cmsis_os.h"
 #include "bsp_uart.h"
 #include "Remote_Control.h"
-#include "Command_Task.hpp"
+#include "command-task.hpp"
 #include "rm_motor.h"
 
 extern RM_Motor_Feedback_t gm6020;
 
-void Command_Task(void const *argument)
+extern "C" void Command_Task(void const *argument)
 {
 	TickType_t Control_Task_SysTick = 0;
 
