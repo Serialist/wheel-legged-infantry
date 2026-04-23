@@ -11,45 +11,41 @@
 
 /* ================================================================ include ================================================================ */
 
-#if 0
-
 #include "cmsis_os.h"
 
 #include "kalman_filter_whx.h"
 #include "rm_motor.h"
 #include "vmc-dm.h"
 
-#include "wheel_legged_chassis.h"
-#include "INS_task.h"
+#include "chassis.hpp"
+#include "ins-task.hpp"
 #include "observer.hpp"
-
 
 /* ================================================================ macro ================================================================ */
 
-#define TASK_PERIOD_MS 3 // ÈÎÎñÖÜÆÚ
+#define TASK_PERIOD_MS 3 // ä»»åŠ¡å‘¨æœŸ
 
 /* ================================================================ typedef ================================================================ */
 
 /* ================================================================ variable ================================================================ */
 
-KalmanFilter_t vaEstimateKF; // ÕâÊÇÒ»¸ö¿¨¶ûÂüÂË²¨Æ÷¶ÔÏó
+whxKalmanFilter_t vaEstimateKF; // è¿™æ˜¯ä¸€ä¸ªå¡å°”æ›¼æ»¤æ³¢å™¨å¯¹è±¡
 
 float vaEstimateKF_F[4] = {1.0f, 0.003f,
-						   0.0f, 1.0f}; // ×´Ì¬×ªÒÆ¾ØÕó£¬¿ØÖÆÖÜÆÚÎª0.001s
+						   0.0f, 1.0f}; // çŠ¶æ€è½¬ç§»çŸ©é˜µï¼Œæ§åˆ¶å‘¨æœŸä¸º0.001s
 
 float vaEstimateKF_P[4] = {1.0f, 0.0f,
-						   0.0f, 1.0f}; // ºóÑé¹À¼ÆĞ­·½²î³õÊ¼Öµ
+						   0.0f, 1.0f}; // åéªŒä¼°è®¡åæ–¹å·®åˆå§‹å€¼
 
 float vaEstimateKF_Q[4] = {0.5f, 0.0f,
-						   0.0f, 0.5f}; // Q¾ØÕó³õÊ¼Öµ
+						   0.0f, 0.5f}; // QçŸ©é˜µåˆå§‹å€¼
 
 float vaEstimateKF_R[4] = {100.0f, 0.0f,
 						   0.0f, 100.0f};
 
 const float vaEstimateKF_H[4] = {1.0f, 0.0f,
-								 0.0f, 1.0f}; // ÉèÖÃ¾ØÕóHÎª³£Á¿
+								 0.0f, 1.0f}; // è®¾ç½®çŸ©é˜µHä¸ºå¸¸é‡
 
-extern INS_t INS;
 extern VMC_t leg[2];
 extern Wheel_Leg_Target_t set;
 
@@ -58,18 +54,18 @@ float vel_acc[2];
 float motor_vel_r;
 float motor_vel_l;
 
-float wr, wl = 0.0f;		  // wheel ÂÖì±ËÙ¶È
+float wr, wl = 0.0f;		  // wheel è½®æ¯‚é€Ÿåº¦
 float vrb = 0.0f, vlb = 0.0f; // vehicle
 float aver_v = 0.0f;
 
-Observer_t ob; // ¹Û²âÆ÷·µ»ØÖµ
-
 extern RM_Motor_Feedback_t m3508[2];
+
+Observer_t ob;
 
 /* ================================================================ prototype ================================================================ */
 
-void xvEstimateKF_Init(KalmanFilter_t *EstimateKF);
-void xvEstimateKF_Update(KalmanFilter_t *EstimateKF, float acc, float vel);
+void ObEKF_Init();
+void ObEKF_Update(float acc, float vel);
 
 /* ================================================================ function ================================================================ */
 
@@ -83,13 +79,8 @@ extern "C" void Observer_Task(void const *argument)
 	TickType_t xLastWakeTime;
 
 	xLastWakeTime = xTaskGetTickCount();
-	// µÈ´ı¼ÓËÙ¶ÈÊÕÁ²
-	while (INS.ready == false)
-	{
-		osDelay(1);
-	}
 
-	xvEstimateKF_Init(&vaEstimateKF);
+	ObEKF_Init();
 
 	while (1)
 	{
@@ -98,66 +89,65 @@ extern "C" void Observer_Task(void const *argument)
 		motor_vel_r = HEXROLL_VELOCITY(&m3508[RIGHT]);
 		motor_vel_l = -HEXROLL_VELOCITY(&m3508[LEFT]);
 
-		// »úÌåËÙ¶È¹Û²âÆ÷
+		// æœºä½“é€Ÿåº¦è§‚æµ‹å™¨
 
-		// ÓÒ
-		wr =					// ÓÒÂÖËÙ¶È
-			motor_vel_r +		// ÂÖì±·´À¡ËÙ¶È
-			INS.Gyro[0] +		// »úÌå½ÇËÙ¶È
-			leg[RIGHT].d_alpha; // ÍÈËÙ¶È
-		vrb = wr * wheelRadius +
+		// å³
+		wr =					// å³è½®é€Ÿåº¦
+			motor_vel_r +		// è½®æ¯‚åé¦ˆé€Ÿåº¦
+			ins.Gyro[0] +		// æœºä½“è§’é€Ÿåº¦
+			leg[RIGHT].d_alpha; // è…¿é€Ÿåº¦
+		vrb = wr * WHEEL_RADIUS +
 			  leg[RIGHT].L0 * leg[RIGHT].d_theta * arm_cos_f32(leg[RIGHT].theta) +
-			  leg[RIGHT].d_L0 * arm_sin_f32(leg[RIGHT].theta); // ÓÒ»úÌåËÙ¶È
+			  leg[RIGHT].d_L0 * arm_sin_f32(leg[RIGHT].theta); // å³æœºä½“é€Ÿåº¦
 
-		// ×ó
+		// å·¦
 		wl = motor_vel_l +
-			 INS.Gyro[0] +
-			 leg[LEFT].d_alpha; // ×óÂÖËÙ¶È
-		vlb = wl * wheelRadius +
+			 ins.Gyro[0] +
+			 leg[LEFT].d_alpha; // å·¦è½®é€Ÿåº¦
+		vlb = wl * WHEEL_RADIUS +
 			  leg[LEFT].L0 * leg[LEFT].d_theta * arm_cos_f32(leg[LEFT].theta) +
-			  leg[LEFT].d_L0 * arm_sin_f32(leg[LEFT].theta); // ×ó»úÌåËÙ¶È
+			  leg[LEFT].d_L0 * arm_sin_f32(leg[LEFT].theta); // å·¦æœºä½“é€Ÿåº¦
 
-		// ×ÜÌå»¥²¹ÂË²¨
-		aver_v = (vrb + vlb) / 2.0f;									  // È¡Æ½¾ù
-		xvEstimateKF_Update(&vaEstimateKF, INS.MotionAccel_n[1], aver_v); // ins ¼ÓËÙ¶È ÂÖì±·´À¡ËÙ¶È ÈÚºÏÂË²¨
+		// æ€»ä½“äº’è¡¥æ»¤æ³¢
+		aver_v = (vrb + vlb) / 2.0f; // å–å¹³å‡
 
-		// Ô­µØ×Ô×ªµÄ¹ı³ÌÖĞv_filterºÍx_filterÓ¦¸Ã¶¼ÊÇÎª0
+		ObEKF_Update(ins.Accel[1], aver_v); // ins åŠ é€Ÿåº¦ è½®æ¯‚åé¦ˆé€Ÿåº¦ èåˆæ»¤æ³¢
+
+		// åŸåœ°è‡ªè½¬çš„è¿‡ç¨‹ä¸­v_filterå’Œx_filteråº”è¯¥éƒ½æ˜¯ä¸º0
 		ob.v = vel_acc[0];
 
 		ob.x += ob.v * (TASK_PERIOD_MS * 0.001f);
 
-		// ¾«È·ÖÜÆÚ¿ØÖÆ
+		// ç²¾ç¡®å‘¨æœŸæ§åˆ¶
 		vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(TASK_PERIOD_MS));
 	}
 }
 
-// ´ïÃîÀı³ÌËÙ¶È¹Û²âÆ÷//
+// è¾¾å¦™ä¾‹ç¨‹é€Ÿåº¦è§‚æµ‹å™¨//
 
-void xvEstimateKF_Init(KalmanFilter_t *EstimateKF)
+void ObEKF_Init()
 {
-	Kalman_Filter_Init(EstimateKF, 2, 0, 2); // ×´Ì¬ÏòÁ¿2Î¬ Ã»ÓĞ¿ØÖÆÁ¿ ²âÁ¿ÏòÁ¿2Î¬
+	whxKalman_Filter_Init(&vaEstimateKF, 2, 0, 2); // çŠ¶æ€å‘é‡2ç»´ æ²¡æœ‰æ§åˆ¶é‡ æµ‹é‡å‘é‡2ç»´
 
-	memcpy(EstimateKF->F_data, vaEstimateKF_F, sizeof(vaEstimateKF_F));
-	memcpy(EstimateKF->P_data, vaEstimateKF_P, sizeof(vaEstimateKF_P));
-	memcpy(EstimateKF->Q_data, vaEstimateKF_Q, sizeof(vaEstimateKF_Q));
-	memcpy(EstimateKF->R_data, vaEstimateKF_R, sizeof(vaEstimateKF_R));
-	memcpy(EstimateKF->H_data, vaEstimateKF_H, sizeof(vaEstimateKF_H));
+	memcpy(vaEstimateKF.F_data, vaEstimateKF_F, sizeof(vaEstimateKF_F));
+	memcpy(vaEstimateKF.P_data, vaEstimateKF_P, sizeof(vaEstimateKF_P));
+	memcpy(vaEstimateKF.Q_data, vaEstimateKF_Q, sizeof(vaEstimateKF_Q));
+	memcpy(vaEstimateKF.R_data, vaEstimateKF_R, sizeof(vaEstimateKF_R));
+	memcpy(vaEstimateKF.H_data, vaEstimateKF_H, sizeof(vaEstimateKF_H));
 }
 
-void xvEstimateKF_Update(KalmanFilter_t *EstimateKF, float acc, float vel)
+void ObEKF_Update(float acc, float vel)
 {
-	// ¿¨¶ûÂüÂË²¨Æ÷²âÁ¿Öµ¸üĞÂ
-	EstimateKF->MeasuredVector[0] = vel; // ²âÁ¿ËÙ¶È
-	EstimateKF->MeasuredVector[1] = acc; // ²âÁ¿¼ÓËÙ¶È
+	// å¡å°”æ›¼æ»¤æ³¢å™¨æµ‹é‡å€¼æ›´æ–°
+	vaEstimateKF.MeasuredVector[0] = vel; // æµ‹é‡é€Ÿåº¦
+	vaEstimateKF.MeasuredVector[1] = acc; // æµ‹é‡åŠ é€Ÿåº¦
 
-	// ¿¨¶ûÂüÂË²¨Æ÷¸üĞÂº¯Êı
-	Kalman_Filter_Update(EstimateKF);
+	// å¡å°”æ›¼æ»¤æ³¢å™¨æ›´æ–°å‡½æ•°
+	whxKalman_Filter_Update(&vaEstimateKF);
 
-	// ÌáÈ¡¹À¼ÆÖµ
+	// æå–ä¼°è®¡å€¼
 	for (uint8_t i = 0; i < 2; i++)
 	{
-		vel_acc[i] = EstimateKF->FilteredValue[i];
+		vel_acc[i] = vaEstimateKF.FilteredValue[i];
 	}
 }
-
-#endif

@@ -18,12 +18,16 @@
 
 #define BOARD_DM_MC02
 
+#define ZERO_FORCE
+
 /// @brief 0: referee-system 1: image-trans
-#define USART1_RX_Switch 1
+#define USART1_RX_Switch 0
 
 /* General physics and mathematics constants ---------------------------------*/
 
 #define GravityAccel 9.718f
+
+#define WHEEL_RADIUS 0.066f
 
 /**
  * @brief the flag of bmi088 Calibration

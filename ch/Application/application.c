@@ -11,9 +11,9 @@
 
 #include "task-tool.h"
 
-// TASK_DEFINE(Chassis_Task, osPriorityHigh, 2048);
+TASK_DEFINE(Chassis_Task, osPriorityHigh, 2048);
 
-extern "C" void Application_Init(void)
+void Application_Init(void)
 {
-	// TASK_CREATE(Chassis_Task);
+	TASK_CREATE(Chassis_Task);
 }

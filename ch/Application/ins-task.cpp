@@ -39,7 +39,7 @@
 /**
  * @brief the structure that contains the information for the INS.
  */
-INS_Info_Typedef INS_Info;
+INS_Info_Typedef ins;
 
 /**
  * @brief the array that contains the data of LPF2p coefficients.
@@ -115,42 +115,42 @@ extern "C" void INS_Task(void const *argument)
 		BMI088_Info_Update(&BMI088_Info);
 
 		/* Accel measurement LPF2p */
-		INS_Info.Accel[0] = LowPassFilter2p_Update(&INS_AccelPF2p[0], BMI088_Info.Accel[0]);
-		INS_Info.Accel[1] = LowPassFilter2p_Update(&INS_AccelPF2p[1], BMI088_Info.Accel[1]);
-		INS_Info.Accel[2] = LowPassFilter2p_Update(&INS_AccelPF2p[2], BMI088_Info.Accel[2]);
+		ins.Accel[0] = LowPassFilter2p_Update(&INS_AccelPF2p[0], BMI088_Info.Accel[0]);
+		ins.Accel[1] = LowPassFilter2p_Update(&INS_AccelPF2p[1], BMI088_Info.Accel[1]);
+		ins.Accel[2] = LowPassFilter2p_Update(&INS_AccelPF2p[2], BMI088_Info.Accel[2]);
 
 		/* Update the INS gyro in radians */
-		INS_Info.Gyro[0] = BMI088_Info.Gyro[0];
-		INS_Info.Gyro[1] = BMI088_Info.Gyro[1];
-		INS_Info.Gyro[2] = BMI088_Info.Gyro[2];
+		ins.Gyro[0] = BMI088_Info.Gyro[0];
+		ins.Gyro[1] = BMI088_Info.Gyro[1];
+		ins.Gyro[2] = BMI088_Info.Gyro[2];
 
 		/* Update the QuaternionEKF */
-		QuaternionEKF_Update(&Quaternion_Info, INS_Info.Gyro, INS_Info.Accel, 0.001f);
+		QuaternionEKF_Update(&Quaternion_Info, ins.Gyro, ins.Accel, 0.001f);
 
-		memcpy(INS_Info.Angle, Quaternion_Info.EulerAngle, sizeof(INS_Info.Angle));
+		memcpy(ins.Angle, Quaternion_Info.EulerAngle, sizeof(ins.Angle));
 
 		/* Update the Euler angle in degrees. */
-		INS_Info.Pitch_Angle = Quaternion_Info.EulerAngle[IMU_ANGLE_INDEX_PITCH] * 57.295779513f;
-		INS_Info.Yaw_Angle = Quaternion_Info.EulerAngle[IMU_ANGLE_INDEX_YAW] * 57.295779513f;
-		INS_Info.Roll_Angle = Quaternion_Info.EulerAngle[IMU_ANGLE_INDEX_ROLL] * 57.295779513f;
+		ins.Pitch_Angle = Quaternion_Info.EulerAngle[IMU_ANGLE_INDEX_PITCH] * 57.295779513f;
+		ins.Yaw_Angle = Quaternion_Info.EulerAngle[IMU_ANGLE_INDEX_YAW] * 57.295779513f;
+		ins.Roll_Angle = Quaternion_Info.EulerAngle[IMU_ANGLE_INDEX_ROLL] * 57.295779513f;
 
 		/* Update the yaw total angle */
-		if (INS_Info.Yaw_Angle - INS_Info.Last_Yaw_Angle < -180.f)
+		if (ins.Yaw_Angle - ins.Last_Yaw_Angle < -180.f)
 		{
-			INS_Info.YawRoundCount++;
+			ins.YawRoundCount++;
 		}
-		else if (INS_Info.Yaw_Angle - INS_Info.Last_Yaw_Angle > 180.f)
+		else if (ins.Yaw_Angle - ins.Last_Yaw_Angle > 180.f)
 		{
-			INS_Info.YawRoundCount--;
+			ins.YawRoundCount--;
 		}
-		INS_Info.Last_Yaw_Angle = INS_Info.Yaw_Angle;
+		ins.Last_Yaw_Angle = ins.Yaw_Angle;
 
-		INS_Info.Yaw_TolAngle = INS_Info.Yaw_Angle + INS_Info.YawRoundCount * 360.f;
+		ins.Yaw_TolAngle = ins.Yaw_Angle + ins.YawRoundCount * 360.f;
 
 		/* Update the INS gyro in degrees */
-		INS_Info.Pitch_Gyro = INS_Info.Gyro[IMU_GYRO_INDEX_PITCH] * RadiansToDegrees;
-		INS_Info.Yaw_Gyro = INS_Info.Gyro[IMU_GYRO_INDEX_YAW] * RadiansToDegrees;
-		INS_Info.Roll_Gyro = INS_Info.Gyro[IMU_GYRO_INDEX_ROLL] * RadiansToDegrees;
+		ins.Pitch_Gyro = ins.Gyro[IMU_GYRO_INDEX_PITCH] * RadiansToDegrees;
+		ins.Yaw_Gyro = ins.Gyro[IMU_GYRO_INDEX_YAW] * RadiansToDegrees;
+		ins.Roll_Gyro = ins.Gyro[IMU_GYRO_INDEX_ROLL] * RadiansToDegrees;
 
 		if (INS_Task_SysTick % 5 == 0)
 		{
