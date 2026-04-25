@@ -16,14 +16,29 @@
 #ifndef ROBOT_CONFIG_H
 #define ROBOT_CONFIG_H
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #define BOARD_DM_MC02
 
 #define ZERO_FORCE
 
+// CAN ID
+// 关节
+#define HIP_LF_ID 0x03
+#define HIP_LB_ID 0x04
+#define HIP_RF_ID 0x01
+#define HIP_RB_ID 0x02
+// 轮毂
+#define HUB_L_ID 0x201
+#define HUB_R_ID 0x202
+// 板间通信
+#define B2B_CHASSIS_CMD_ID 0x666
+
 /// @brief 0: referee-system 1: image-trans
 #define USART1_RX_Switch 0
-
-/* General physics and mathematics constants ---------------------------------*/
 
 #define GravityAccel 9.718f
 
@@ -54,5 +69,9 @@
  *        1: USART
  */
 #define REMOTE_FRAME_USART_CAN 0U
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ROBOT_CONFIG_H

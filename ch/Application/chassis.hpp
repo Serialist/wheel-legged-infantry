@@ -14,18 +14,6 @@
 
 #include "utils.h"
 
-// CAN ID
-// 关节
-#define HIP_LF_ID 0x03
-#define HIP_LB_ID 0x04
-#define HIP_RF_ID 0x01
-#define HIP_RB_ID 0x02
-// 轮毂
-#define HUB_L_ID 0x201
-#define HUB_R_ID 0x202
-// 板间通信
-#define B2B_CHASSIS_CMD_ID 0x666
-
 // 机体姿态
 typedef struct
 {

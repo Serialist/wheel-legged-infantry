@@ -10,6 +10,7 @@
  */
 
 #include "task-tool.h"
+#include "Minipc.h"
 
 TASK_DEFINE(Chassis_Task, osPriorityHigh, 2048);
 
