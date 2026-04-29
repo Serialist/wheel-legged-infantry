@@ -1,7 +1,7 @@
 <deployment-project plugin="plugin.coder" plugin-version="R2024a">
-  <configuration file="E:\serialist\workplace\robomaster\project\wheel_leg\v0.1.0_clone\Matlab\leg_pos_1.prj" location="E:\serialist\workplace\robomaster\project\wheel_leg\v0.1.0_clone\Matlab" name="leg_pos_1" target="target.unifiedcoder" target-name="MATLAB Coder">
+  <configuration build-checksum="2870888791" file="E:\serialist\workspace\robomaster\project\wheel_legged_dev-ch\matlab\leg_pos_1.prj" location="E:\serialist\workspace\robomaster\project\wheel_legged_dev-ch\matlab" name="leg_pos_1" target="target.unifiedcoder" target-name="MATLAB Coder">
     <profile key="profile.mex">
-      <param.BuiltInstrumentedMex />
+      <param.BuiltInstrumentedMex>false</param.BuiltInstrumentedMex>
       <param.RanInstrumentedMex>false</param.RanInstrumentedMex>
       <param.WorkingFolder>option.WorkingFolder.Project</param.WorkingFolder>
       <param.SpecifiedWorkingFolder />
@@ -12,18 +12,18 @@
       <var.SimdQueryHardwareType>MATLAB Host Computer</var.SimdQueryHardwareType>
       <param.InstructionSetExtensionsAvailableInUI>true</param.InstructionSetExtensionsAvailableInUI>
       <param.InstructionSetExtensionsConfig.FMA>false</param.InstructionSetExtensionsConfig.FMA>
-      <param.ResponsivenessChecks />
-      <param.ExtrinsicCalls />
-      <param.IntegrityChecks />
+      <param.ResponsivenessChecks>true</param.ResponsivenessChecks>
+      <param.ExtrinsicCalls>true</param.ExtrinsicCalls>
+      <param.IntegrityChecks>true</param.IntegrityChecks>
       <param.SaturateOnIntegerOverflow>true</param.SaturateOnIntegerOverflow>
       <param.EnableAutoParallelization>false</param.EnableAutoParallelization>
       <param.NumberOfCpuThreads>0</param.NumberOfCpuThreads>
       <param.OptimizeReductions>false</param.OptimizeReductions>
-      <param.SIMDAcceleration />
-      <param.GlobalDataSyncMethod />
+      <param.SIMDAcceleration>option.SIMDAcceleration.Portable</param.SIMDAcceleration>
+      <param.GlobalDataSyncMethod>option.GlobalDataSyncMethod.SyncAlways</param.GlobalDataSyncMethod>
       <param.EnableVariableSizing>true</param.EnableVariableSizing>
       <param.EnableDynamicMemoryAllocation>true</param.EnableDynamicMemoryAllocation>
-      <param.DynamicMemoryAllocation />
+      <param.DynamicMemoryAllocation>option.DynamicMemoryAllocation.Threshold</param.DynamicMemoryAllocation>
       <param.DynamicMemoryAllocationThreshold>65536</param.DynamicMemoryAllocationThreshold>
       <param.DynamicMemoryAllocationForFixedSizeArrays>false</param.DynamicMemoryAllocationForFixedSizeArrays>
       <param.DynamicMemoryAllocationInterface>option.DynamicMemoryAllocationInterface.AUTO</param.DynamicMemoryAllocationInterface>
@@ -39,8 +39,8 @@
       <param.MATLABSourceCommentLineNumbers>true</param.MATLABSourceCommentLineNumbers>
       <param.CodeFormattingTool>option.CodeFormattingTool.Auto</param.CodeFormattingTool>
       <param.ReservedNameArray />
-      <param.CppStyleConst />
-      <param.EnableDebugging />
+      <param.CppStyleConst>true</param.CppStyleConst>
+      <param.EnableDebugging>false</param.EnableDebugging>
       <param.Verbosity>option.Verbosity.Info</param.Verbosity>
       <param.ReportPotentialDifferences>false</param.ReportPotentialDifferences>
       <param.GenerateReport>true</param.GenerateReport>
@@ -50,10 +50,10 @@
       <param.ReportInfoVarName />
       <param.DefaultTestFile />
       <param.MergeInstrumentationResults>false</param.MergeInstrumentationResults>
-      <param.VerificationMode />
-      <param.VerificationStatus>option.VerificationStatus.Inactive</param.VerificationStatus>
+      <param.VerificationMode>option.VerificationMode.None</param.VerificationMode>
+      <param.VerificationStatus>option.VerificationStatus.FailedTest</param.VerificationStatus>
       <param.EnableMexProfiling>false</param.EnableMexProfiling>
-      <var.BuiltWithMexProfiling />
+      <var.BuiltWithMexProfiling>false</var.BuiltWithMexProfiling>
       <param.CustomSourceCode />
       <param.CustomHeaderCode />
       <param.CustomInitializer />
@@ -62,15 +62,15 @@
       <param.CustomSource />
       <param.CustomLibrary />
       <param.PostCodeGenCommand />
-      <param.mex.GenCodeOnly />
+      <param.mex.GenCodeOnly>false</param.mex.GenCodeOnly>
       <param.ConstantFoldingTimeout>40000</param.ConstantFoldingTimeout>
       <param.CompileTimeRecursionLimit>50</param.CompileTimeRecursionLimit>
       <param.EnableRuntimeRecursion>true</param.EnableRuntimeRecursion>
       <param.PreserveVariableNames>option.PreserveVariableNames.None</param.PreserveVariableNames>
-      <param.EchoExpressions />
-      <param.InlineThreshold />
-      <param.InlineThresholdMax />
-      <param.InlineStackLimit />
+      <param.EchoExpressions>true</param.EchoExpressions>
+      <param.InlineThreshold>10</param.InlineThreshold>
+      <param.InlineThresholdMax>200</param.InlineThresholdMax>
+      <param.InlineStackLimit>1000000</param.InlineStackLimit>
       <param.InlineBetweenUserFunctions>option.InlineBetweenUserFunctions.Speed</param.InlineBetweenUserFunctions>
       <param.InlineBetweenUserAndMathWorksFunctions>option.InlineBetweenUserAndMathWorksFunctions.Readability</param.InlineBetweenUserAndMathWorksFunctions>
       <param.InlineBetweenMathWorksFunctions>option.InlineBetweenMathWorksFunctions.Speed</param.InlineBetweenMathWorksFunctions>
@@ -78,18 +78,18 @@
       <param.MemcpyThreshold>64</param.MemcpyThreshold>
       <param.EnableOpenMP>true</param.EnableOpenMP>
       <param.InitFltsAndDblsToZero>true</param.InitFltsAndDblsToZero>
-      <param.DefaultVariableInitialization />
-      <param.ConstantInputs />
+      <param.DefaultVariableInitialization>option.DefaultVariableInitialization.None</param.DefaultVariableInitialization>
+      <param.ConstantInputs>option.ConstantInputs.CheckValues</param.ConstantInputs>
       <param.UsePrecompiledLibraries>option.UsePrecompiledLibraries.Prefer</param.UsePrecompiledLibraries>
       <param.EnableCRICodeCoverage>true</param.EnableCRICodeCoverage>
       <param.EnableAutoParallelizationReporting>true</param.EnableAutoParallelizationReporting>
       <param.CacheDynamicArrayDataPointer>true</param.CacheDynamicArrayDataPointer>
       <param.EnableJIT>false</param.EnableJIT>
-      <param.EnableJITSilentBailOut />
-      <param.CheckForIssuesJIT />
-      <param.EnableGitSupport />
-      <param.EnableAutoCommit />
-      <param.RepositoryStyle />
+      <param.EnableJITSilentBailOut>false</param.EnableJITSilentBailOut>
+      <param.CheckForIssuesJIT>true</param.CheckForIssuesJIT>
+      <param.EnableGitSupport>false</param.EnableGitSupport>
+      <param.EnableAutoCommit>true</param.EnableAutoCommit>
+      <param.RepositoryStyle>option.RepositoryStyle.Auto</param.RepositoryStyle>
       <unset>
         <param.BuiltInstrumentedMex />
         <param.RanInstrumentedMex />
@@ -141,7 +141,6 @@
         <param.DefaultTestFile />
         <param.MergeInstrumentationResults />
         <param.VerificationMode />
-        <param.VerificationStatus />
         <param.EnableMexProfiling />
         <var.BuiltWithMexProfiling />
         <param.CustomSourceCode />
@@ -203,7 +202,7 @@
       <param.OptimizeReductions>false</param.OptimizeReductions>
       <param.EnableVariableSizing>true</param.EnableVariableSizing>
       <param.EnableDynamicMemoryAllocation>true</param.EnableDynamicMemoryAllocation>
-      <param.DynamicMemoryAllocation />
+      <param.DynamicMemoryAllocation>option.DynamicMemoryAllocation.Threshold</param.DynamicMemoryAllocation>
       <param.DynamicMemoryAllocationThreshold>65536</param.DynamicMemoryAllocationThreshold>
       <param.DynamicMemoryAllocationForFixedSizeArrays>false</param.DynamicMemoryAllocationForFixedSizeArrays>
       <param.DynamicMemoryAllocationInterface>option.DynamicMemoryAllocationInterface.AUTO</param.DynamicMemoryAllocationInterface>
@@ -259,9 +258,9 @@
       <param.CustomSymbolStrEMXArray>emxArray_$M$N</param.CustomSymbolStrEMXArray>
       <param.CustomSymbolStrEMXArrayFcn>emx$M$N</param.CustomSymbolStrEMXArrayFcn>
       <param.ReservedNameArray />
-      <param.CppStyleConst />
+      <param.CppStyleConst>true</param.CppStyleConst>
       <param.RuntimeChecks>false</param.RuntimeChecks>
-      <param.Verbose />
+      <param.Verbose>false</param.Verbose>
       <param.Verbosity>option.Verbosity.Info</param.Verbosity>
       <param.ReportPotentialDifferences>false</param.ReportPotentialDifferences>
       <param.GenerateReport>true</param.GenerateReport>
@@ -284,7 +283,7 @@
       <param.DefaultTestFile />
       <param.MergeInstrumentationResults>false</param.MergeInstrumentationResults>
       <param.RanPilSilVerification>false</param.RanPilSilVerification>
-      <param.VerificationMode />
+      <param.VerificationMode>option.VerificationMode.None</param.VerificationMode>
       <param.VerificationStatus>option.VerificationStatus.Inactive</param.VerificationStatus>
       <param.CustomSourceCode />
       <param.CustomHeaderCode />
@@ -296,19 +295,19 @@
       <param.PostCodeGenCommand />
       <param.TargetLangStandard>Auto</param.TargetLangStandard>
       <param.CodeReplacementLibrary>None</param.CodeReplacementLibrary>
-      <param.DeprecatedCRLFlag />
+      <param.DeprecatedCRLFlag>false</param.DeprecatedCRLFlag>
       <param.SameHardware>true</param.SameHardware>
-      <param.Toolchain>CMake</param.Toolchain>
+      <param.Toolchain>Automatically locate an installed toolchain</param.Toolchain>
       <param.BuildConfiguration>Faster Runs</param.BuildConfiguration>
       <param.CustomToolchainOptions />
       <var.ToolchainSettingsVisible>true</var.ToolchainSettingsVisible>
-      <var.ToolchainSupportsBuildConfigurations>false</var.ToolchainSupportsBuildConfigurations>
+      <var.ToolchainSupportsBuildConfigurations>true</var.ToolchainSupportsBuildConfigurations>
       <param.target.Data>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;ctdata&gt;&lt;configuredHardware/&gt;&lt;/ctdata&gt;</param.target.Data>
       <param.target.ActiveType>option.target.TargetType.MatlabHost</param.target.ActiveType>
       <param.target.ActiveTarget />
       <param.HardwareVendor.Production>Generic</param.HardwareVendor.Production>
       <param.HardwareType.Production>MATLAB Host Computer</param.HardwareType.Production>
-      <param.HWDeviceType.Production />
+      <param.HWDeviceType.Production>Generic-&gt;MATLAB Host Computer</param.HWDeviceType.Production>
       <var.instance.enabled.Production>true</var.instance.enabled.Production>
       <param.HardwareSizeChar.Production>8</param.HardwareSizeChar.Production>
       <param.HardwareSizeShort.Production>16</param.HardwareSizeShort.Production>
@@ -329,7 +328,7 @@
       <param.HardwareDivisionRounding.Production>option.HardwareDivisionRounding.Zero</param.HardwareDivisionRounding.Production>
       <param.HardwareVendor.Target>Generic</param.HardwareVendor.Target>
       <param.HardwareType.Target>MATLAB Host Computer</param.HardwareType.Target>
-      <param.HWDeviceType.Target />
+      <param.HWDeviceType.Target>Generic-&gt;MATLAB Host Computer</param.HWDeviceType.Target>
       <var.instance.enabled.Target>false</var.instance.enabled.Target>
       <param.HardwareSizeChar.Target>8</param.HardwareSizeChar.Target>
       <param.HardwareSizeShort.Target>16</param.HardwareSizeShort.Target>
@@ -365,9 +364,9 @@
       <param.GenerateMakefile>true</param.GenerateMakefile>
       <param.BuildToolEnable>false</param.BuildToolEnable>
       <param.BuildToolConfiguration />
-      <param.InlineThreshold />
-      <param.InlineThresholdMax />
-      <param.InlineStackLimit />
+      <param.InlineThreshold>10</param.InlineThreshold>
+      <param.InlineThresholdMax>200</param.InlineThresholdMax>
+      <param.InlineStackLimit>1000000</param.InlineStackLimit>
       <param.InlineBetweenUserFunctions>option.InlineBetweenUserFunctions.Speed</param.InlineBetweenUserFunctions>
       <param.InlineBetweenUserAndMathWorksFunctions>option.InlineBetweenUserAndMathWorksFunctions.Readability</param.InlineBetweenUserAndMathWorksFunctions>
       <param.InlineBetweenMathWorksFunctions>option.InlineBetweenMathWorksFunctions.Speed</param.InlineBetweenMathWorksFunctions>
@@ -376,7 +375,7 @@
       <param.MemcpyThreshold>64</param.MemcpyThreshold>
       <param.EnableOpenMP>true</param.EnableOpenMP>
       <param.InitFltsAndDblsToZero>true</param.InitFltsAndDblsToZero>
-      <param.DefaultVariableInitialization />
+      <param.DefaultVariableInitialization>option.DefaultVariableInitialization.None</param.DefaultVariableInitialization>
       <param.GenerateNonFiniteFilesIfUsed>true</param.GenerateNonFiniteFilesIfUsed>
       <param.PassStructByReference>true</param.PassStructByReference>
       <param.UseBuiltinFFTWLibrary>false</param.UseBuiltinFFTWLibrary>
@@ -392,17 +391,17 @@
       <param.SILPILVerbosity>option.SILPILVerbosity.off</param.SILPILVerbosity>
       <param.CodeProfilingCodeMetrics>option.CodeProfilingCodeMetrics.Time</param.CodeProfilingCodeMetrics>
       <param.UseECoderFeatures>false</param.UseECoderFeatures>
-      <param.EnableGitSupport />
-      <param.EnableAutoCommit />
-      <param.RepositoryStyle />
-      <param.psCustomPrjState />
+      <param.EnableGitSupport>false</param.EnableGitSupport>
+      <param.EnableAutoCommit>true</param.EnableAutoCommit>
+      <param.RepositoryStyle>option.RepositoryStyle.Auto</param.RepositoryStyle>
+      <param.psCustomPrjState>false</param.psCustomPrjState>
       <param.psCustomProjectFile />
-      <param.psCheckConfValue />
-      <param.psUniqueOutPutState />
-      <param.psOpenResultsState />
-      <param.psProductModeValue />
-      <param.psQuickConfValue />
-      <param.psOutputFolder />
+      <param.psCheckConfValue>option.psCheckConfValue.onWarnCheckConfDlg</param.psCheckConfValue>
+      <param.psUniqueOutPutState>true</param.psUniqueOutPutState>
+      <param.psOpenResultsState>true</param.psOpenResultsState>
+      <param.psProductModeValue>option.psProductModeValue.codeProver</param.psProductModeValue>
+      <param.psQuickConfValue>option.psQuickConfValue.proj</param.psQuickConfValue>
+      <param.psOutputFolder>results_$codegenName$</param.psOutputFolder>
       <unset>
         <param.WorkingFolder />
         <param.SpecifiedWorkingFolder />
@@ -519,6 +518,7 @@
         <param.CodeReplacementLibrary />
         <param.DeprecatedCRLFlag />
         <param.SameHardware />
+        <param.Toolchain />
         <param.BuildConfiguration />
         <param.CustomToolchainOptions />
         <var.ToolchainSettingsVisible />
@@ -610,42 +610,33 @@
       </unset>
     </profile>
     <param.objective>option.objective.c</param.objective>
-    <param.WorkflowStep>generateCode</param.WorkflowStep>
-    <param.TestSnippets />
-    <param.ExternalFcnMajority />
-    <param.UseGlobals>option.UseGlobals.Yes</param.UseGlobals>
+    <param.WorkflowStep>workflowSummary</param.WorkflowStep>
+    <param.TestSnippets>
+      <item>leg_pos_1</item>
+    </param.TestSnippets>
+    <param.ExternalFcnMajority>column</param.ExternalFcnMajority>
+    <param.UseGlobals>option.UseGlobals.No</param.UseGlobals>
     <param.outputfile>${PROJECT_ROOT}\codegen\lib\leg_pos_1\leg_pos_1.lib</param.outputfile>
-    <param.version />
+    <param.version>R2012a</param.version>
     <param.HasECoderFeatures>false</param.HasECoderFeatures>
     <param.HasGpuCoder>false</param.HasGpuCoder>
     <var.HasNeuralNetworkToolbox>true</var.HasNeuralNetworkToolbox>
     <param.newGlobals>
       <Globals>
-        <Input Name="pos" typeId="0" />
-        <idpTable>
-          <type typeId="0">
-            <Class>double</Class>
-            <Size>1 x 1</Size>
-            <Value />
-            <InitialValue />
-            <UserDefined>true</UserDefined>
-            <Complex>false</Complex>
-            <Sparse>false</Sparse>
-          </type>
-        </idpTable>
+        <idpTable />
       </Globals>
     </param.newGlobals>
     <param.mex.mainhtml />
     <param.grt.mainhtml />
     <param.CallGeneratedCodeFromTest>true</param.CallGeneratedCodeFromTest>
     <param.AutoInferDefaultFile />
-    <param.AutoInferUseVariableSize />
-    <param.AutoInferUseUnboundedSize />
-    <param.AutoInferVariableSizeThreshold />
-    <param.AutoInferUnboundedSizeThreshold />
-    <param.EnableFixedPointStep />
+    <param.AutoInferUseVariableSize>false</param.AutoInferUseVariableSize>
+    <param.AutoInferUseUnboundedSize>false</param.AutoInferUseUnboundedSize>
+    <param.AutoInferVariableSizeThreshold>1024</param.AutoInferVariableSizeThreshold>
+    <param.AutoInferUnboundedSizeThreshold>2048</param.AutoInferUnboundedSizeThreshold>
+    <param.EnableFixedPointStep>false</param.EnableFixedPointStep>
     <param.EnableScreener>true</param.EnableScreener>
-    <param.AnnotationChecksum>968538515</param.AnnotationChecksum>
+    <param.AnnotationChecksum>1924898136</param.AnnotationChecksum>
     <var.LegacyTarget />
     <var.MirrorOnOpen>false</var.MirrorOnOpen>
     <param.FixedPointEnabled>false</param.FixedPointEnabled>
@@ -655,25 +646,26 @@
     <param.hdlParamStorage />
     <var.gc.lastOutputRoot>codegen\lib\leg_pos_1</var.gc.lastOutputRoot>
     <var.gc.lastOutputType>C_CODE</var.gc.lastOutputType>
-    <var.gc.preBuildChecksum>2933981238</var.gc.preBuildChecksum>
-    <var.cfi.lastOutputRoot />
-    <var.cfi.preBuildChecksum />
-    <var.outdatedOnRestore />
-    <var.lastUserSourceChecksum>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;checksum&gt;&lt;includedFiles&gt;&lt;file&gt;C:\Users\PC\Desktop\works\coding\keil\VGD Project\RM wheel_leg\Matlab\leg_pos_1.m&lt;/file&gt;&lt;/includedFiles&gt;&lt;value&gt;3884494279&lt;/value&gt;&lt;/checksum&gt;</var.lastUserSourceChecksum>
-    <var.sourceSetState>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;sourceModel&gt;&lt;primarySourceFiles&gt;&lt;file&gt;E:\serialist\workplace\robomaster\project\wheel_leg\v0.1.0_clone\Matlab\leg_pos_1.m&lt;/file&gt;&lt;/primarySourceFiles&gt;&lt;fixedPointSourceFiles/&gt;&lt;fixedPointSourceRegistered&gt;false&lt;/fixedPointSourceRegistered&gt;&lt;fixedPointSourceSelected&gt;false&lt;/fixedPointSourceSelected&gt;&lt;/sourceModel&gt;</var.sourceSetState>
+    <var.gc.preBuildChecksum>673036568</var.gc.preBuildChecksum>
+    <var.cfi.lastOutputRoot>codegen\mex\leg_pos_1</var.cfi.lastOutputRoot>
+    <var.cfi.preBuildChecksum>4105836327</var.cfi.preBuildChecksum>
+    <var.lastCfiTestSnippet>leg_pos_1</var.lastCfiTestSnippet>
+    <var.outdatedOnRestore>false</var.outdatedOnRestore>
+    <var.lastUserSourceChecksum>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;checksum&gt;&lt;includedFiles&gt;&lt;file&gt;E:\serialist\workspace\robomaster\project\wheel_legged_dev-ch\matlab\leg_pos_1.m&lt;/file&gt;&lt;/includedFiles&gt;&lt;value&gt;3857061146&lt;/value&gt;&lt;/checksum&gt;</var.lastUserSourceChecksum>
+    <var.sourceSetState>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;sourceModel&gt;&lt;primarySourceFiles&gt;&lt;file&gt;E:\serialist\workspace\robomaster\project\wheel_legged_dev-ch\matlab\leg_pos_1.m&lt;/file&gt;&lt;/primarySourceFiles&gt;&lt;fixedPointSourceFiles/&gt;&lt;fixedPointSourceRegistered&gt;false&lt;/fixedPointSourceRegistered&gt;&lt;fixedPointSourceSelected&gt;false&lt;/fixedPointSourceSelected&gt;&lt;/sourceModel&gt;</var.sourceSetState>
     <param.forceMexBuild>false</param.forceMexBuild>
-    <param.NoDefaultJIT />
+    <param.NoDefaultJIT>false</param.NoDefaultJIT>
     <param.configImportActive>false</param.configImportActive>
     <var.isGpuCoder>false</var.isGpuCoder>
     <var.notGpuCoder>true</var.notGpuCoder>
     <var.boundToGui>true</var.boundToGui>
-    <var.isConfigDialog />
+    <var.isConfigDialog>false</var.isConfigDialog>
     <var.ecoderEnabled>false</var.ecoderEnabled>
-    <param.AlwaysGenerateTypedefGuards />
-    <param.RemoveDuplicateFunctionsAndTypes />
-    <param.EnableStructExplosion />
-    <param.ForceANSIC />
-    <param.NumCompileJobs />
+    <param.AlwaysGenerateTypedefGuards>false</param.AlwaysGenerateTypedefGuards>
+    <param.RemoveDuplicateFunctionsAndTypes>true</param.RemoveDuplicateFunctionsAndTypes>
+    <param.EnableStructExplosion>true</param.EnableStructExplosion>
+    <param.ForceANSIC>false</param.ForceANSIC>
+    <param.NumCompileJobs>1</param.NumCompileJobs>
     <param.mex.outputfile>leg_pos_1_mex</param.mex.outputfile>
     <param.grt.outputfile>leg_pos_1</param.grt.outputfile>
     <param.artifact>option.target.artifact.lib</param.artifact>
@@ -684,15 +676,15 @@
     <param.CppPreserveClasses>true</param.CppPreserveClasses>
     <param.CppGenerateEnumClass>true</param.CppGenerateEnumClass>
     <param.gpu.Enabled>false</param.gpu.Enabled>
-    <param.gpu.SelectCudaDevice />
+    <param.gpu.SelectCudaDevice>-1</param.gpu.SelectCudaDevice>
     <param.gpu.ComputeCapability />
     <param.gpu.CustomComputeCapability />
     <param.gpu.MallocMode />
-    <param.gpu.MallocThreshold />
-    <param.gpu.StackLimitPerThread />
-    <param.gpu.MaximumBlocksPerKernel />
+    <param.gpu.MallocThreshold>200</param.gpu.MallocThreshold>
+    <param.gpu.StackLimitPerThread>1024</param.gpu.StackLimitPerThread>
+    <param.gpu.MaximumBlocksPerKernel>0</param.gpu.MaximumBlocksPerKernel>
     <param.gpu.Benchmarking>false</param.gpu.Benchmarking>
-    <param.gpu.SafeBuild />
+    <param.gpu.SafeBuild>false</param.gpu.SafeBuild>
     <param.gpu.KernelNamePrefix />
     <param.gpu.CompilerFlags />
     <param.gpu.EnableCUBLAS>false</param.gpu.EnableCUBLAS>
@@ -721,27 +713,27 @@
     <param.cmsis-nn.DataType>option.arm-compute.datatype.int8</param.cmsis-nn.DataType>
     <param.cmsis-nn.CalibrationResultFile />
     <param.none.LearnablesCompression>option.none.LearnablesCompression.None</param.none.LearnablesCompression>
-    <var.ToolchainCanRunBuildArtifact>false</var.ToolchainCanRunBuildArtifact>
+    <var.ToolchainCanRunBuildArtifact>true</var.ToolchainCanRunBuildArtifact>
     <param.TargetLang>option.TargetLang.C</param.TargetLang>
     <param.EnableAutoExtrinsicCalls>true</param.EnableAutoExtrinsicCalls>
     <param.EnableImplicitExpansion>true</param.EnableImplicitExpansion>
     <param.UsePreconditions>false</param.UsePreconditions>
     <param.FeatureFlags />
     <param.FixedPointMode>option.FixedPointMode.None</param.FixedPointMode>
-    <param.AutoScaleLoopIndexVariables />
+    <param.AutoScaleLoopIndexVariables>false</param.AutoScaleLoopIndexVariables>
     <param.ComputedFixedPointData />
     <param.UserFixedPointData />
-    <param.DefaultWordLength />
-    <param.DefaultFractionLength />
-    <param.FixedPointSafetyMargin />
-    <param.FixedPointFimath />
-    <param.FixedPointTypeSource />
+    <param.DefaultWordLength>16</param.DefaultWordLength>
+    <param.DefaultFractionLength>4</param.DefaultFractionLength>
+    <param.FixedPointSafetyMargin>0</param.FixedPointSafetyMargin>
+    <param.FixedPointFimath>fimath('RoundingMethod', 'Floor', 'OverflowAction', 'Wrap', 'ProductMode', 'FullPrecision', 'MaxProductWordLength', 128, 'SumMode', 'FullPrecision', 'MaxSumWordLength', 128)</param.FixedPointFimath>
+    <param.FixedPointTypeSource>option.FixedPointTypeSource.SimAndDerived</param.FixedPointTypeSource>
     <param.StaticAnalysisTimeout />
-    <param.StaticAnalysisGlobalRangesOnly />
-    <param.LogAllIOValues />
-    <param.DetectOverflows />
-    <param.LogHistogram />
-    <param.ShowCoverage />
+    <param.StaticAnalysisGlobalRangesOnly>false</param.StaticAnalysisGlobalRangesOnly>
+    <param.LogAllIOValues>false</param.LogAllIOValues>
+    <param.DetectOverflows>false</param.DetectOverflows>
+    <param.LogHistogram>false</param.LogHistogram>
+    <param.ShowCoverage>true</param.ShowCoverage>
     <param.ExcludedFixedPointVerificationFiles />
     <param.ExcludedFixedPointSimulationFiles />
     <param.InstrumentedBuildChecksum />
@@ -750,16 +742,16 @@
     <param.FixedPointValidationChecksum />
     <param.FixedPointSourceCodeChecksum />
     <param.FixedPointFunctionReplacements />
-    <param.OptimizeWholeNumbers />
-    <param.ContainerTypes />
+    <param.OptimizeWholeNumbers>true</param.OptimizeWholeNumbers>
+    <param.ContainerTypes>false</param.ContainerTypes>
     <param.GeneratedFixedPointFileSuffix>_fixpt</param.GeneratedFixedPointFileSuffix>
     <param.PlotFunction />
-    <param.SDIPlot />
-    <param.EnableCodeEfficiencyChecks />
-    <param.DefaultFixedPointSignedness />
-    <param.FixedPointTypeProposalMode />
-    <param.EnableFixedPointStep />
-    <var.lastFixedPointAction />
+    <param.SDIPlot>false</param.SDIPlot>
+    <param.EnableCodeEfficiencyChecks>false</param.EnableCodeEfficiencyChecks>
+    <param.DefaultFixedPointSignedness>option.DefaultFixedPointSignedness.Automatic</param.DefaultFixedPointSignedness>
+    <param.FixedPointTypeProposalMode>option.FixedPointTypeProposalMode.ProposeFractionLengths</param.FixedPointTypeProposalMode>
+    <param.EnableFixedPointStep>false</param.EnableFixedPointStep>
+    <var.lastFixedPointAction>option.fixedPointAction.none</var.lastFixedPointAction>
     <var.lastSimContext />
     <var.lastVerifyContext />
     <param.fpDataRoot />
@@ -767,13 +759,13 @@
     <var.snapshotChecksum />
     <param.fpLastConvertChecksum />
     <var.functionBlockSid />
-    <param.fptSignedness />
-    <var.FixedPointAnalysisMode />
-    <param.FixedPointUseDesignRanges />
+    <param.fptSignedness>false</param.fptSignedness>
+    <var.FixedPointAnalysisMode>option.FixedPointAnalysisMode.Sim</var.FixedPointAnalysisMode>
+    <param.FixedPointUseDesignRanges>false</param.FixedPointUseDesignRanges>
     <unset>
       <param.objective />
-      <param.TestSnippets />
       <param.ExternalFcnMajority />
+      <param.UseGlobals />
       <param.outputfile />
       <param.version />
       <param.HasECoderFeatures />
@@ -796,8 +788,6 @@
       <var.DismissScreener />
       <param.unifiedParamStorage />
       <param.hdlParamStorage />
-      <var.cfi.lastOutputRoot />
-      <var.cfi.preBuildChecksum />
       <var.outdatedOnRestore />
       <param.forceMexBuild />
       <param.NoDefaultJIT />
@@ -907,7 +897,7 @@
     </unset>
     <fileset.entrypoints>
       <file custom-data-expanded="false" value="${PROJECT_ROOT}\leg_pos_1.m">
-        <Marker>1730640106174</Marker>
+        <Marker>1777303792471</Marker>
       </file>
     </fileset.entrypoints>
     <fileset.testbench />
@@ -918,20 +908,19 @@
           <Input Name="phi4" typeId="0" />
           <idpTable>
             <type typeId="0">
-              <Class>double</Class>
+              <Class>single</Class>
               <Size>1 x 1</Size>
               <Value />
               <InitialValue />
               <UserDefined>true</UserDefined>
               <Complex>false</Complex>
-              <Sparse>false</Sparse>
             </type>
           </idpTable>
         </Inputs>
       </file>
     </fileset.inputtypes>
     <build-deliverables>
-      <file location="${PROJECT_ROOT}\codegen\lib\leg_pos_1" name="leg_pos_1.lib" optional="false">E:\serialist\workplace\robomaster\project\wheel_leg\v0.1.0_clone\Matlab\codegen\lib\leg_pos_1\leg_pos_1.lib</file>
+      <file location="${PROJECT_ROOT}\codegen\lib\leg_pos_1" name="leg_pos_1.lib" optional="false">E:\serialist\workspace\robomaster\project\wheel_legged_dev-ch\matlab\codegen\lib\leg_pos_1\leg_pos_1.lib</file>
     </build-deliverables>
     <workflow />
     <matlab>

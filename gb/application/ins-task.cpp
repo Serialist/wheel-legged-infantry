@@ -130,27 +130,27 @@ extern "C" void INS_Task(void const *argument)
 		memcpy(ins.Angle, Quaternion_Info.EulerAngle, sizeof(ins.Angle));
 
 		/* Update the Euler angle in degrees. */
-		ins.Pitch_Angle = Quaternion_Info.EulerAngle[IMU_ANGLE_INDEX_PITCH];
+		ins.Pitch_Angle = -Quaternion_Info.EulerAngle[IMU_ANGLE_INDEX_PITCH];
 		ins.Yaw_Angle = Quaternion_Info.EulerAngle[IMU_ANGLE_INDEX_YAW];
-		ins.Roll_Angle = Quaternion_Info.EulerAngle[IMU_ANGLE_INDEX_ROLL];
+		ins.Roll_Angle = -Quaternion_Info.EulerAngle[IMU_ANGLE_INDEX_ROLL];
 
 		/* Update the yaw total angle */
-		if (ins.Yaw_Angle - ins.Last_Yaw_Angle < -PI)
+		if (ins.Yaw_Angle - ins.Last_Yaw_Angle < -180.f)
 		{
 			ins.YawRoundCount++;
 		}
-		else if (ins.Yaw_Angle - ins.Last_Yaw_Angle > PI)
+		else if (ins.Yaw_Angle - ins.Last_Yaw_Angle > 180.f)
 		{
 			ins.YawRoundCount--;
 		}
 		ins.Last_Yaw_Angle = ins.Yaw_Angle;
 
-		ins.Yaw_TolAngle = ins.Yaw_Angle + ins.YawRoundCount * 2 * PI;
+		ins.Yaw_TolAngle = ins.Yaw_Angle + ins.YawRoundCount * 360.f;
 
 		/* Update the INS gyro in degrees */
-		ins.Pitch_Gyro = ins.Gyro[IMU_GYRO_INDEX_PITCH];
+		ins.Pitch_Gyro = -ins.Gyro[IMU_GYRO_INDEX_PITCH];
 		ins.Yaw_Gyro = ins.Gyro[IMU_GYRO_INDEX_YAW];
-		ins.Roll_Gyro = ins.Gyro[IMU_GYRO_INDEX_ROLL];
+		ins.Roll_Gyro = -ins.Gyro[IMU_GYRO_INDEX_ROLL];
 
 		if (INS_Task_SysTick % 5 == 0)
 		{

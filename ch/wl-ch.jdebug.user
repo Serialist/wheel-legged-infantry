@@ -1,23 +1,37 @@
 
 
-GraphedExpression="(ins).Pitch_Angle", Color=#e56a6f
-GraphedExpression="(ins).Yaw_Angle", Color=#35792b
-GraphedExpression="(ins).Roll_Angle", Color=#769dda
-OpenDocument="main.c", FilePath="E:/serialist/workspace/robomaster/project/wl-h7/ch/dmh7/Core/Src/main.c", Line=0
+GraphedExpression="ul_temp[0]", Color=#e56a6f, Show=0
+GraphedExpression="ul_temp[1]", Color=#35792b
+GraphedExpression="ul_temp[2]", Color=#769dda, Show=0
+GraphedExpression="ul_temp[3]", Color=#b14f0d, Show=0
+GraphedExpression="ul_temp[4]", Color=#b3c38e, Show=0
+GraphedExpression="ul_temp[5]", Color=#ab7b05, Show=0
+GraphedExpression="ul_temp[6]", Color=#7fd3b7, Show=0
+GraphedExpression="ul_temp[7]", Color=#50328f, Show=0
+GraphedExpression="ul_temp[8]", Color=#c587a5, Show=0
+GraphedExpression="ul_temp[9]", Color=#999401, Show=0
+GraphedExpression="ul_temp[10]", Color=#aa1d24, Show=0
+GraphedExpression="ul_temp[11]", Color=#86d27e, Show=0
+GraphedExpression="ul[0]", Color=#2a5191
+GraphedExpression="ul[1]", Color=#f49758, Show=0
+OpenDocument="main.c", FilePath="e:/serialist/workspace/robomaster/project/wl-h7/ch/dmh7/Core/Src/main.c", Line=50
 OpenToolbar="Debug", Floating=0, x=0, y=0
-OpenWindow="Source Files", DockArea=LEFT, x=0, y=0, w=610, h=1093, TabPos=0, TopOfStack=1, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Source Files", DockArea=LEFT, x=0, y=0, w=610, h=1093, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
 OpenWindow="Disassembly", DockArea=RIGHT, x=0, y=0, w=300, h=1093, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
 OpenWindow="Memory 1", DockArea=BOTTOM, x=1, y=0, w=513, h=328, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, EditorAddress=0x110
-OpenWindow="Watched Data 1", DockArea=FLOATING, x=386, y=366, w=1649, h=819, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
-OpenWindow="Data Sampling", DockArea=FLOATING, x=376, y=414, w=1505, h=778, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, VisibleTab=0, UniformSampleSpacing=0
+OpenWindow="Watched Data 1", DockArea=FLOATING, x=618, y=355, w=1649, h=819, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Data Sampling", DockArea=FLOATING, x=376, y=414, w=1505, h=778, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, VisibleTab=1, UniformSampleSpacing=0
+OpenWindow="Timeline", DockArea=FLOATING, x=387, y=412, w=1674, h=902, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=1, DataPaneShown=1, PowerPaneShown=0, CodePaneShown=0, PinCursor="Cursor Movable", TimePerDiv="200 ms / Div", TimeStampFormat="Time", DataGraphDrawAsPoints=0, DataGraphLegendShown=1, DataGraphUniformSampleSpacing=0, DataGraphLegendPosition="1421;419", DataGraphShowNamesAtCursor=0, PowerGraphDrawAsPoints=0, PowerGraphLegendShown=0, PowerGraphAvgFilterTime=Off, PowerGraphAvgFilterLen=Off, PowerGraphUniformSampleSpacing=0, PowerGraphLegendPosition="1455;0", CodeGraphLegendShown=0, CodeGraphLegendPosition="1397;0"
 OpenWindow="Console", DockArea=BOTTOM, x=0, y=0, w=2046, h=328, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
 SmartViewPlugin="", Page="", Toolbar="Hidden", Window="SmartView 1"
 TableHeader="Source Files", SortCol="File", SortOrder="ASCENDING", VisibleCols=["File";"Status";"Size";"#Insts";"Path"], ColWidths=[263;100;100;100;1086]
-TableHeader="Data Sampling Table", SortCol="None", SortOrder="ASCENDING", VisibleCols=["Index";"Time";" (ins).Pitch_Angle";" (ins).Yaw_Angle";" (ins).Roll_Angle"], ColWidths=[100;100;100;100;210]
-TableHeader="Data Sampling Setup", SortCol="Expression", SortOrder="DESCENDING", VisibleCols=["Expression";"Type";"Value";"Min";"Max";"Average";"# Changes";"Min. Change";"Max. Change"], ColWidths=[166;100;100;154;164;100;110;126;485]
-TableHeader="Watched Data 1", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Value";"Location";"Refresh";"Access"], ColWidths=[315;286;104;944;100]
+TableHeader="Data Sampling Setup", SortCol="Expression", SortOrder="DESCENDING", VisibleCols=["Expression";"Type";"Value";"Min";"Max";"Average";"# Changes";"Min. Change";"Max. Change"], ColWidths=[118;100;124;124;114;154;110;134;527]
+TableHeader="Data Sampling Table", SortCol="None", SortOrder="ASCENDING", VisibleCols=["Index";"Time";" ul_temp[0]";" ul_temp[1]";" ul_temp[2]";" ul_temp[3]";" ul_temp[4]";" ul_temp[5]";" ul_temp[6]";" ul_temp[7]";" ul_temp[8]";" ul_temp[9]";" ul_temp[10]";" ul_temp[11]";" ul[0]";" ul[1]"], ColWidths=[100;100;100;100;100;100;100;100;100;100;100;100;100;100;100;100]
 TableHeader="Power Sampling", SortCol="Index", SortOrder="ASCENDING", VisibleCols=["Index";"Time";"Ch 0"], ColWidths=[100;100;100]
+TableHeader="Watched Data 1", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Value";"Location";"Refresh";"Access"], ColWidths=[315;286;104;944;100]
 TableHeader="RegisterSelectionDialog", SortCol="None", SortOrder="ASCENDING", VisibleCols=[], ColWidths=[]
-TableHeader="TargetExceptionDialog", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Value";"Address";"Description"], ColWidths=[27;27;27;685]
+TableHeader="TargetExceptionDialog", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Value";"Address";"Description"], ColWidths=[27;27;27;26]
 WatchedExpression="ins", Window=Watched Data 1
-WatchedExpression="(ins).Roll_Angle", Window=Watched Data 1
+WatchedExpression="ul_temp", Window=Watched Data 1
+WatchedExpression="ur_temp", Window=Watched Data 1
+WatchedExpression="ul", Window=Watched Data 1

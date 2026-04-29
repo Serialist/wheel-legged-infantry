@@ -23,26 +23,16 @@ extern "C"
 
 #define BOARD_DM_MC02
 
-// #define ZERO_FORCE
+#define ZERO_FORCE
 
-// CAN ID
-// 关节
-#define HIP_LF_ID 0x03
-#define HIP_LB_ID 0x04
-#define HIP_RF_ID 0x02
-#define HIP_RB_ID 0x01
-// 轮毂
-#define HUB_L_ID 0x201
-#define HUB_R_ID 0x202
-// 板间通信
 #define B2B_CHASSIS_CMD_ID 0x199
 
 /// @brief 0: referee-system 1: image-trans
-#define USART1_RX_Switch 0
+#define USART1_RX_Switch 1
 
 #define GravityAccel 9.718f
 
-#define WHEEL_RADIUS 0.068f
+#define WHEEL_RADIUS 0.066f
 
 /**
  * @brief the flag of bmi088 Calibration

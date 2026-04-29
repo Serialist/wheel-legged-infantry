@@ -31,20 +31,16 @@
 
 whxKalmanFilter_t vaEstimateKF; // 这是一个卡尔曼滤波器对象
 
-float vaEstimateKF_F[4] = {1.0f, 0.003f,
-						   0.0f, 1.0f}; // 状态转移矩阵，控制周期为0.001s
+float vaEstimateKF_F[4] = {
+	1.0f, 0.003f, 0.0f, 1.0f}; // 状态转移矩阵，控制周期为0.001s
 
-float vaEstimateKF_P[4] = {1.0f, 0.0f,
-						   0.0f, 1.0f}; // 后验估计协方差初始值
+float vaEstimateKF_P[4] = {1.0f, 0.0f, 0.0f, 1.0f}; // 后验估计协方差初始值
 
-float vaEstimateKF_Q[4] = {0.5f, 0.0f,
-						   0.0f, 0.5f}; // Q矩阵初始值
+float vaEstimateKF_Q[4] = {0.5f, 0.0f, 0.0f, 0.5f}; // Q矩阵初始值
 
-float vaEstimateKF_R[4] = {100.0f, 0.0f,
-						   0.0f, 100.0f};
+float vaEstimateKF_R[4] = {100.0f, 0.0f, 0.0f, 100.0f};
 
-const float vaEstimateKF_H[4] = {1.0f, 0.0f,
-								 0.0f, 1.0f}; // 设置矩阵H为常量
+const float vaEstimateKF_H[4] = {1.0f, 0.0f, 0.0f, 1.0f}; // 设置矩阵H为常量
 
 extern VMC_t leg[2];
 extern Wheel_Leg_Target_t set;
@@ -92,21 +88,20 @@ extern "C" void Observer_Task(void const *argument)
 		// 机体速度观测器
 
 		// 右
-		wr =					// 右轮速度
-			motor_vel_r +		// 轮毂反馈速度
-			ins.Gyro[0] +		// 机体角速度
-			leg[RIGHT].d_alpha; // 腿速度
-		vrb = wr * WHEEL_RADIUS +
-			  leg[RIGHT].L0 * leg[RIGHT].d_theta * arm_cos_f32(leg[RIGHT].theta) +
-			  leg[RIGHT].d_L0 * arm_sin_f32(leg[RIGHT].theta); // 右机体速度
+		wr =					  //
+			motor_vel_r			  // 轮毂反馈速度
+			+ ins.Gyro[0]		  // 机体角速度
+			+ leg[RIGHT].d_alpha; // 腿速度
+		vrb =
+			wr * WHEEL_RADIUS
+			+ leg[RIGHT].L0 * leg[RIGHT].d_theta * arm_cos_f32(leg[RIGHT].theta)
+			+ leg[RIGHT].d_L0 * arm_sin_f32(leg[RIGHT].theta); // 右机体速度
 
 		// 左
-		wl = motor_vel_l +
-			 ins.Gyro[0] +
-			 leg[LEFT].d_alpha; // 左轮速度
-		vlb = wl * WHEEL_RADIUS +
-			  leg[LEFT].L0 * leg[LEFT].d_theta * arm_cos_f32(leg[LEFT].theta) +
-			  leg[LEFT].d_L0 * arm_sin_f32(leg[LEFT].theta); // 左机体速度
+		wl = motor_vel_l + ins.Gyro[0] + leg[LEFT].d_alpha; // 左轮速度
+		vlb = wl * WHEEL_RADIUS
+			  + leg[LEFT].L0 * leg[LEFT].d_theta * arm_cos_f32(leg[LEFT].theta)
+			  + leg[LEFT].d_L0 * arm_sin_f32(leg[LEFT].theta); // 左机体速度
 
 		// 总体互补滤波
 		aver_v = (vrb + vlb) / 2.0f; // 取平均
@@ -127,7 +122,8 @@ extern "C" void Observer_Task(void const *argument)
 
 void ObEKF_Init()
 {
-	whxKalman_Filter_Init(&vaEstimateKF, 2, 0, 2); // 状态向量2维 没有控制量 测量向量2维
+	whxKalman_Filter_Init(
+		&vaEstimateKF, 2, 0, 2); // 状态向量2维 没有控制量 测量向量2维
 
 	memcpy(vaEstimateKF.F_data, vaEstimateKF_F, sizeof(vaEstimateKF_F));
 	memcpy(vaEstimateKF.P_data, vaEstimateKF_P, sizeof(vaEstimateKF_P));

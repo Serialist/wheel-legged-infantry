@@ -77,6 +77,7 @@ float xl[6], xr[6];
 
 // 控制量
 float ul[2], ur[2];
+float ul_temp[12], ur_temp[12];
 
 // debug variable
 float t1 = 0, t2 = 0;
@@ -168,7 +169,7 @@ void Motor_Enable(void)
 {
 	for (int a = 1; a <= 4; a++)
 	{
-		AK_Motor_MIT_Enable(a);
+		AK_Motor_MIT_Enable(BSP_PORT2, a);
 		osDelay(1);
 	}
 }
@@ -192,18 +193,18 @@ void Wheel_Leg_Attitude_Calc(void)
 	VMC_5bar_FK(&leg[LEFT],
 				PI / 2.0f + ak10[LF].angle,
 				PI / 2.0f + ak10[LB].angle,
-				att.pitch,
-				att.vpitch,
+				ins.Pitch_Angle,
+				ins.Pitch_Gyro,
 				0.003f); // left 反转
 	VMC_5bar_FK(&leg[RIGHT],
 				PI / 2.0f - ak10[RF].angle,
 				PI / 2.0f - ak10[RB].angle,
-				att.pitch,
-				att.vpitch,
+				ins.Pitch_Angle,
+				ins.Pitch_Gyro,
 				0.003f);
 
-	OffGround_Detection(&leg[LEFT], att.az);
-	OffGround_Detection(&leg[RIGHT], att.az);
+	OffGround_Detection(&leg[LEFT], ins.Accel[2]);
+	OffGround_Detection(&leg[RIGHT], ins.Accel[2]);
 
 	if (jump_state != JPS_NONE && jump_state != JPS_INIT)
 	{
@@ -260,59 +261,50 @@ void Chassis_Motor_Transmit(void)
  *************************************************/
 void Wheel_Leg_Control(void)
 {
-	xl[0] = leg[LEFT].theta;
-	xl[1] = leg[LEFT].d_theta;
-	xl[2] = (ob.x - set.x);
-	xl[3] = (ob.v - set.v);
-	xl[4] = att.pitch;
-	xl[5] = att.vpitch;
+	xl[0] = 0 - leg[LEFT].theta;
+	xl[1] = 0 - leg[LEFT].d_theta;
+	xl[2] = set.x - set.x;
+	xl[3] = set.v - ob.v;
+	xl[4] = 0 - ins.Pitch_Angle;
+	xl[5] = 0 - ins.Pitch_Gyro;
 
-	LQR_Control(xl, ul, leg[LEFT].L0);
-	LQR_Control(xr, ur, leg[RIGHT].L0);
-	xr[0] = leg[RIGHT].theta;
-	xr[1] = leg[RIGHT].d_theta;
-	xr[2] = (ob.x - set.x);
-	xr[3] = (ob.v - set.v);
-	xr[4] = att.pitch;
-	xr[5] = att.vpitch;
+	LQR_Control(xl, ul, ul_temp, leg[LEFT].L0);
 
-	LQR_Control(xl, ul, leg[LEFT].L0);
-	LQR_Control(xr, ur, leg[RIGHT].L0);
+	xr[0] = 0 - leg[RIGHT].theta;
+	xr[1] = 0 - leg[RIGHT].d_theta;
+	xr[2] = set.x - ob.x;
+	xr[3] = set.v - ob.v;
+	xr[4] = 0 - ins.Pitch_Angle;
+	xr[5] = 0 - ins.Pitch_Gyro;
 
-	// 应为 u = -kx，所以这里取负
-	ul[0] = -ul[0];
-	ul[1] = -ul[1];
-	ur[0] = -ur[0];
-	ur[1] = -ur[1];
+	LQR_Control(xr, ur, ur_temp, leg[RIGHT].L0);
 
 	if (rbflag.offground)
 	{
 		ul[U_T] = ur[U_T] = 0;
 		set.x = ob.x;
-		set.yaw = att.totalyaw;
+		set.yaw = ins.Yaw_TolAngle;
 		// ul[U_TP] = PID_Update(&pid_tpl, 0, leg[LEFT].theta);
 		// ur[U_TP] = PID_Update(&pid_tpr, 0, leg[RIGHT].theta);
 		ul[U_TP] = pid_tpl.Update(0, leg[LEFT].theta);
 		ur[U_TP] = pid_tpl.Update(0, leg[RIGHT].theta);
 	}
 
-	/* ================================ 轮 解算 ================================
-	 */
+	/* ================================ 轮 解算 ================================ */
 
-	turn_t = yaw_pid.kp * (set.yaw - att.totalyaw)
-			 - yaw_pid.kd * att.vyaw; // 这样计算更稳一点
+	turn_t = yaw_pid.kp * (set.yaw - RAD2DEG(ins.Yaw_TolAngle))
+			 - yaw_pid.kd * ins.Yaw_Gyro; // 这样计算更稳一点
 	if (rbflag.offground)
 		turn_t = 0;
 	set.hub_torque[LEFT] = -(ul[U_T] - turn_t); // left 反转
 	set.hub_torque[RIGHT] = ur[U_T] + turn_t;
 
-	/* ================================ 腿 解算 ================================
-	 */
+	/* ================================ 腿 解算 ================================ */
 
 	// set.length = set.height / arm_cos_f32(leg[LEFT].theta);
 	// set.right_length = set.height / arm_cos_f32(leg[RIGHT].theta);
 
-	len_roll = roll_pid.Update(set.roll, att.roll);
+	len_roll = roll_pid.Update(set.roll, -ins.Roll_Angle);
 	// len_roll = 0;
 
 	/// @brief 腿推力 PID

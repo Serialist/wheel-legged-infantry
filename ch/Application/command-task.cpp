@@ -22,9 +22,9 @@
 #include "ins-task.hpp"
 #include "observer.hpp"
 
-Ramp_t v_ramp; // 速度斜坡
+B2B_Chassis_Command_t ch_cmd;
 
-B2B_Chassis_Cmd_t ch_cmd;
+Ramp_t v_ramp; // 速度斜坡
 
 extern Remote_Info_Typedef remote_ctrl;
 extern Wheel_Leg_Target_t set;
@@ -34,10 +34,17 @@ extern JUMP_State_t jump_state;
 void Cmd_Get(void);
 void Cmd_Reset(void);
 
+// #define RC_SWITCH remote_ctrl.rc.s[DT7_SL]
+#define RC_SWITCH ch_cmd.sw[0]
+
+// #define RC_STOP DT7_UP
+// #define RC_RUN DT7_MID
+#define RC_STOP 0
+#define RC_RUN 1
+
 extern "C" void Command_Task(void const *argument)
 {
-	/* ================================ 系统初始化
-	 * ================================ */
+	/* ================================ 系统初始化 ================================ */
 
 	rbstate = RBS_INIT;
 
@@ -47,31 +54,29 @@ extern "C" void Command_Task(void const *argument)
 
 	rbstate = RBS_READY;
 
-	/* ================================ 模式切换 ================================
-	 */
+	/* ================================ 模式切换 ================================ */
 	for (;;)
 	{
 		// 停止
-		if (remote_ctrl.rc.s[DT7_SL] == DT7_UP)
+		if (RC_SWITCH == RC_STOP)
 		{
 			rbstate = RBS_STOP;
 			jump_state = JPS_NONE;
 			Cmd_Reset();
 		}
 		// 正常行驶
-		else if (remote_ctrl.rc.s[DT7_SL] == DT7_MID
-				 || (remote_ctrl.rc.s[DT7_SL] == DT7_DOWN
-					 && jump_state != JPS_NONE))
+		else if (RC_SWITCH == RC_RUN)
+		//  || (RC_SWITCH == DT7_DOWN && jump_state != JPS_NONE))
 		{
 			rbstate = RBS_RUN;
 			Cmd_Get();
 		}
 		// 跳
-		else if (remote_ctrl.rc.s[DT7_SL] == DT7_DOWN && jump_state == JPS_NONE)
-		{
-			rbstate = RBS_JUMP;
-			Cmd_Get();
-		}
+		// else if (RC_SWITCH == DT7_DOWN && jump_state == JPS_NONE)
+		// {
+		// 	rbstate = RBS_JUMP;
+		// 	Cmd_Get();
+		// }
 
 		// USART_Vofa_Justfloat_Transmit(0, 0.f, 0.f);
 
@@ -79,15 +84,15 @@ extern "C" void Command_Task(void const *argument)
 	}
 }
 
-//
-//
-//
-//
+// #define LEG_LEN_CMD remote_ctrl.rc.ch[DT7_RY]
+// #define V_CMD remote_ctrl.rc.ch[DT7_LY]
+// #define YAW_CMD remote_ctrl.rc.ch[DT7_LX]
+// #define ROLL_CMD remote_ctrl.rc.ch[DT7_RX]
 
-#define LEG_LEN_CMD remote_ctrl.rc.ch[DT7_RY]
-#define V_CMD remote_ctrl.rc.ch[DT7_LY]
-#define YAW_CMD remote_ctrl.rc.ch[DT7_LX]
-#define ROLL_CMD remote_ctrl.rc.ch[DT7_RX]
+#define LEG_LEN_CMD ch_cmd.vy
+#define V_CMD ch_cmd.vyaw
+#define YAW_CMD ch_cmd.vx
+#define ROLL_CMD 0
 
 /// @brief 获取控制量
 void Cmd_Get(void)
@@ -108,7 +113,7 @@ void Cmd_Get(void)
 							: 0.15f; // deadzone
 
 	// set.roll = -ROLL_CMD * 30.0f / 660.0f;
-	set.roll = 0.1;
+	set.roll = 0;
 
 	if (set.v != 0)
 		set.x = ob.x;
@@ -117,7 +122,7 @@ void Cmd_Get(void)
 void Cmd_Reset(void)
 {
 	set.v = 0;
-	set.yaw = att.totalyaw;
+	set.yaw = ins.Yaw_TolAngle;
 	set.roll = 0;
 	set.x = ob.x;
 }
