@@ -21,11 +21,26 @@ extern "C"
 {
 #endif
 
+#include "main.h"
+
+/* ================ mode switch ================ */
+
 #define BOARD_DM_MC02
 
 // #define ZERO_FORCE
 
-// CAN ID
+/// @brief 0: referee-system 1: image-trans
+#define USART1_RX_Switch 0
+
+/**
+ * @brief the flag of remote control receive frame data
+ * @note  0: CAN
+ *        1: USART
+ */
+#define REMOTE_FRAME_USART_CAN 0U
+
+/* ================ CAN ID ================ */
+
 // 关节
 #define HIP_LF_ID 0x03
 #define HIP_LB_ID 0x04
@@ -37,12 +52,29 @@ extern "C"
 // 板间通信
 #define B2B_CHASSIS_CMD_ID 0x199
 
-/// @brief 0: referee-system 1: image-trans
-#define USART1_RX_Switch 0
+/* ================ environment parameter ================ */
 
-#define GravityAccel 9.718f
+#define GRAVITY_ACCEL 9.718f
 
-#define WHEEL_RADIUS 0.068f
+#define GravityAccel GRAVITY_ACCEL
+
+/* ================ robot parameter ================ */
+
+#define WHEEL_MASS 0.513 // kg
+#define ROD1_MASS 1		 // kg
+#define ROD2_MASS 13.4	 // kg
+
+#define WHEEL_INERTIA 0.000956	 // kg m^2
+#define ROD1_INERTIA 0			 // kg m^2
+#define ROD2_INERTIA 0.353588749 // kg m^2
+
+#define WHEEL_RADIUS 0.068 // m
+#define ROD1_LEN 0		   // m
+#define ROD2_LEN 0.036	   // m
+
+#define BODY_WIDTH 0.54 // m
+
+/* ================ ins ================ */
 
 /**
  * @brief the flag of bmi088 Calibration
@@ -62,13 +94,6 @@ extern "C"
 #define IMU_ACCEL_INDEX_PITCH 0U
 #define IMU_ACCEL_INDEX_YAW 2U
 #define IMU_ACCEL_INDEX_ROLL 1U
-
-/**
- * @brief the flag of remote control receive frame data
- * @note  0: CAN
- *        1: USART
- */
-#define REMOTE_FRAME_USART_CAN 0U
 
 #ifdef __cplusplus
 }

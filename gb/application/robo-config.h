@@ -21,6 +21,10 @@ extern "C"
 {
 #endif
 
+#define FR_DEFAULT_VELOCITY 6000
+
+#define YAW_ENCODER_OFFSET 7300
+
 #define BOARD_DM_MC02
 
 #define ZERO_FORCE

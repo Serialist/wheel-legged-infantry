@@ -23,17 +23,17 @@
 #include "Quaternion.h"
 #include "bsp_pwm.h"
 
-#define VAL_LIMIT(x, min, max)                                                 \
-	do                                                                         \
-	{                                                                          \
-		if ((x) > (max))                                                       \
-		{                                                                      \
-			(x) = (max);                                                       \
-		}                                                                      \
-		else if ((x) < (min))                                                  \
-		{                                                                      \
-			(x) = (min);                                                       \
-		}                                                                      \
+#define VAL_LIMIT(x, min, max)                                                                                         \
+	do                                                                                                                 \
+	{                                                                                                                  \
+		if ((x) > (max))                                                                                               \
+		{                                                                                                              \
+			(x) = (max);                                                                                               \
+		}                                                                                                              \
+		else if ((x) < (min))                                                                                          \
+		{                                                                                                              \
+			(x) = (min);                                                                                               \
+		}                                                                                                              \
 	} while (0U)
 
 /**
@@ -44,8 +44,7 @@ INS_Info_Typedef ins;
 /**
  * @brief the array that contains the data of LPF2p coefficients.
  */
-static float INS_LPF2p_Alpha[3] = {
-	1.929454039488895f, -0.93178349823448126f, 0.002329458745586203f};
+static float INS_LPF2p_Alpha[3] = {1.929454039488895f, -0.93178349823448126f, 0.002329458745586203f};
 
 /**
  * @brief the structure that contains the Information of accel LPF2p.
@@ -55,23 +54,20 @@ LowPassFilter2p_Info_TypeDef INS_AccelPF2p[3];
 /**
  * @brief the Initialize data of state transition matrix.
  */
-static float QuaternionEKF_A_Data[36] = {1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
-										 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0,
-										 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1};
+static float QuaternionEKF_A_Data[36] = {
+	1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1};
 
 /**
  * @brief the Initialize data of posteriori covariance matrix.
  */
-static float QuaternionEKF_P_Data[36] = {
-	100000, 0.1, 0.1,	 0.1, 0.1, 0.1, 0.1, 100000, 0.1, 0.1,	  0.1, 0.1,
-	0.1,	0.1, 100000, 0.1, 0.1, 0.1, 0.1, 0.1,	 0.1, 100000, 0.1, 0.1,
-	0.1,	0.1, 0.1,	 0.1, 100, 0.1, 0.1, 0.1,	 0.1, 0.1,	  0.1, 100};
+static float QuaternionEKF_P_Data[36] = {100000, 0.1, 0.1,	  0.1, 0.1, 0.1, 0.1, 100000, 0.1, 0.1,	   0.1, 0.1,
+										 0.1,	 0.1, 100000, 0.1, 0.1, 0.1, 0.1, 0.1,	  0.1, 100000, 0.1, 0.1,
+										 0.1,	 0.1, 0.1,	  0.1, 100, 0.1, 0.1, 0.1,	  0.1, 0.1,	   0.1, 100};
 
 /**
  * @brief the Initialize data of Temperature Control PID.
  */
-static float TemCtrl_PID_Param[PID_PARAMETER_NUM] = {
-	1200, 20, 0, 0, 0, 0, 2000};
+static float TemCtrl_PID_Param[PID_PARAMETER_NUM] = {1200, 20, 0, 0, 0, 0, 2000};
 
 /**
  * @brief the structure that contains the Information of Temperature Control PID.
@@ -112,12 +108,9 @@ extern "C" void INS_Task(void const *argument)
 		BMI088_Info_Update(&BMI088_Info);
 
 		/* Accel measurement LPF2p */
-		ins.Accel[0] =
-			LowPassFilter2p_Update(&INS_AccelPF2p[0], BMI088_Info.Accel[0]);
-		ins.Accel[1] =
-			LowPassFilter2p_Update(&INS_AccelPF2p[1], BMI088_Info.Accel[1]);
-		ins.Accel[2] =
-			LowPassFilter2p_Update(&INS_AccelPF2p[2], BMI088_Info.Accel[2]);
+		ins.Accel[0] = LowPassFilter2p_Update(&INS_AccelPF2p[0], BMI088_Info.Accel[0]);
+		ins.Accel[1] = LowPassFilter2p_Update(&INS_AccelPF2p[1], BMI088_Info.Accel[1]);
+		ins.Accel[2] = LowPassFilter2p_Update(&INS_AccelPF2p[2], BMI088_Info.Accel[2]);
 
 		/* Update the INS gyro in radians */
 		ins.Gyro[0] = BMI088_Info.Gyro[0];
@@ -135,17 +128,17 @@ extern "C" void INS_Task(void const *argument)
 		ins.Roll_Angle = -Quaternion_Info.EulerAngle[IMU_ANGLE_INDEX_ROLL];
 
 		/* Update the yaw total angle */
-		if (ins.Yaw_Angle - ins.Last_Yaw_Angle < -180.f)
+		if (ins.Yaw_Angle - ins.Last_Yaw_Angle < -PI)
 		{
 			ins.YawRoundCount++;
 		}
-		else if (ins.Yaw_Angle - ins.Last_Yaw_Angle > 180.f)
+		else if (ins.Yaw_Angle - ins.Last_Yaw_Angle > PI)
 		{
 			ins.YawRoundCount--;
 		}
 		ins.Last_Yaw_Angle = ins.Yaw_Angle;
 
-		ins.Yaw_TolAngle = ins.Yaw_Angle + ins.YawRoundCount * 360.f;
+		ins.Yaw_TolAngle = ins.Yaw_Angle + ins.YawRoundCount * 2 * PI;
 
 		/* Update the INS gyro in degrees */
 		ins.Pitch_Gyro = -ins.Gyro[IMU_GYRO_INDEX_PITCH];
@@ -176,12 +169,7 @@ static void INS_Task_Init(void)
 	PID_Init(&TempCtrl_PID, PID_POSITION, TemCtrl_PID_Param);
 
 	/* Initializes the Quaternion EKF */
-	QuaternionEKF_Init(&Quaternion_Info,
-					   10.f,
-					   0.001f,
-					   1000000.f,
-					   QuaternionEKF_A_Data,
-					   QuaternionEKF_P_Data);
+	QuaternionEKF_Init(&Quaternion_Info, 10.f, 0.001f, 1000000.f, QuaternionEKF_A_Data, QuaternionEKF_P_Data);
 }
 //------------------------------------------------------------------------------
 /**
@@ -193,9 +181,7 @@ static void BMI088_Temp_Control(float Temp)
 {
 	PID_Calculate(&TempCtrl_PID, 40.f, Temp);
 
-	VAL_LIMIT(TempCtrl_PID.Output,
-			  -TempCtrl_PID.Param.LimitOutput,
-			  TempCtrl_PID.Param.LimitOutput);
+	VAL_LIMIT(TempCtrl_PID.Output, -TempCtrl_PID.Param.LimitOutput, TempCtrl_PID.Param.LimitOutput);
 
 	Heat_Power_Control((uint16_t)(TempCtrl_PID.Output));
 }

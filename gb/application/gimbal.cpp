@@ -36,8 +36,8 @@ using namespace vgd;
 
 RM_Motor_Feedback_t yaw_motor, pitch_motor;
 
-PT::PID yaw_pid[2] = {{0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}};
-PT::PID pitch_pid[2] = {{0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}};
+PID yaw_pid[2] = {{10, 0, 1, 15, 0}, {1500, 0, 0, 10000, 0}};
+PID pitch_pid[2] = {{80, 0, 2, 7, 0}, {1500, 0.1, 0, 10000, 1000}};
 
 float
 	// yaw
@@ -49,7 +49,12 @@ float
 	pitch_velocity, // 速度环 目标
 	pitch_current;	// 电流输出
 
+Gimbal_Mode gb_mode = Gimbal_Mode::zero_force;
+
 /* ================================================================ prototype ================================================================ */
+
+void Gimbal_ZeroForce(void);
+void Gimbal_Running(void);
 
 /* ================================================================ function ================================================================ */
 
@@ -57,83 +62,44 @@ extern "C" void Gimbal_Task(void const *argument)
 {
 	for (;;)
 	{
-		yaw_velocity = yaw_pid[POSITION_PID].UpdateEZ(
-			yaw_position - ins.Yaw_Angle, 0, -ins.Yaw_Gyro);
+		switch (gb_mode)
+		{
+		case Gimbal_Mode::zero_force:
+			Gimbal_ZeroForce();
+			break;
 
-		yaw_current = yaw_pid[VELOCITY_PID].Update(yaw_velocity, ins.Yaw_Gyro);
+		case Gimbal_Mode::running:
+			Gimbal_Running();
+			break;
+		}
 
 		osDelay(1);
 	}
 }
 
-// RM_Motor_Fdb_t pitch_motor_fdb = {0};
+void Gimbal_ZeroForce(void)
+{
+	// RM_Motor_Control_Transmit(BSP_PORT2, GM6020_TX_V_ID_1, (RM_Motor_Control_t){0, 0, 0, 0}); // yaw tx
+	// RM_Motor_Control_Transmit(BSP_PORT1, GM6020_TX_V_ID_1, (RM_Motor_Control_t){0, 0, 0, 0}); // pitch tx
+}
 
-// //                          KP   KI   KD  Alpha Deadband  I_MAX   Output_MAX
-// float yaw_pid_param[7] = {13.f, 0.1f, 0.f, 0.f, 0.f, 5000.f, 12000.f};
-// float pitch_pid_param[7] = {4000.f, 0, 40.f, 0, 0, 0, 16384.f};
+void Gimbal_Running(void)
+{
+	// yaw 位置环
+	yaw_velocity = yaw_pid[POSITION_PID].UpdateEZ(yaw_position - ins.Yaw_TolAngle, 0, -ins.Yaw_Gyro);
 
-// float pitch_output = 0;
-// float yaw_output = 0;
-// float single_yaw_angle = 0;
+	// yaw 速度环
+	yaw_current = -yaw_pid[VELOCITY_PID].Update(yaw_velocity, ins.Yaw_Gyro);
 
-// RM_Motor_Cmd_t pitch_cmd, yaw_cmd;
+	// yaw tx
+	RM_Motor_Control_Transmit(BSP_PORT2, GM6020_TX_V_ID_1, (RM_Motor_Control_t){0, 0, (int16_t)yaw_current, 0});
 
-// BUFFER_T gb_can_buf[8];
+	// pitch 位置环
+	pitch_velocity = pitch_pid[POSITION_PID].UpdateEZ(pitch_position - ins.Pitch_Angle, 0, -ins.Pitch_Gyro);
 
-// TickType_t Gimbal_Task_SysTick = 0;
+	// pitch 速度环
+	pitch_current = pitch_pid[VELOCITY_PID].Update(pitch_velocity, ins.Pitch_Gyro);
 
-// void (*gimbal_control)(void) = Gimbal_ZeroForce;
-
-// void Gimbal_Task(void const *argument)
-// {
-
-// 	PID_Init(&Yaw_PID, PID_POSITION, yaw_pid_param);
-// 	PID_Init(&Pitch_PID, PID_POSITION, pitch_pid_param);
-
-// 	gimbal.target.pitch = INS_Info.Pitch_Angle;
-
-// 	for (;;)
-// 	{
-// 		Gimbal_Task_SysTick = osKernelSysTick();
-
-// 		gimbal_control();
-
-// 		RM_Motor_Cmd_Encode(0, 0, pitch_cmd, 0, gb_can_buf);
-// 		USER_FDCAN_Transmit(1, 0x1FF, gb_can_buf);
-
-// 		osDelay(1);
-// 	}
-// }
-
-// void Gimbal_ZeroForce(void)
-// {
-// 	gimbal.output.pitch = 0;
-// 	gimbal.output.yaw = 0;
-// 	gimbal.target.yaw = INS_Info.Yaw_TolAngle;
-// 	gimbal.target.pitch = INS_Info.Pitch_Angle;
-// }
-
-// float yaw_offset = 0;
-
-// void Gimbal_Running(void)
-// {
-// 	// yaw
-
-// 	single_yaw_angle = LoopClampf(INS_Info.Yaw_TolAngle + yaw_offset, 0, 180);
-
-// 	yaw_output = yaw_pid_param[0] * (gimbal.target.yaw - single_yaw_angle)
-// 				 + yaw_pid_param[2] * (-INS_Info.Yaw_Gyro);
-// 	yaw_output = ClampAbsf(yaw_output, yaw_pid_param[6]);
-
-// 	// pitch
-
-// 	gimbal.target.pitch =
-// 		Clampf(gimbal.target.pitch, PITCH_MIN_ANGLE, PITCH_MAX_ANGLE);
-
-// 	pitch_output =
-// 		pitch_pid_param[0] * (gimbal.target.pitch - INS_Info.Pitch_Angle)
-// 		+ pitch_pid_param[2] * (-INS_Info.Pitch_Gyro);
-// 	gimbal.output.pitch = -(int16_t)ClampAbsf(pitch_output, pitch_pid_param[6]);
-
-// 	pitch_cmd = gimbal.output.pitch;
-// }
+	// pitch tx
+	RM_Motor_Control_Transmit(BSP_PORT1, GM6020_TX_V_ID_1, (RM_Motor_Control_t){0, 0, (int16_t)pitch_current, 0});
+}

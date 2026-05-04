@@ -13,8 +13,8 @@
 /* USER CODE END Header */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef INS_TASK_H
-#define INS_TASK_H
+#ifndef INS_TASK_HPP
+#define INS_TASK_HPP
 
 /* Includes ------------------------------------------------------------------*/
 #include "stdint.h"

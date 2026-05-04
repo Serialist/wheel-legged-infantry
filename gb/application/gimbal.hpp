@@ -14,26 +14,17 @@
 
 #include "utils.h"
 
-namespace vgd
+extern float yaw_position, // 角度环 目标
+	yaw_velocity,		   // 速度环 目标
+	pitch_position,		   // 角度环 目标
+	pitch_velocity;		   // 速度环 目标
+
+enum class Gimbal_Mode
 {
-class Gimbal
-{
-	enum class State
-	{
-		none,
-		disable,
-		enable_stop,
-		enable_run
-	};
-
-public:
-	Gimbal();
-	~Gimbal();
-
-	void Control_Loop();
-
-	void SetPoint(float yaw, float pitch);
+	zero_force,
+	running
 };
-} // namespace vgd
+
+extern Gimbal_Mode gb_mode;
 
 #endif

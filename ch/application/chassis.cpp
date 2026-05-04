@@ -1,6 +1,6 @@
 /***********************************************
- * @file wheel_legged_chassis.c
  * @author Serialist (ba3pt@chd.edu.cn)
+ * @file wheel_legged_chassis.c
  * @brief
  * @version 0.1.0
  * @date 2025-10-16
@@ -19,8 +19,7 @@
 
 /* ================================================================ include ================================================================ */
 
-#include "chassis.hpp"
-
+#include "rm_motor.h"
 #include "Remote_Control.h"
 #include "cmsis_os.h"
 #include "cubemars_motor.h"
@@ -28,11 +27,13 @@
 #include "lqr.h"
 #include "observer.hpp"
 #include "ptpid.hpp"
-#include "rm_motor.h"
 #include "vmc-dm.h"
 #include "utils.h"
 #include "simple-planner.h"
 #include "simple-filter.hpp"
+#include "leg-spd.h"
+
+#include "chassis.hpp"
 
 using namespace vgd;
 
@@ -43,24 +44,25 @@ using namespace vgd;
 Motor_AK_RxData_t ak10[4];
 RM_Motor_Feedback_t m3508[2];
 
-Robo_State_t rbstate;				// 机器人模式
+Robo_State_t rbstate, prev_rbstate; // 机器人模式
 Robo_Flag_t rbflag;					// 机器人状态
 JUMP_State_t jump_state = JPS_NONE; // 跳跃状态机
 
 PID pid_tpl(14, 0, 3, 10, 0), // 离地关节 pid
 	pid_tpr(14, 0, 3, 10, 0), // 离地关节 pid
 
-	length_pid[2]{{200, 0, 2000, 50, 0}, {200, 0, 2000, 50, 0}}, // 腿长 pid
+	length_pid[2]{{660, 0, -130, 80, 0}, {660, 0, -130, 80, 0}}, // 腿长 pid
 
 	jump_length_pid[2]{{1300, 0, 60, 300, 0}, {1300, 0, 60, 300, 0}},	// 跳跃 pid
 	damping_pid[2]{{1000, 0, 20000, 300, 0}, {1000, 0, 20000, 300, 0}}, // 阻尼 pid
 	land_pid[2]{{500, 0, 10000, 150, 0}, {500, 0, 10000, 150, 0}},		// 落地缓冲 pid
 
-	yaw_pid(1, 0, 0.5, 6, 0), vyaw_pid{0, 0, 0, 0, 0}, // yaw 旋转 pid
-	roll_pid(1.8, 0, .06, 0.3, 0),					   // roll 轴补偿 pid
-	tp_pid(10, 0, 2, 3, 0);							   // 劈叉 pid
+	yaw_pid(4, 0, 1, 999, 0), vyaw_pid{0, 0, 0, 0, 0}, // yaw 旋转 pid
+	roll_pid(100, 0, 10, 30, 0),					   // roll 轴补偿 pid
+	tp_pid(20, 0, 2, 10, 0);						   // 劈叉 pid
 
-algorithm::LowPass_Order_1 dtheta_filter[2] = {{15, 1000}, {15, 1000}};
+algorithm::LowPass_Order_1 dtheta_filter[2] = {{15, 1000}, {15, 1000}}, // leg dtheta
+	dl0_flr[2] = {{80, 1000}, {80, 1000}};								// leg dlength
 
 Ramp_t ramp_leg_length; // 腿长斜坡
 
@@ -69,7 +71,7 @@ Wheel_Leg_Target_t set; // 目标值
 VMC_t leg[2];			// 腿 VMC 解算
 
 float turn_t;	// yaw 补偿
-float len_roll; // roll 补偿
+float roll_t;	// roll 补偿
 float tp_alpha; // 劈叉
 
 // 腿前馈
@@ -91,12 +93,16 @@ float t1 = 0, t2 = 0;
 /* ================================================================ prototype ================================================================ */
 
 void Motor_Enable(void);
+void Motor_Disable(void);
 void Wheel_Leg_Attitude_Calc(void);
 void Wheel_Leg_Control(void);
 void Yaw_Control(void);
 void Chassis_Motor_Transmit(void);
-void Jump_FSM(void);
+void Jump_FSM(void); // 正常跳
+void Pmuj_FSM(void); // 磕上台阶
 void Chassis_Zero(void);
+void Roll_Height_Calc(
+	float ll, float lr, float w, float r, float h, float *ltl, float *ltr, float min_len, float max_len);
 
 /* ================================================================ function ================================================================ */
 
@@ -107,7 +113,7 @@ extern "C" void Chassis_Task(void const *argument)
 
 	Ramp_Init(&ramp_leg_length, .1f, -0.0008f, 0.0008f);
 
-	set.length = 0.13f;
+	set.height = 0.13f;
 
 	Motor_Enable();
 
@@ -123,7 +129,7 @@ extern "C" void Chassis_Task(void const *argument)
 		{
 		case RBS_RUN:
 		case RBS_JUMP:
-			Jump_FSM();
+			Pmuj_FSM();
 			Wheel_Leg_Control();
 			break;
 
@@ -132,6 +138,7 @@ extern "C" void Chassis_Task(void const *argument)
 			Chassis_Zero();
 			break;
 		}
+		prev_rbstate = rbstate;
 
 		// LQR_Control();
 		// Yaw_Control();
@@ -143,7 +150,7 @@ extern "C" void Chassis_Task(void const *argument)
 
 		Chassis_Motor_Transmit();
 
-		osDelay(1);
+		// osDelay(1);
 	}
 }
 
@@ -156,6 +163,15 @@ void Motor_Enable(void)
 	for (int a = 1; a <= 4; a++)
 	{
 		AK_Motor_MIT_Enable(BSP_PORT2, a);
+		osDelay(1);
+	}
+}
+
+void Motor_Disable(void)
+{
+	for (int a = 1; a <= 4; a++)
+	{
+		AK_Motor_MIT_Disable(BSP_PORT2, a);
 		osDelay(1);
 	}
 }
@@ -173,6 +189,8 @@ void Chassis_Zero(void)
 // debug variable
 float ttphi1 = 0, ttphi4 = 0, tttp = 0, ttf0 = 0;
 
+float dleg[2][2] = {0};
+
 // 腿正解
 void Wheel_Leg_Attitude_Calc(void)
 {
@@ -182,8 +200,14 @@ void Wheel_Leg_Attitude_Calc(void)
 	VMC_5bar_FK(
 		&leg[RIGHT], PI / 2.0f - ak10[RF].angle, PI / 2.0f - ak10[RB].angle, ins.Pitch_Angle, ins.Pitch_Gyro, 0.001f);
 
-	OffGround_Detection(&leg[LEFT], ins.Accel[2]);
-	OffGround_Detection(&leg[RIGHT], ins.Accel[2]);
+	Leg_Spd(ak10[LF].speed, ak10[LB].speed, PI / 2.0f + ak10[LF].angle, PI / 2.0f + ak10[LB].angle, dleg[LEFT]);
+	Leg_Spd(-ak10[RF].speed, -ak10[RB].speed, PI / 2.0f - ak10[RF].angle, PI / 2.0f - ak10[RB].angle, dleg[RIGHT]);
+
+	// leg[LEFT].d_L0 = dl0_flr[LEFT].update(leg[LEFT].L0);
+	// leg[RIGHT].d_L0 = dl0_flr[RIGHT].update(leg[RIGHT].L0);
+
+	OffGround_Detection(&leg[LEFT], ins.Accel[1]);
+	OffGround_Detection(&leg[RIGHT], ins.Accel[1]);
 
 	if (jump_state != JPS_NONE && jump_state != JPS_INIT)
 	{
@@ -197,6 +221,7 @@ void Wheel_Leg_Attitude_Calc(void)
 }
 
 int ch_task_cnt = 0;
+float body_width = BODY_WIDTH;
 
 void Chassis_Motor_Transmit(void)
 {
@@ -210,7 +235,6 @@ void Chassis_Motor_Transmit(void)
 		(RM_Motor_Control_t){
 			HEXROLL_TORQUE_TO_CURRENT(set.hub_torque[LEFT]), HEXROLL_TORQUE_TO_CURRENT(set.hub_torque[RIGHT]), 0, 0});
 
-	// MIT模式下发送
 	if (ch_task_cnt == 0)
 	{
 		AK_Motor_MIT_Transmit(BSP_PORT2, HIP_LF_ID, 0, 0, 0, 0, set.hip_torque[LF]);
@@ -231,7 +255,6 @@ void Chassis_Motor_Transmit(void)
 	osDelay(1);
 	AK_Motor_MIT_Transmit(BSP_PORT2, HIP_RF_ID, 0, 0, 0, 0, 0);
 	AK_Motor_MIT_Transmit(BSP_PORT2, HIP_RB_ID, 0, 0, 0, 0, 0);
-	osDelay(1);
 
 #endif
 }
@@ -278,19 +301,31 @@ void Wheel_Leg_Control(void)
 
 	/* ================================ 腿 解算 ================================ */
 
-	// set.length = set.height / arm_cos_f32(leg[LEFT].theta);
-	// set.right_length = set.height / arm_cos_f32(leg[RIGHT].theta);
+	// set.roll = set.yaw * 0.2;
+	// roll_t = -roll_pid.Update(set.roll, ins.Roll_Angle);
+	// roll_t = 0;
 
-	len_roll = roll_pid.Update(set.roll, -ins.Roll_Angle);
-	// len_roll = 0;
+	// roll 前馈
+	Roll_Height_Calc(leg[LEFT].L0,
+					 leg[RIGHT].L0,
+					 body_width,
+					 ins.Roll_Angle,
+					 set.height,
+					 &set.length[LEFT],
+					 &set.length[RIGHT],
+					 0.1,
+					 0.4);
+	// set.length[LEFT] = set.length[RIGHT] = set.height;
 
 	/// @brief 腿推力 PID
 
-	leg[LEFT].F0 = leg_ff * COSF(leg[LEFT].theta)
-				   + length_pid[LEFT].Update(Clampf(set.length + len_roll, 0.1f, 0.35f), leg[LEFT].L0);
+	leg[LEFT].F0 = leg_ff * COSF(leg[LEFT].theta) // 前馈
+				   + roll_t						  // roll 补偿
+				   + length_pid[LEFT].UpdateEZ(set.length[LEFT] - leg[LEFT].L0, 0, dleg[LEFT][0]);
 
-	leg[RIGHT].F0 = leg_ff * COSF(leg[RIGHT].theta)
-					+ length_pid[RIGHT].Update(Clampf(set.length - len_roll, 0.1f, 0.35f), leg[RIGHT].L0);
+	leg[RIGHT].F0 = leg_ff * COSF(leg[RIGHT].theta) // 前馈
+					- roll_t						// roll 补偿
+					+ length_pid[RIGHT].UpdateEZ(set.length[RIGHT] - leg[RIGHT].L0, 0, dleg[RIGHT][0]);
 
 	tp_alpha = tp_pid.Update(0, leg[LEFT].alpha - leg[RIGHT].alpha);
 
@@ -340,9 +375,6 @@ float d_leg_len = 0;
 
 void Jump_FSM(void)
 {
-	leg_len = (leg[LEFT].L0 + leg[RIGHT].L0) * .5f;
-	d_leg_len = (leg[LEFT].d_L0 - leg[RIGHT].d_L0) * .5f;
-
 	switch (jump_state)
 	{
 		// 空闲
@@ -359,22 +391,9 @@ void Jump_FSM(void)
 		// 蹲下准备
 	case JPS_INIT:
 	{
-		set.length = .1f;
-
-		set.jump_f0[LEFT] = leg_ff * COSF(leg[LEFT].theta)
-							+ length_pid[LEFT].Update(Clampf(set.length + len_roll, 0.1f, 0.35f), leg[LEFT].L0);
-
-		set.jump_f0[RIGHT] = leg_ff * COSF(leg[RIGHT].theta)
-							 + length_pid[RIGHT].Update(Clampf(set.length - len_roll, 0.1f, 0.35f), leg[RIGHT].L0);
 
 		if (jump_time >= init_time)
 		{
-			Ramp_Init(&jump_f_ramp, leg_len, 0, (.25f / stretch_time));
-			length_pid[LEFT].Reset();
-			length_pid[RIGHT].Reset();
-
-			jump_state = JPS_STRETCH;
-			jump_time = 0;
 		}
 	}
 	break;
@@ -382,21 +401,9 @@ void Jump_FSM(void)
 		// 伸腿
 	case JPS_STRETCH:
 	{
-		set.length = .33f;
-		// set.length = Ramp_Update(&jump_f_ramp, .35f, .003f); // 斜坡函数
 
-		set.jump_f0[LEFT] = leg_ff * COSF(leg[LEFT].theta) + length_pid[LEFT].Update(set.length, leg[LEFT].L0);
-
-		set.jump_f0[RIGHT] = leg_ff * COSF(leg[RIGHT].theta) + length_pid[RIGHT].Update(set.length, leg[RIGHT].L0);
-
-		if (leg_len >= set.length || jump_time >= stretch_time)
+		if (leg_len >= set.height || jump_time >= stretch_time)
 		{
-			Ramp_Init(&jump_f_ramp, leg[LEFT].L0, -(.25f / shrink_time), 0);
-			jump_length_pid[LEFT].Reset();
-			jump_length_pid[RIGHT].Reset();
-
-			jump_state = JPS_STRETCH_DAMPING;
-			jump_time = 0;
 		}
 	}
 	break;
@@ -404,21 +411,9 @@ void Jump_FSM(void)
 	// 伸腿缓冲
 	case JPS_STRETCH_DAMPING:
 	{
-		set.length = .33f;
-
-		set.jump_f0[LEFT] = offground_leg_ff * COSF(leg[LEFT].theta)
-							+ damping_pid[LEFT].Update(set.length, leg[LEFT].L0);
-
-		set.jump_f0[RIGHT] = offground_leg_ff * COSF(leg[RIGHT].theta)
-							 + damping_pid[RIGHT].Update(set.length, leg[RIGHT].L0);
 
 		if (jump_time >= stretch_damping_time)
 		{
-			damping_pid[LEFT].Reset();
-			damping_pid[RIGHT].Reset();
-
-			jump_state = JPS_SHRINK;
-			jump_time = 0;
 		}
 	}
 	break;
@@ -426,21 +421,9 @@ void Jump_FSM(void)
 		// 缩腿
 	case JPS_SHRINK:
 	{
-		set.length = .15f;
-		// set.length = Ramp_Update(&jump_f_ramp, .15f, .003f); // 斜坡函数
 
-		set.jump_f0[LEFT] = shrink_leg_ff * COSF(leg[LEFT].theta) + length_pid[LEFT].Update(set.length, leg[LEFT].L0);
-
-		set.jump_f0[RIGHT] = shrink_leg_ff * COSF(leg[RIGHT].theta)
-							 + length_pid[RIGHT].Update(set.length, leg[RIGHT].L0);
-
-		if (leg_len <= set.length || jump_time >= shrink_time)
+		if (leg_len <= set.height || jump_time >= shrink_time)
 		{
-			jump_length_pid[LEFT].Reset();
-			jump_length_pid[RIGHT].Reset();
-
-			jump_state = JPS_SHRINK_DAMPING;
-			jump_time = 0;
 		}
 	}
 	break;
@@ -448,21 +431,9 @@ void Jump_FSM(void)
 	// 缓冲
 	case JPS_SHRINK_DAMPING:
 	{
-		set.length = .15f;
-
-		set.jump_f0[LEFT] = offground_leg_ff * COSF(leg[LEFT].theta)
-							+ damping_pid[LEFT].Update(set.length, leg[LEFT].L0);
-
-		set.jump_f0[RIGHT] = offground_leg_ff * COSF(leg[RIGHT].theta)
-							 + damping_pid[RIGHT].Update(set.length, leg[RIGHT].L0);
 
 		if (jump_time >= shrink_damping_time)
 		{
-			damping_pid[LEFT].Reset();
-			damping_pid[RIGHT].Reset();
-
-			jump_state = JPS_LAND;
-			jump_time = 0;
 		}
 	}
 	break;
@@ -470,25 +441,59 @@ void Jump_FSM(void)
 		// 结束
 	case JPS_LAND:
 	{
-		set.length = .15f;
-
-		set.jump_f0[LEFT] = offground_leg_ff * COSF(leg[LEFT].theta) + land_pid[LEFT].Update(set.length, leg[LEFT].L0);
-
-		set.jump_f0[RIGHT] = offground_leg_ff * COSF(leg[RIGHT].theta)
-							 + land_pid[RIGHT].Update(set.length, leg[RIGHT].L0);
 
 		if (rbflag.offground == false || jump_time >= land_time)
 		{
-			land_pid[LEFT].Reset();
-
-			jump_state = JPS_NONE;
-			jump_time = 0;
 		}
 	}
 	break;
 	}
 
-	jump_time += 3;
+	jump_time += 1;
+}
+
+enum class Pmuj
+{
+	none,
+	wait,
+	shrink,
+	back,
+	end,
+};
+
+Pmuj pmuj = Pmuj::none;
+
+float avg_length = 0;
+uint32_t pmuj_time = 0;
+
+void Pmuj_FSM(void)
+{
+	pmuj_time++;
+	avg_length = (leg[LEFT].L0 + leg[RIGHT].L0) * 0.5;
+
+	switch (pmuj)
+	{
+	case Pmuj::none:
+		if (jump_state == JPS_SHRINK)
+		{
+			pmuj_time = 0;
+			pmuj = Pmuj::shrink;
+		}
+		break;
+
+	case Pmuj::shrink:
+		leg_ff = -10;
+		set.height = 0.1;
+		if (avg_length < 0.2)
+		{
+			pmuj_time = 0;
+			pmuj = Pmuj::none;
+		}
+		break;
+
+	default:
+		break;
+	}
 }
 
 // jump()
@@ -637,4 +642,31 @@ void Yaw_Control(void)
 
 void LQR_Control_(void)
 {
+}
+
+float phi_diff = 0,	  // 两腿角度差
+	phi_slope = 0,	  // 地面倾斜角
+	delta_length = 0, // 腿长差
+	slope_ratio = 1.2;
+
+/// @brief 腿长计算
+/// @param ll 左腿长 当前
+/// @param lr 右腿长 当前
+/// @param w 机体宽度
+/// @param r 机体 ins.roll
+/// @param h 机体中心里地高度 目标
+/// @param ltl[out] 左腿长 目标
+/// @param ltr[out] 右腿长 目标
+/// @param min_len 最小腿长
+/// @param max_len 最大腿长
+/// @note 按照右手直角坐标系，xyz前左上，绕xzy轴逆时针为roll pitch yaw
+void Roll_Height_Calc(
+	float ll, float lr, float w, float r, float h, float *ltl, float *ltr, float min_len, float max_len)
+{
+	phi_diff = std::atanf((ll - lr) / w);
+	phi_slope = phi_diff + r;
+	delta_length = w / 2 * std::tanf(phi_slope * slope_ratio);
+
+	*ltl = h + delta_length;
+	*ltr = h - delta_length;
 }

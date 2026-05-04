@@ -8,8 +8,7 @@ py.lqr_k_extract.fclear()
 
 L0s = 0.12:0.01:0.32;          % L0变化范围
 Ks = zeros(2, 6, length(L0s)); % 存放不同L0对应的K
-% theta_list = 0;
-theta_list = [0 15 30 45 60];
+theta_list = 0;
 
 K_data = zeros(2, 6, length(theta_list), length(L0s), "double"); % 储存所有K
 
@@ -59,7 +58,7 @@ for theta_step = 1:length(theta_list)
         B = vpa(subs(Jb, [theta dtheta x x1 phi phi1 Tp T], [theta_t 0 0 0 0 0 0 0]));
 
         % 离散化
-        [G, H] = c2d(double(A), double(B), 0.003);
+        [G, H] = c2d(double(A), double(B), 0.001);
         
         % 定义权重矩阵Q, R
         % PSO 参数
@@ -84,8 +83,8 @@ for theta_step = 1:length(theta_list)
         % Q = diag([6000, 80, 4000, 0.01, 8000, 20]);
         % R_ = diag([50 5]);
 
-        Q = diag([3000, 150, 4000, 200, 8000, 200]);
-        R_ = diag([50 5]);
+        Q = diag([6000, 80, 400, 100, 8000, 20]);
+        R_ = diag([40 10]);
     
         % 求解反馈矩阵K
         K_val = dlqr(G, H, Q, R_);
