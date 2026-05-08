@@ -9,8 +9,8 @@
  *
  */
 
-#ifndef CHASSIS_H
-#define CHASSIS_H
+#ifndef CHASSIS_HPP
+#define CHASSIS_HPP
 
 #include "rm_motor.h"
 #include "vmc-dm.h"
@@ -22,6 +22,8 @@ typedef struct
 	bool offground_r;
 	bool offground;
 	bool fallen;
+	bool reable;
+	bool enable;
 } Robo_Flag_t;
 
 // 机体姿态

@@ -58,30 +58,19 @@ extern "C" void Command_Task(void const *argument)
 	for (;;)
 	{
 		// 停止
-		if (RC_SWITCH == RC_STOP)
+		if (RC_SWITCH == RC_RUN)
+		{
+			rbstate = RBS_RUN;
+			Cmd_Get();
+		}
+		else if (RC_SWITCH == RC_JUMP)
+		{
+			rbstate = RBS_JUMP;
+		}
+		else
 		{
 			rbstate = RBS_STOP;
 			Cmd_Reset();
-		}
-		// 跳
-		// else if (RC_SWITCH == RC_JUMP &&   // 跳
-		// 		 prev_switch != RC_JUMP && // 上次不是跳
-		// 		 rbstate == RBS_JUMP)	   // 没有正在跳
-		// {
-		// 	rbstate = RBS_JUMP;
-		// 	Cmd_Get();
-		// }
-		// 正常行驶
-		else if (RC_SWITCH == RC_RUN || RC_SWITCH == RC_JUMP)
-		{
-			if (RC_SWITCH == RC_JUMP && prev_switch != RC_JUMP)
-				jump_state = JPS_SHRINK;
-			else
-				jump_state = JPS_NONE;
-
-			rbstate = RBS_RUN;
-
-			Cmd_Get();
 		}
 
 		prev_switch = RC_SWITCH;

@@ -45,7 +45,7 @@ Motor_AK_RxData_t ak10[4];
 RM_Motor_Feedback_t m3508[2];
 
 Robo_State_t rbstate, prev_rbstate; // 机器人模式
-Robo_Flag_t rbflag;					// 机器人状态
+Robo_Flag_t rbflag, prev_rbflag;	// 机器人状态
 JUMP_State_t jump_state = JPS_NONE; // 跳跃状态机
 
 PID pid_tpl(14, 0, 3, 10, 0), // 离地关节 pid
@@ -113,13 +113,25 @@ extern "C" void Chassis_Task(void const *argument)
 
 	Ramp_Init(&ramp_leg_length, .1f, -0.0008f, 0.0008f);
 
-	set.height = 0.13f;
+	set.height = 0.1f;
 
 	Motor_Enable();
 
 	for (;;)
 	{
 		/* ================ 状态更新 ================ */
+
+		if (rbflag.reable == true)
+		{
+			rbflag.reable = false;
+			Motor_Disable();
+			Motor_Enable();
+		}
+
+		if (rbflag.enable == true && prev_rbflag.enable == false)
+			Motor_Enable();
+		else if (rbflag.enable == false && prev_rbflag.enable == true)
+			Motor_Disable();
 
 		Wheel_Leg_Attitude_Calc();
 
@@ -138,7 +150,9 @@ extern "C" void Chassis_Task(void const *argument)
 			Chassis_Zero();
 			break;
 		}
+
 		prev_rbstate = rbstate;
+		prev_rbflag = rbflag;
 
 		// LQR_Control();
 		// Yaw_Control();
@@ -150,7 +164,7 @@ extern "C" void Chassis_Task(void const *argument)
 
 		Chassis_Motor_Transmit();
 
-		// osDelay(1);
+		osDelay(1);
 	}
 }
 
@@ -162,7 +176,7 @@ void Motor_Enable(void)
 {
 	for (int a = 1; a <= 4; a++)
 	{
-		AK_Motor_MIT_Enable(BSP_PORT2, a);
+		AK_Motor_MIT_Enable(BSP_PORT1, a);
 		osDelay(1);
 	}
 }
@@ -171,7 +185,7 @@ void Motor_Disable(void)
 {
 	for (int a = 1; a <= 4; a++)
 	{
-		AK_Motor_MIT_Disable(BSP_PORT2, a);
+		AK_Motor_MIT_Disable(BSP_PORT1, a);
 		osDelay(1);
 	}
 }
@@ -223,27 +237,36 @@ void Wheel_Leg_Attitude_Calc(void)
 int ch_task_cnt = 0;
 float body_width = BODY_WIDTH;
 
+bool hipMotorSendEnable[4] = {true, true, true, true};
+
 void Chassis_Motor_Transmit(void)
 {
-	ch_task_cnt = (ch_task_cnt + 1) % 2;
+	ch_task_cnt = (ch_task_cnt + 1) % 4;
+
 #ifndef ZERO_FORCE
 
 	/// @brief 用 3508
 	RM_Motor_Control_Transmit(
-		BSP_PORT1,
+		BSP_PORT3,
 		M3508_TX_ID_1,
 		(RM_Motor_Control_t){
 			HEXROLL_TORQUE_TO_CURRENT(set.hub_torque[LEFT]), HEXROLL_TORQUE_TO_CURRENT(set.hub_torque[RIGHT]), 0, 0});
 
-	if (ch_task_cnt == 0)
+	if (ch_task_cnt == 0 && hipMotorSendEnable[0] == true)
 	{
-		AK_Motor_MIT_Transmit(BSP_PORT2, HIP_LF_ID, 0, 0, 0, 0, set.hip_torque[LF]);
-		AK_Motor_MIT_Transmit(BSP_PORT2, HIP_LB_ID, 0, 0, 0, 0, set.hip_torque[LB]);
+		AK_Motor_MIT_Transmit(BSP_PORT1, HIP_LF_ID, 0, 0, 0, 0, set.hip_torque[LF]);
 	}
-	else if (ch_task_cnt == 1)
+	else if (ch_task_cnt == 1 && hipMotorSendEnable[1] == true)
 	{
-		AK_Motor_MIT_Transmit(BSP_PORT2, HIP_RF_ID, 0, 0, 0, 0, set.hip_torque[RF]);
-		AK_Motor_MIT_Transmit(BSP_PORT2, HIP_RB_ID, 0, 0, 0, 0, set.hip_torque[RB]);
+		AK_Motor_MIT_Transmit(BSP_PORT1, HIP_LB_ID, 0, 0, 0, 0, set.hip_torque[LB]);
+	}
+	else if (ch_task_cnt == 2 && hipMotorSendEnable[2] == true)
+	{
+		AK_Motor_MIT_Transmit(BSP_PORT1, HIP_RF_ID, 0, 0, 0, 0, set.hip_torque[RF]);
+	}
+	else if (ch_task_cnt == 3 && hipMotorSendEnable[3] == true)
+	{
+		AK_Motor_MIT_Transmit(BSP_PORT1, HIP_RB_ID, 0, 0, 0, 0, set.hip_torque[RB]);
 	}
 
 #else
@@ -468,31 +491,18 @@ uint32_t pmuj_time = 0;
 
 void Pmuj_FSM(void)
 {
-	pmuj_time++;
-	avg_length = (leg[LEFT].L0 + leg[RIGHT].L0) * 0.5;
-
-	switch (pmuj)
+	if (rbstate == RBS_JUMP && pmuj_time < 300)
 	{
-	case Pmuj::none:
-		if (jump_state == JPS_SHRINK)
-		{
-			pmuj_time = 0;
-			pmuj = Pmuj::shrink;
-		}
-		break;
+		pmuj_time++;
+		avg_length = (leg[LEFT].L0 + leg[RIGHT].L0) * 0.5;
 
-	case Pmuj::shrink:
 		leg_ff = -10;
 		set.height = 0.1;
-		if (avg_length < 0.2)
-		{
-			pmuj_time = 0;
-			pmuj = Pmuj::none;
-		}
-		break;
-
-	default:
-		break;
+	}
+	else
+	{
+		pmuj_time = 0;
+		leg_ff = ROD2_MASS * GRAVITY_ACCEL / 2;
 	}
 }
 

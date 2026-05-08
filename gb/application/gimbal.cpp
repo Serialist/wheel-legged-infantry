@@ -89,10 +89,11 @@ void Gimbal_Running(void)
 	yaw_velocity = yaw_pid[POSITION_PID].UpdateEZ(yaw_position - ins.Yaw_TolAngle, 0, -ins.Yaw_Gyro);
 
 	// yaw 速度环
-	yaw_current = -yaw_pid[VELOCITY_PID].Update(yaw_velocity, ins.Yaw_Gyro);
+	yaw_current = yaw_pid[VELOCITY_PID].Update(yaw_velocity, ins.Yaw_Gyro);
 
 	// yaw tx
-	RM_Motor_Control_Transmit(BSP_PORT2, GM6020_TX_V_ID_1, (RM_Motor_Control_t){0, 0, (int16_t)yaw_current, 0});
+	// yaw 电机反装向下，坐标系向上，所以方向反的
+	RM_Motor_Control_Transmit(BSP_PORT2, GM6020_TX_V_ID_1, (RM_Motor_Control_t){0, 0, -(int16_t)yaw_current, 0});
 
 	// pitch 位置环
 	pitch_velocity = pitch_pid[POSITION_PID].UpdateEZ(pitch_position - ins.Pitch_Angle, 0, -ins.Pitch_Gyro);
