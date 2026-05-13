@@ -9,22 +9,21 @@
  *
  */
 
-#include "cmsis_os.h"
-
+#include "command-task.hpp"
+#include "Image_Transmission.h"
 #include "Remote_Control.h"
 #include "b2b.h"
-#include "bsp_uart.h"
-#include "rm_motor.h"
-#include "vmc-dm.h"
-#include "Image_Transmission.h"
-
-#include "gimbal.hpp"
-#include "command-task.hpp"
-#include "ins-task.hpp"
 #include "bsp_can.h"
-
-#include "superpower.h"
+#include "bsp_uart.h"
+#include "cmsis_os.h"
+#include "gimbal.hpp"
+#include "ins-task.hpp"
 #include "math-utils.hpp"
+#include "rm_motor.h"
+#include "superpower.h"
+#include "vmc-dm.h"
+
+using namespace vgd;
 
 extern RM_Motor_Feedback_t yaw_motor, pitch_motor;
 
@@ -38,24 +37,17 @@ void Command_Jump(void);
 float sp_target = 0;
 uint8_t sp_buf[8];
 
-extern "C" void Command_Task(void const *argument)
-{
-
-	for (;;)
-	{
+extern "C" void Command_Task(void const* argument) {
+	for (;;) {
 		Remote_Message_Moniter(&remote_ctrl);
 
 		if (remote_ctrl.rc_lost == true || // 遥控器断线
 			remote_ctrl.rc.s[DT7_SL] == DT7_UP)
 		{
 			Command_ZeroForce();
-		}
-		else if (remote_ctrl.rc.s[DT7_SL] == DT7_MID)
-		{
+		} else if (remote_ctrl.rc.s[DT7_SL] == DT7_MID) {
 			Command_Normal();
-		}
-		else if (remote_ctrl.rc.s[DT7_SL] == DT7_DOWN)
-		{
+		} else if (remote_ctrl.rc.s[DT7_SL] == DT7_DOWN) {
 			Command_Jump();
 		}
 
@@ -70,8 +62,7 @@ extern "C" void Command_Task(void const *argument)
 	}
 }
 
-void Command_ZeroForce(void)
-{
+void Command_ZeroForce(void) {
 	gb_mode = Gimbal_Mode::zero_force;
 
 	ch_cmd.vx = 0;
@@ -88,8 +79,7 @@ void Command_ZeroForce(void)
 #define VYAW_CMD remote_ctrl.rc.ch[DT7_RX]
 #define VPITCH_CMD remote_ctrl.rc.ch[DT7_RY]
 
-void Command_Normal(void)
-{
+void Command_Normal(void) {
 	gb_mode = Gimbal_Mode::running;
 
 	// ch_cmd.vx = VT13_Info.RC.Channel[0];
@@ -109,16 +99,15 @@ void Command_Normal(void)
 
 	yaw_position = yaw_position - VYAW_CMD * 0.0000075;
 
-	pitch_position = vgd::utils::ClampAbsf(pitch_position + VPITCH_CMD * 0.000007, DEG2RAD(20));
+	pitch_position = math::ClampAbsf(pitch_position + VPITCH_CMD * 0.000007, DEG2RAD(20));
 
-	ch_cmd.vx = vgd::utils::Remapf(V_CMD, -660, 660, -2, 2);
-	ch_cmd.vy = vgd::utils::Remapf(std::fmaxf(LEG_LEN_CMD, 60), 60, 660, 0.1, 0.4);
+	ch_cmd.vx = math::Remapf(V_CMD, -660, 660, -2, 2);
+	ch_cmd.vy = math::Remapf(std::fmaxf(LEG_LEN_CMD, 60), 60, 660, 0.1, 0.4);
 	ch_cmd.vyaw = yaw_position;
 	ch_cmd.sw[0] = 1;
 }
 
-void Command_Jump(void)
-{
+void Command_Jump(void) {
 	Command_Normal();
 	ch_cmd.sw[0] = 2;
 }

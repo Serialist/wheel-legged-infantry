@@ -44,8 +44,7 @@ void Cmd_Reset(void);
 // #define RC_SWITCH remote_ctrl.rc.s[DT7_SL]
 #define RC_SWITCH ch_cmd.sw[0]
 
-extern "C" void Command_Task(void const *argument)
-{
+extern "C" void Command_Task(void const* argument) {
 	/* ================================ 系统初始化 ================================ */
 
 	rbstate = RBS_INIT;
@@ -55,20 +54,14 @@ extern "C" void Command_Task(void const *argument)
 	rbstate = RBS_READY;
 
 	/* ================================ 模式切换 ================================ */
-	for (;;)
-	{
+	for (;;) {
 		// 停止
-		if (RC_SWITCH == RC_RUN)
-		{
+		if (RC_SWITCH == RC_RUN) {
 			rbstate = RBS_RUN;
 			Cmd_Get();
-		}
-		else if (RC_SWITCH == RC_JUMP)
-		{
+		} else if (RC_SWITCH == RC_JUMP) {
 			rbstate = RBS_JUMP;
-		}
-		else
-		{
+		} else {
 			rbstate = RBS_STOP;
 			Cmd_Reset();
 		}
@@ -92,8 +85,7 @@ extern "C" void Command_Task(void const *argument)
 #define ROLL_CMD 0
 
 /// @brief 获取控制量
-void Cmd_Get(void)
-{
+void Cmd_Get(void) {
 	set.v = V_CMD;
 
 	// set.x += V_CMD / 660 * 0.02f;
@@ -109,8 +101,7 @@ void Cmd_Get(void)
 		set.x = ob.x;
 }
 
-void Cmd_Reset(void)
-{
+void Cmd_Reset(void) {
 	set.v = 0;
 	set.yaw = ins.Yaw_TolAngle;
 	set.roll = 0;

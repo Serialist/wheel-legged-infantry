@@ -17,10 +17,10 @@
 #define ROBOT_CONFIG_H
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
+#include "arm_math.h"
 #include "main.h"
 
 /* ================ mode switch ================ */

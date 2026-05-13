@@ -21,7 +21,7 @@
 
 #include "cmsis_os.h"
 #include "shoot.hpp"
-#include "ptpid.hpp"
+#include "vgd-pid.hpp"
 #include "rm_motor.h"
 #include "heat-limit.h"
 #include "robo-config.h"
@@ -38,8 +38,8 @@ using namespace vgd;
 
 RM_Motor_Feedback_t feed_motor, fr_motor[2];
 
-PID feed_pid = {0, 0, 0, 0, 0};	   // 拨盘
-PID fr_pid[2] = {{0, 0, 0, 0, 0},  // 0 left
+controller::PID feed_pid = {0, 0, 0, 0, 0};	   // 拨盘
+controller::PID fr_pid[2] = {{0, 0, 0, 0, 0},  // 0 left
 				 {0, 0, 0, 0, 0}}; // 1 right
 
 float fr_velocity = FR_DEFAULT_VELOCITY, // 摩擦轮射速
