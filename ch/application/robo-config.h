@@ -51,6 +51,7 @@ extern "C" {
 #define HUB_R_ID 0x202
 // 板间通信
 #define B2B_CHASSIS_CMD_ID 0x199
+#define YAW_ID 0x203
 
 /* ================ environment parameter ================ */
 
@@ -61,18 +62,20 @@ extern "C" {
 /* ================ robot parameter ================ */
 
 #define WHEEL_MASS 0.513 // kg
-#define ROD1_MASS 1		 // kg
-#define ROD2_MASS 13.4	 // kg
+#define ROD1_MASS 1      // kg
+#define ROD2_MASS 13.4   // kg
 
-#define WHEEL_INERTIA 0.000956	 // kg m^2
-#define ROD1_INERTIA 0			 // kg m^2
+#define WHEEL_INERTIA 0.000956   // kg m^2
+#define ROD1_INERTIA 0           // kg m^2
 #define ROD2_INERTIA 0.353588749 // kg m^2
 
 #define WHEEL_RADIUS 0.068 // m
-#define ROD1_LEN 0		   // m
-#define ROD2_LEN 0.036	   // m
+#define ROD1_LEN 0         // m
+#define ROD2_LEN 0.036     // m
 
 #define BODY_WIDTH 0.54 // m
+
+#define YAW_ENCODER_OFFSET 7300 // rmmotor encoder
 
 /* ================ ins ================ */
 

@@ -9,19 +9,21 @@
  *
  */
 
-#include "cmsis_os.h"
-
+#include "command-task.hpp"
 #include "Remote_Control.h"
 #include "b2b.h"
 #include "bsp_uart.h"
-#include "rm_motor.h"
-#include "vmc-dm.h"
-
 #include "chassis.hpp"
-#include "command-task.hpp"
+#include "cmsis_os.h"
 #include "ins-task.hpp"
+#include "math-utils.hpp"
 #include "observer.hpp"
+#include "rm_motor.h"
 #include "simple-planner.h"
+#include "vmc-dm.h"
+#include <cmath>
+
+using namespace vgd;
 
 // #define RC_STOP DT7_UP
 // #define RC_RUN DT7_MID
@@ -45,33 +47,33 @@ void Cmd_Reset(void);
 #define RC_SWITCH ch_cmd.sw[0]
 
 extern "C" void Command_Task(void const* argument) {
-	/* ================================ 系统初始化 ================================ */
+    /* ================================ 系统初始化 ================================ */
 
-	rbstate = RBS_INIT;
+    rbstate = RBS_INIT;
 
-	/* ================================ 初始化 ================================ */
+    /* ================================ 初始化 ================================ */
 
-	rbstate = RBS_READY;
+    rbstate = RBS_READY;
 
-	/* ================================ 模式切换 ================================ */
-	for (;;) {
-		// 停止
-		if (RC_SWITCH == RC_RUN) {
-			rbstate = RBS_RUN;
-			Cmd_Get();
-		} else if (RC_SWITCH == RC_JUMP) {
-			rbstate = RBS_JUMP;
-		} else {
-			rbstate = RBS_STOP;
-			Cmd_Reset();
-		}
+    /* ================================ 模式切换 ================================ */
+    for (;;) {
+        // 停止
+        if (RC_SWITCH == RC_RUN) {
+            rbstate = RBS_RUN;
+            Cmd_Get();
+        } else if (RC_SWITCH == RC_JUMP) {
+            rbstate = RBS_JUMP;
+        } else {
+            rbstate = RBS_STOP;
+            Cmd_Reset();
+        }
 
-		prev_switch = RC_SWITCH;
+        prev_switch = RC_SWITCH;
 
-		// USART_Vofa_Justfloat_Transmit(0, 0.f, 0.f);
+        // USART_Vofa_Justfloat_Transmit(0, 0.f, 0.f);
 
-		osDelay(1);
-	}
+        osDelay(1);
+    }
 }
 
 // #define LEG_LEN_CMD remote_ctrl.rc.ch[DT7_RY]
@@ -79,31 +81,25 @@ extern "C" void Command_Task(void const* argument) {
 // #define YAW_CMD remote_ctrl.rc.ch[DT7_LX]
 // #define ROLL_CMD remote_ctrl.rc.ch[DT7_RX]
 
-#define LEG_LEN_CMD ch_cmd.vy
-#define V_CMD ch_cmd.vx
-#define YAW_CMD ch_cmd.vyaw
-#define ROLL_CMD 0
-
 /// @brief 获取控制量
 void Cmd_Get(void) {
-	set.v = V_CMD;
+    set.v = ch_cmd.ch[0];
 
-	// set.x += V_CMD / 660 * 0.02f;
+    set.yaw = ch_cmd.ch[2];
 
-	set.yaw = YAW_CMD;
+    set.height = ch_cmd.ch[3];
 
-	set.height = LEG_LEN_CMD;
+    set.roll = 0;
 
-	// set.roll = -ROLL_CMD * 30.0f / 660.0f;
-	set.roll = 0;
+    if (std::abs(set.v) > 0.1)
+        set.x = ob.x = 0;
 
-	if (set.v != 0)
-		set.x = ob.x;
+    set.theta = -0.04;
 }
 
 void Cmd_Reset(void) {
-	set.v = 0;
-	set.yaw = ins.Yaw_TolAngle;
-	set.roll = 0;
-	set.x = ob.x;
+    set.v = 0;
+    set.yaw = 0;
+    set.roll = 0;
+    set.x = ob.x = 0;
 }

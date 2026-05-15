@@ -22,10 +22,12 @@
 #include "gimbal.hpp"
 #include "cmsis_os.h"
 #include "ins-task.hpp"
+#include "math-utils.hpp"
 #include "rm_motor.h"
 #include "vgd-pid.hpp"
 
 using namespace vgd;
+using vgd::module::Gimbal_Mode;
 
 /* ================================================================ micro ================================================================ */
 
@@ -40,14 +42,16 @@ controller::PID yaw_pid[2] = { { 10, 0, 1, 15, 0 }, { 1500, 0, 0, 10000, 0 } };
 controller::PID pitch_pid[2] = { { 80, 0, 2, 7, 0 }, { 1500, 0.1, 0, 10000, 1000 } };
 
 float
-	// yaw
-	yaw_position, // 角度环 目标
-	yaw_velocity, // 速度环 目标
-	yaw_current,  // 电流输出
-	// pitch
-	pitch_position, // 角度环 目标
-	pitch_velocity, // 速度环 目标
-	pitch_current;	// 电流输出
+    // yaw
+    yaw_position, // 角度环 目标
+    yaw_velocity, // 速度环 目标
+    yaw_current,  // 电流输出
+    // pitch
+    pitch_position, // 角度环 目标
+    pitch_velocity, // 速度环 目标
+    pitch_current;  // 电流输出
+
+extern float feed_current;
 
 Gimbal_Mode gb_mode = Gimbal_Mode::zero_force;
 
@@ -59,53 +63,56 @@ void Gimbal_Running(void);
 /* ================================================================ function ================================================================ */
 
 extern "C" void Gimbal_Task(void const* argument) {
-	for (;;) {
-		switch (gb_mode) {
-			case Gimbal_Mode::zero_force:
-				Gimbal_ZeroForce();
-				break;
+    for (;;) {
+        switch (gb_mode) {
+            case Gimbal_Mode::zero_force:
+                Gimbal_ZeroForce();
+                break;
 
-			case Gimbal_Mode::running:
-				Gimbal_Running();
-				break;
-		}
+            case Gimbal_Mode::running:
+                Gimbal_Running();
+                break;
+        }
 
-		osDelay(1);
-	}
+        osDelay(1);
+    }
 }
 
 void Gimbal_ZeroForce(void) {
-	// RM_Motor_Control_Transmit(BSP_PORT2, GM6020_TX_V_ID_1, (RM_Motor_Control_t){0, 0, 0, 0}); // yaw tx
-	// RM_Motor_Control_Transmit(BSP_PORT1, GM6020_TX_V_ID_1, (RM_Motor_Control_t){0, 0, 0, 0}); // pitch tx
+    // RM_Motor_Control_Transmit(BSP_PORT2, GM6020_TX_V_ID_1, (RM_Motor_Control_t){0, 0, 0, 0}); // yaw tx
+    // RM_Motor_Control_Transmit(BSP_PORT1, GM6020_TX_V_ID_1, (RM_Motor_Control_t){0, 0, 0, 0}); // pitch tx
 }
 
 void Gimbal_Running(void) {
-	// yaw 位置环
-	yaw_velocity =
-		yaw_pid[POSITION_PID].UpdateEZ(yaw_position - ins.Yaw_TolAngle, 0, -ins.Yaw_Gyro);
+    // yaw 位置环
+    yaw_velocity = yaw_pid[POSITION_PID].UpdateEZ(
+        math::CircleNearestDistance(ins.Yaw_Angle, yaw_position),
+        0,
+        0 - ins.Yaw_Gyro
+    );
 
-	// yaw 速度环
-	yaw_current = -yaw_pid[VELOCITY_PID].Update(yaw_velocity, ins.Yaw_Gyro);
+    // yaw 速度环
+    yaw_current = -yaw_pid[VELOCITY_PID].Update(yaw_velocity, ins.Yaw_Gyro);
 
-	// yaw tx
-	// yaw 电机反装向下，坐标系向上，所以方向反的
-	RM_Motor_Control_Transmit(
-		BSP_PORT2,
-		GM6020_TX_V_ID_1,
-		(RM_Motor_Control_t) { 0, 0, (int16_t)yaw_current, 0 }
-	);
+    // yaw tx
+    // yaw 电机反装向下，坐标系向上，所以方向反的
+    RM_Motor_Control_Transmit(
+        BSP_PORT2,
+        GM6020_TX_V_ID_1,
+        (RM_Motor_Control_t) { 0, 0, (int16_t)yaw_current, 0 }
+    );
 
-	// pitch 位置环
-	pitch_velocity =
-		pitch_pid[POSITION_PID].UpdateEZ(pitch_position - ins.Pitch_Angle, 0, -ins.Pitch_Gyro);
+    // pitch 位置环
+    pitch_velocity =
+        pitch_pid[POSITION_PID].UpdateEZ(pitch_position - ins.Pitch_Angle, 0, -ins.Pitch_Gyro);
 
-	// pitch 速度环
-	pitch_current = pitch_pid[VELOCITY_PID].Update(pitch_velocity, ins.Pitch_Gyro);
+    // pitch 速度环
+    pitch_current = pitch_pid[VELOCITY_PID].Update(pitch_velocity, ins.Pitch_Gyro);
 
-	// pitch tx
-	RM_Motor_Control_Transmit(
-		BSP_PORT1,
-		GM6020_TX_V_ID_1,
-		(RM_Motor_Control_t) { 0, 0, (int16_t)pitch_current, 0 }
-	);
+    // pitch tx
+    RM_Motor_Control_Transmit(
+        BSP_PORT1,
+        GM6020_TX_V_ID_1,
+        (RM_Motor_Control_t) { (int16_t)feed_current, 0, (int16_t)pitch_current, 0 }
+    );
 }
