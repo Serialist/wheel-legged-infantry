@@ -25,7 +25,7 @@ extern "C" {
 
 #define FR_DEFAULT_VELOCITY 0
 
-#define YAW_ENCODER_OFFSET 7300
+#define YAW_ENCODER_OFFSET 280
 
 #define BOARD_DM_MC02
 

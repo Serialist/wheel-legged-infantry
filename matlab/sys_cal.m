@@ -54,8 +54,8 @@ for theta_step = 1:length(theta_list)
         Jb = jacobian( [dtheta; ddtheta; x1; x2; phi1; phi2], [T Tp]);
 
         % 代入数值并转换为数值矩阵
-        A = vpa(subs(Ja, [theta dtheta x x1 phi phi1 Tp T], [theta_t 0 0 0 0 0 0 0]));
-        B = vpa(subs(Jb, [theta dtheta x x1 phi phi1 Tp T], [theta_t 0 0 0 0 0 0 0]));
+        A = vpa(subs(Ja, [theta dtheta x x1 phi phi1 Tp T], [0 0 0 0 0 0 0 0]));
+        B = vpa(subs(Jb, [theta dtheta x x1 phi phi1 Tp T], [0 0 0 0 0 0 0 0]));
 
         % 离散化
         [G, H] = c2d(double(A), double(B), 0.001);
@@ -86,7 +86,7 @@ for theta_step = 1:length(theta_list)
         % Q = diag([6000, 80, 900, 300, 8000, 20]);
         % R_ = diag([40 10]);
 
-        Q = diag([5500, 60, 1500, 300, 7500, 20]);
+        Q = diag([6500, 60, 1500, 300, 7500, 20]);
         R_ = diag([40 10]);
     
         % 求解反馈矩阵K

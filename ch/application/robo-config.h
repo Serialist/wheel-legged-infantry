@@ -47,8 +47,8 @@ extern "C" {
 #define HIP_RF_ID 0x02
 #define HIP_RB_ID 0x01
 // 轮毂
-#define HUB_L_ID 0x201
-#define HUB_R_ID 0x202
+#define HUB_L_ID 0x202
+#define HUB_R_ID 0x201
 // 板间通信
 #define B2B_CHASSIS_CMD_ID 0x199
 #define YAW_ID 0x203
@@ -75,7 +75,11 @@ extern "C" {
 
 #define BODY_WIDTH 0.54 // m
 
-#define YAW_ENCODER_OFFSET 7300 // rmmotor encoder
+#define YAW_ENCODER_OFFSET 7777 // rmmotor encoder
+
+#define MOTOR_PARAM_K1 0.805767
+#define MOTOR_PARAM_K2 1.049220
+#define MOTOR_PARAM_K3 -1.361828
 
 /* ================ ins ================ */
 

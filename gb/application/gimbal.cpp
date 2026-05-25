@@ -23,11 +23,11 @@
 #include "cmsis_os.h"
 #include "ins-task.hpp"
 #include "math-utils.hpp"
+#include "pid.hpp"
 #include "rm_motor.h"
-#include "vgd-pid.hpp"
 
-using namespace vgd;
-using vgd::module::Gimbal_Mode;
+using namespace rb2;
+using rb2::module::Gimbal_Mode;
 
 /* ================================================================ micro ================================================================ */
 
@@ -38,8 +38,8 @@ using vgd::module::Gimbal_Mode;
 
 RM_Motor_Feedback_t yaw_motor, pitch_motor;
 
-controller::PID yaw_pid[2] = { { 10, 0, 1, 15, 0 }, { 1500, 0, 0, 10000, 0 } };
-controller::PID pitch_pid[2] = { { 80, 0, 2, 7, 0 }, { 1500, 0.1, 0, 10000, 1000 } };
+controller::PID yaw_pid[2] = { { 150, 0, 3, 70, 0 }, { 1500, 0, 0, 14000, 0 } };
+controller::PID pitch_pid[2] = { { 150, 0, 3, 70, 0 }, { 1500, 0.1, 0, 14000, 0 } };
 
 float
     // yaw

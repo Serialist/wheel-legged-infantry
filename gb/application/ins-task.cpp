@@ -17,7 +17,7 @@
 #include "ins-task.hpp"
 #include "bmi088.h"
 #include "lpf.h"
-#include "pid.h"
+#include "pid-cod.h"
 #include "utils.h"
 #include "tim.h"
 #include "Quaternion.h"

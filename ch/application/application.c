@@ -9,12 +9,25 @@
  *
  */
 
-#include "task-tool.h"
 #include "Minipc.h"
+#include "stddef.h"
+#include "task-tool.h"
 
 TASK_DEFINE(Chassis_Task, osPriorityHigh, 2048);
 
-void Application_Init(void)
-{
-	TASK_CREATE(Chassis_Task);
+StackType_t powerControllTaskStack[128];
+StaticTask_t powerControllTaskTCB;
+void powerControllTask(void* pvParameters);
+void Application_Init(void) {
+    TASK_CREATE(Chassis_Task);
+
+    xTaskCreateStatic(
+        powerControllTask,
+        "PowerControll",
+        128,
+        NULL,
+        10,
+        powerControllTaskStack,
+        &powerControllTaskTCB
+    );
 }

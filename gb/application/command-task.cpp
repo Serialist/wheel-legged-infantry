@@ -20,13 +20,15 @@
 #include "ins-task.hpp"
 #include "math-utils.hpp"
 #include "rm_motor.h"
+#include "shoot.hpp"
 #include "superpower.h"
 #include "vmc-dm.h"
 
-using namespace vgd;
+using namespace rb2;
 using module::robot::Remote_Control_Mode;
+using rb2::module::Shoot;
 
-extern RM_Motor_Feedback_t yaw_motor, pitch_motor;
+extern RM_Motor_Feedback_t yaw_motor, pitch_motor, feed_motor, fr_motor[2];
 
 B2B_Chassis_Command_t ch_cmd;
 uint8_t buf[8];
@@ -36,21 +38,34 @@ void Command_Normal(void);
 void Command_Jump(void);
 
 module::robot::Robot rb;
-Remote_Control_Mode rc_mode = Remote_Control_Mode::dt7;
+Remote_Control_Mode rc_mode = Remote_Control_Mode::vt13;
 
 extern "C" void Command_Task(void const* argument) {
     for (;;) {
         Remote_Message_Moniter(&remote_ctrl);
+        VT13_Monitor(&VT13_Info);
+        RM_MOTOR_MONITOR(&yaw_motor);
+        RM_MOTOR_MONITOR(&pitch_motor);
+        RM_MOTOR_MONITOR(&feed_motor);
+        RM_MOTOR_MONITOR(&fr_motor[0]);
+        RM_MOTOR_MONITOR(&fr_motor[1]);
 
-        if (remote_ctrl.rc_lost == true || // 遥控器断线
-            remote_ctrl.rc.s[DT7_SL] == DT7_UP)
-        {
-            Command_ZeroForce();
-        } else if (remote_ctrl.rc.s[DT7_SL] == DT7_MID) {
+        if (VT13_Info.RC.Switch == 0) {
+            if (remote_ctrl.rc_lost == true || remote_ctrl.rc.s[DT7_SL] == DT7_UP)
+                Command_ZeroForce();
+            else {
+                rc_mode = Remote_Control_Mode::dt7;
+                Command_Normal();
+            }
+        } else if (VT13_Info.RC.Switch == 1) {
+            rc_mode = Remote_Control_Mode::vt13;
             Command_Normal();
-        } else if (remote_ctrl.rc.s[DT7_SL] == DT7_DOWN) {
+        } else if (VT13_Info.RC.Switch == 2) {
+            rc_mode = Remote_Control_Mode::vt13_pc;
+            Command_Normal();
+        } /*  else if (remote_ctrl.rc.s[DT7_SL] == DT7_DOWN) {
             Command_Jump();
-        }
+        } */
 
         /* 设置 */
 
@@ -74,6 +89,9 @@ void Command_ZeroForce(void) {
 
 float atg1 = 0, atg2 = 0;
 float yaw_angle, chassis_angle, bias_angle, chassis_yaw_setpoint;
+bool re0 = false; // 头尾
+
+float mouse_ratio = 0.00005;
 
 void Command_Normal(void) {
     float setv;
@@ -86,10 +104,19 @@ void Command_Normal(void) {
         case Remote_Control_Mode::dt7:
             rb.att.vx = math::Remapf(remote_ctrl.rc.ch[DT7_LY], -660, 660, -2, 2);  // 底盘x速度
             rb.att.vy = math::Remapf(-remote_ctrl.rc.ch[DT7_LX], -660, 660, -2, 2); // 底盘y速度
-            rb.att.z =
-                math::Remapf(std::fmaxf(remote_ctrl.rc.ch[DT7_WHEEL], 60), 60, 660, 0.1, 0.4); // 腿
-            rb.att.vyaw = -remote_ctrl.rc.ch[DT7_RX] * 0.000007;  // 底盘yaw角速度
-            rb.att.vpitch = remote_ctrl.rc.ch[DT7_RY] * 0.000007; // 底盘pitch角速度
+            // rb.att.z = math::Remapf(
+            //     std::fmaxf(remote_ctrl.rc.ch[DT7_WHEEL], 60),
+            //     60,
+            //     660,
+            //     0.1,
+            //     0.4
+            // );
+            rb.att.z = remote_ctrl.rc.s[DT7_SR] == DT7_UP ? 0.1
+                : remote_ctrl.rc.s[DT7_SR] == DT7_MID     ? 0.25
+                : remote_ctrl.rc.s[DT7_SR] == DT7_DOWN    ? 0.4
+                                                          : 0.1;                      // 腿
+            rb.att.vyaw = -remote_ctrl.rc.ch[DT7_RX] * 0.000007;                      // yaw角速度
+            rb.att.vpitch = remote_ctrl.rc.ch[DT7_RY] * 0.000007;                     // pitch角速度
             rb.att.yaw = math::LoopClampf(rb.att.yaw + rb.att.vyaw, 0, math::two_pi); // yaw角
             rb.att.pitch =
                 math::ClampAbsf(rb.att.pitch + rb.att.vpitch, math::Deg2Rad(25)); // pitch角
@@ -97,21 +124,32 @@ void Command_Normal(void) {
 
             /* 图传遥控器控制 */
         case Remote_Control_Mode::vt13:
-            // ch_cmd.vx = VT13_Info.RC.Channel[0];
-            // ch_cmd.vy = VT13_Info.RC.Channel[1];
-            // ch_cmd.vyaw = VT13_Info.RC.Channel[2];
-            // ch_cmd.sw[0] = VT13_Info.RC.Switch;
-            // ch_cmd.button[0] = VT13_Info.RC.Left;
-            // ch_cmd.button[1] = VT13_Info.RC.Right;
-            // ch_cmd.button[2] = VT13_Info.RC.Stop;
-            // ch_cmd.button[3] = VT13_Info.RC.Trigger;
+            rb.att.vx = math::Remapf(VT13_Info.RC.Channel[DT7_LX], -660, 660, -2, 2);  // 底盘x速度
+            rb.att.vy = math::Remapf(-VT13_Info.RC.Channel[DT7_LY], -660, 660, -2, 2); // 底盘y速度
+            rb.att.z = math::Remapf(std::fmaxf(VT13_Info.RC.Wheel, 60), 60, 660, 0.1,
+                                    0.4);                            // 腿
+            rb.att.vyaw = -VT13_Info.RC.Channel[DT7_RX] * 0.000007;  // 底盘yaw角速度
+            rb.att.vpitch = VT13_Info.RC.Channel[DT7_RY] * 0.000007; // 底盘pitch角速度
+            rb.att.yaw = math::LoopClampf(rb.att.yaw + rb.att.vyaw, 0, math::two_pi); // yaw角
+            rb.att.pitch =
+                math::ClampAbsf(rb.att.pitch + rb.att.vpitch, math::Deg2Rad(25)); // pitch角
             break;
 
             /* 图传键鼠控制 */
         case Remote_Control_Mode::vt13_pc:
-            setv = VT13_Info.Key.Set.SHIFT ? 2.5 : 1.5;
+            setv = VT13_Info.Key.Set.SHIFT ? 1.5 : 0.75;
             rb.att.vx = (VT13_Info.Key.Set.W - VT13_Info.Key.Set.S) * setv;
             rb.att.vy = (VT13_Info.Key.Set.A - VT13_Info.Key.Set.D) * setv;
+            rb.att.vz = VT13_Info.Mouse.Z * mouse_ratio;
+            rb.att.z = math::Clampf(rb.att.z + rb.att.vz, 0.1, 0.4);
+            rb.att.vyaw = -VT13_Info.Mouse.X * mouse_ratio;   // 底盘yaw角速度
+            rb.att.vpitch = -VT13_Info.Mouse.Y * mouse_ratio; // 底盘pitch角速度
+            rb.att.yaw = math::LoopClampf(rb.att.yaw + rb.att.vyaw, 0, math::two_pi); // yaw角
+            rb.att.pitch =
+                math::ClampAbsf(rb.att.pitch + rb.att.vpitch, math::Deg2Rad(25)); // pitch角
+            // rb.cmd.sp = VT13_Info.Key.Set.SHIFT ? true : false;
+            rb.cmd.fire = VT13_Info.Mouse.Press_L ? true : false;
+            rb.cmd.fr = VT13_Info.Key.Set.F ? true : false;
             break;
 
         default:
@@ -131,31 +169,34 @@ void Command_Normal(void) {
     // 底盘对地角度
     chassis_angle = math::CircleClamp(ins.Yaw_Angle + yaw_angle);
 
-    chassis_yaw_setpoint = math::CircleClamp(
-        (std::fabsf(yaw_angle) < math::half_pi) ? (rb.att.yaw) : (rb.att.yaw + math::pi)
-    );
-
     bias_angle = std::atan2f(rb.att.vy, rb.att.vx);
     bias_angle = bias_angle > math::half_pi ? bias_angle - math::pi : bias_angle;
     bias_angle = bias_angle < -math::half_pi ? bias_angle + math::pi : bias_angle;
 
-    ch_cmd.ch[0] = (rb.att.vx < 0 ? -1 : 1)
+    shoot.SetState(rb.cmd.fr ? Shoot::State::SafetyOn : Shoot::State::SafetyOff);
+
+    shoot.Selector(Shoot::Mode::Auto);
+
+    shoot.Fire(rb.cmd.fire);
+
+    chassis_yaw_setpoint = rb.att.yaw + bias_angle;
+    re0 = std::fabsf(math::CircleNearestDistance(chassis_angle, chassis_yaw_setpoint))
+        < math::half_pi;
+    chassis_yaw_setpoint =
+        math::CircleClamp(re0 ? chassis_yaw_setpoint : chassis_yaw_setpoint + math::pi);
+
+    ch_cmd.ch[0] = (((rb.att.vx < 0) == re0) ? -1 : 1)
         * math::ClampAbsf((math::Sqrt(rb.att.vx * rb.att.vx + rb.att.vy * rb.att.vy)), 2);
     ch_cmd.ch[1] = rb.att.vy;
-    ch_cmd.ch[2] = math::CircleNearestDistance(
-        chassis_angle,
-        math::CircleClamp(
-            chassis_yaw_setpoint // 整体
-            + bias_angle
-        ) // 偏走
-    );
+    ch_cmd.ch[2] = math::CircleNearestDistance(chassis_angle, chassis_yaw_setpoint);
 
     ch_cmd.ch[3] = rb.att.z;
     ch_cmd.sw[0] = 1;
     ch_cmd.btn[0] = rb.cmd.enable;
+    ch_cmd.btn[1] = rb.cmd.sp;
 }
 
 void Command_Jump(void) {
     Command_Normal();
-    ch_cmd.sw[0] = 2;
+    ch_cmd.btn[2] = true;
 }

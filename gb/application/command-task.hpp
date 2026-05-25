@@ -14,7 +14,7 @@
 
 #include <stdint.h>
 
-namespace vgd {
+namespace rb2 {
 namespace module {
 namespace robot {
 
@@ -47,6 +47,8 @@ struct Command {
     bool reboot = false;  // 重启
     bool sp = false;      // super power 超电
     bool spinbot = false; // 小陀螺
+    bool aimbot = false;  //
+    bool fr = false;      // 摩擦轮
     bool fire = false;    // 开火
     bool jump = false;    // 跳
     bool unstuck = false; // 脱困
@@ -61,6 +63,6 @@ public:
 
 } // namespace robot
 } // namespace module
-} // namespace vgd
+} // namespace rb2
 
 #endif // CONTROL_TASK_H

@@ -14,15 +14,15 @@
 
 #include "utils.h"
 
-namespace vgd {
+namespace rb2 {
 namespace module {
 
 enum class Gimbal_Mode { zero_force, running };
 
 }
-} // namespace vgd
+} // namespace rb2
 
-extern vgd::module::Gimbal_Mode gb_mode;
+extern rb2::module::Gimbal_Mode gb_mode;
 
 extern float yaw_position, // 角度环 目标
     yaw_velocity,          // 速度环 目标
