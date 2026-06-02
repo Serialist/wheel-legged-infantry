@@ -1,0 +1,52 @@
+
+
+GraphedExpression="(sp_fdb).chassis", Color=#e56a6f, Show=0
+GraphedExpression="rb2::module::wl_pwctrl::cmdPower", Color=#35792b, Show=0
+GraphedExpression="rb2::module::wl_pwctrl::configuredMaxPower", Color=#769dda
+OpenDocument="Ozone_DataSampling_260519.csv", FilePath="E:/Desktop/Ozone_DataSampling_260519.csv", Line=0
+OpenDocument="stm32h7xx_it.c", FilePath="E:/serialist/workspace/robomaster/project/wl-h7/ch/dmh7/Core/Src/stm32h7xx_it.c", Line=104
+OpenDocument="rm_motor.h", FilePath="E:/serialist/workspace/robomaster/project/wl-h7/ch/dmh7/Robo-lib/protocol/rm_motor.h", Line=25
+OpenDocument="tasks.c", FilePath="E:/serialist/workspace/robomaster/project/wl-h7/ch/dmh7/Middlewares/Third_Party/FreeRTOS/Source/tasks.c", Line=3635
+OpenDocument="startup_stm32h723xx.s", FilePath="E:/serialist/workspace/robomaster/project/wl-h7/ch/dmh7/MDK-ARM/startup_stm32h723xx.s", Line=225
+OpenDocument="main.c", FilePath="E:/serialist/workspace/robomaster/project/wl-h7/ch/dmh7/Core/Src/main.c", Line=50
+OpenToolbar="Debug", Floating=0, x=0, y=0
+OpenWindow="Source Files", DockArea=LEFT, x=0, y=0, w=610, h=1093, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Disassembly", DockArea=RIGHT, x=0, y=0, w=300, h=1093, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Memory 1", DockArea=BOTTOM, x=1, y=0, w=513, h=328, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, EditorAddress=0x0
+OpenWindow="Watched Data 1", DockArea=FLOATING, x=220, y=196, w=1651, h=1070, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Data Sampling", DockArea=FLOATING, x=38, y=293, w=1505, h=778, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, VisibleTab=0, UniformSampleSpacing=0
+OpenWindow="Timeline", DockArea=FLOATING, x=323, y=158, w=1761, h=1125, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=1, DataPaneShown=1, PowerPaneShown=0, CodePaneShown=0, PinCursor="Cursor Movable", TimePerDiv="1 s / Div", TimeStampFormat="Time", DataGraphDrawAsPoints=0, DataGraphLegendShown=1, DataGraphUniformSampleSpacing=0, DataGraphLegendPosition="84;95", DataGraphShowNamesAtCursor=0, PowerGraphDrawAsPoints=0, PowerGraphLegendShown=0, PowerGraphAvgFilterTime=Off, PowerGraphAvgFilterLen=Off, PowerGraphUniformSampleSpacing=0, PowerGraphLegendPosition="70;20", CodeGraphLegendShown=0, CodeGraphLegendPosition="80;20"
+OpenWindow="Console", DockArea=BOTTOM, x=0, y=0, w=2046, h=328, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+SmartViewPlugin="", Page="", Toolbar="Hidden", Window="SmartView 1"
+TableHeader="Source Files", SortCol="File", SortOrder="ASCENDING", VisibleCols=["File";"Status";"Size";"#Insts";"Path"], ColWidths=[263;100;100;100;1086]
+TableHeader="Data Sampling Table", SortCol="None", SortOrder="ASCENDING", VisibleCols=["Index";"Time";" (sp_fdb).chassis";" rb2::module::wl_pwctrl::cmdPower";" rb2::module::wl_pwctrl::configuredMaxPower"], ColWidths=[100;100;100;100;100]
+TableHeader="Data Sampling Setup", SortCol="Expression", SortOrder="DESCENDING", VisibleCols=["Expression";"Type";"Value";"Min";"Max";"Average";"# Changes";"Min. Change";"Max. Change"], ColWidths=[182;100;100;154;164;100;110;126;469]
+TableHeader="Power Sampling", SortCol="Index", SortOrder="ASCENDING", VisibleCols=["Index";"Time";"Ch 0"], ColWidths=[100;100;100]
+TableHeader="Watched Data 1", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Value";"Location";"Refresh";"Access"], ColWidths=[315;286;104;946;100]
+TableHeader="RegisterSelectionDialog", SortCol="None", SortOrder="ASCENDING", VisibleCols=[], ColWidths=[]
+TableHeader="TargetExceptionDialog", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Value";"Address";"Description"], ColWidths=[27;27;27;685]
+WatchedExpression="leg", Window=Watched Data 1
+WatchedExpression="dtheta_filter", Window=Watched Data 1
+WatchedExpression="ak10", RefreshRate=5, DisplayFormat=DISPLAY_FORMAT_HEX, Window=Watched Data 1
+WatchedExpression="length_pid", Window=Watched Data 1
+WatchedExpression="dleg", Window=Watched Data 1
+WatchedExpression="hipMotorSendEnable", Window=Watched Data 1
+WatchedExpression="rbflag", Window=Watched Data 1
+WatchedExpression="m3508", Window=Watched Data 1
+WatchedExpression="ob", Window=Watched Data 1
+WatchedExpression="set", Window=Watched Data 1
+WatchedExpression="power_test", Window=Watched Data 1
+WatchedExpression="u_speed", Window=Watched Data 1
+WatchedExpression="u_yaw", Window=Watched Data 1
+WatchedExpression="wl_pwr_ctrl", Window=Watched Data 1
+WatchedExpression="turn_t", Window=Watched Data 1
+WatchedExpression="ul_limited", Window=Watched Data 1
+WatchedExpression="ur_limited", Window=Watched Data 1
+WatchedExpression="sp_fdb", Window=Watched Data 1
+WatchedExpression="rb2::module::wl_pwctrl::K", Window=Watched Data 1
+WatchedExpression="ul_limited", Window=Watched Data 1
+WatchedExpression="ur_limited", Window=Watched Data 1
+WatchedExpression="set.hub_torque", Window=Watched Data 1
+WatchedExpression="cmdpw", Window=Watched Data 1
+WatchedExpression="rb2::module::wl_pwctrl::cmdPower", Window=Watched Data 1
+WatchedExpression="rb2::module::wl_pwctrl::configuredMaxPower", Window=Watched Data 1
