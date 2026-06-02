@@ -19,43 +19,27 @@ namespace module {
 
 class Shoot {
 public:
-    enum class State {
-        SafetyOn,  // 有保险（使能，电机给力但不动）
-        SafetyOff, // 开保险（开摩擦轮）
+    // 摩擦轮模式
+    enum class FrictionMode {
+        Disable,
+        Enable,
     };
 
-    enum class Mode {
+    // 拨盘模式（发射模式）
+    enum class FeedMode {
         Disable, // 无力
-        Single,  // 单发（一颗弹丸）
-        // Burst,   // 连发（点射，连续射 n 发）
-        Auto, // 自动（一直发射）
-        // Semi,   // 半自动，自动切换单发和自动
-        Unload, // 退弹
+        Single,  // 单发
+        Auto,    // 自动
+        Unload,  // 退弹
     };
+
+    FrictionMode fricMode;
+    FeedMode fdMode;
 
     Shoot() = default;
 
-    /// @brief 触发开火（扳机）true  开火
+    /// @brief 开火扳机，true 开火
     void Fire(bool trigger);
-    /// @brief 选择模式（快慢机）
-    inline void Selector(Mode mode) {
-        this->mode = mode;
-    };
-    /// @brief 状态控制
-    inline void SetState(State state) {
-        this->state = state;
-    }
-    inline Mode GetMode(void) {
-        return mode;
-    }
-    inline State GetState(void) {
-        return state;
-    }
-
-private:
-    State state;
-    Mode mode;
-    uint32_t count;
 };
 
 } // namespace module

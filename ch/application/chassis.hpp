@@ -23,6 +23,8 @@ struct Robo_Flag_t {
     bool fallen;
     bool reable;
     bool enable;
+    bool spinbot;
+    bool sp;
 };
 
 // 机体姿态

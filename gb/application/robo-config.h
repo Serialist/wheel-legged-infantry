@@ -23,7 +23,7 @@ extern "C" {
 #include "arm_math.h"
 #include "main.h"
 
-#define FR_DEFAULT_VELOCITY 0
+#define FR_DEFAULT_VELOCITY 6000
 
 #define YAW_ENCODER_OFFSET 280
 

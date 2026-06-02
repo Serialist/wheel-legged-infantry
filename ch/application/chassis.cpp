@@ -30,6 +30,7 @@
 #include "observer.hpp"
 #include "pid.hpp"
 #include "rm_motor.h"
+#include "robo-config.h"
 #include "simple-filter.hpp"
 #include "simple-planner.h"
 #include "superpower.h"
@@ -38,8 +39,12 @@
 #include "wheelleg-power-manager.hpp"
 
 using namespace rb2;
+using rb2::algorithm::LowPass_Order_1;
+using rb2::controller::PID;
 
 namespace pwctrl = rb2::module::wl_pwctrl;
+
+float cmdpw;
 
 /* ================================================================ micro ================================================================ */
 
@@ -54,29 +59,19 @@ Robo_State_t rbstate, prev_rbstate; // 机器人模式
 Robo_Flag_t rbflag, prev_rbflag;    // 机器人状态
 JUMP_State_t jump_state = JPS_NONE; // 跳跃状态机
 
-controller::PID pid_tpl(14, 0, 3, 10, 0), //离地关节 pid
-    pid_tpr(14, 0, 3, 10, 0),             // 离地关节 pid
+PID pid_tpl(14, 0, 3, 10, 0), //离地关节 pid
+    pid_tpr(14, 0, 3, 10, 0), // 离地关节 pid
 
     length_pid[2] { { 660, 0, 130, 80, 0 }, { 660, 0, 130, 80, 0 } }, // 腿长 pid
+    // jump_length_pid[2] { { 1300, 0, 60, 300, 0 }, { 1300, 0, 60, 300, 0 } },   // 跳跃 pid
+    // damping_pid[2] { { 1000, 0, 20000, 300, 0 }, { 1000, 0, 20000, 300, 0 } }, // 阻尼 pid
+    // land_pid[2] { { 500, 0, 10000, 150, 0 }, { 500, 0, 10000, 150, 0 } },      // 落地缓冲 pid
 
-    jump_length_pid[2] { { 1300, 0, 60, 300, 0 }, { 1300, 0, 60, 300, 0 } },   // 跳跃 pid
-    damping_pid[2] { { 1000, 0, 20000, 300, 0 }, { 1000, 0, 20000, 300, 0 } }, // 阻尼 pid
-    land_pid[2] { { 500, 0, 10000, 150, 0 }, { 500, 0, 10000, 150, 0 } },      // 落地缓冲 pid
+    yaw_pid(80, 0, 5, 999, 0), vyaw_pid { 10, 0, 0, 10, 0 }, // yaw 旋转 pid
+    roll_pid(200, 0, 30, 20, 0),                             // roll 轴补偿 pid
+    tp_pid(30, 0, 3, 10, 0);                                 // 劈叉 pid
 
-    yaw_pid(80, 0, 5, 999, 0), vyaw_pid { 0, 0, 0, 0, 0 }, // yaw 旋转 pid
-    roll_pid(200, 0, 30, 20, 0),                           // roll 轴补偿 pid
-    tp_pid(30, 0, 3, 10, 0);                               // 劈叉 pid
-
-algorithm::LowPass_Order_1 dtheta_filter[2] = { { 15, 1000 }, { 15, 1000 } }, // leg dtheta
-    dl0_flr[2] = { { 80, 1000 }, { 80, 1000 } };                              // leg dlength
-
-// // clang-format off
-// module::power_control::Wheel_Leg wl_pwr_ctrl // 功率控制
-//     { MOTOR_PARAM_K1, MOTOR_PARAM_K2, MOTOR_PARAM_K3, // 电机参数
-//       22 * 0.4,		  22 * 0.8,						  // 超电参数
-//       0,			  0,			  0.001,		  // PD控制
-// 	  35};
-// // clang-format on
+LowPass_Order_1 dtheta_filter[2] = { { 15, 1000 }, { 15, 1000 } }; // leg dtheta
 
 Ramp_t ramp_leg_length; // 腿长斜坡
 
@@ -209,14 +204,14 @@ extern "C" void Chassis_Task(void const* argument) {
  ************************/
 void Motor_Enable(void) {
     for (int a = 1; a <= 4; a++) {
-        AK_Motor_MIT_Enable(BSP_PORT3, a);
+        AK_Motor_MIT_Enable(BSP_PORT2, a);
         osDelay(1);
     }
 }
 
 void Motor_Disable(void) {
     for (int a = 1; a <= 4; a++) {
-        AK_Motor_MIT_Disable(BSP_PORT3, a);
+        AK_Motor_MIT_Disable(BSP_PORT2, a);
         osDelay(1);
     }
 }
@@ -237,54 +232,30 @@ float dleg[2][2] = { 0 };
 
 // 腿正解
 void Wheel_Leg_Attitude_Calc(void) {
-    // left 反转
-    VMC_5bar_FK(
-        &leg[LEFT],
-        PI / 2.0f + (ak10[LF].angle),
-        PI / 2.0f + ak10[LB].angle,
-        ins.Pitch_Angle,
-        ins.Pitch_Gyro,
-        0.001f
-    );
-    VMC_5bar_FK(
-        &leg[RIGHT],
-        PI / 2.0f - ak10[RF].angle,
-        PI / 2.0f - ak10[RB].angle,
-        ins.Pitch_Angle,
-        ins.Pitch_Gyro,
-        0.001f
-    );
+    float left_phi1 = ak10[LF].angle - 0.485427856 + math::pi,
+          left_phi4 = ak10[LB].angle - (-2.5434885),
+          right_phi1 = -ak10[RF].angle - (2.55149937) + math::pi,
+          right_phi4 = -ak10[RB].angle - (-1.1816206);
 
-    // 因为上面的腿长微分有问题，所以直接用了关节电机的角速度进行了腿速度的腿运动学解算（关节速度 --> vmc速度）
-    Leg_Spd(
-        ak10[LF].speed,
-        ak10[LB].speed,
-        PI / 2.0f + ak10[LF].angle,
-        PI / 2.0f + ak10[LB].angle,
-        dleg[LEFT]
-    );
-    Leg_Spd(
-        -ak10[RF].speed,
-        -ak10[RB].speed,
-        PI / 2.0f - ak10[RF].angle,
-        PI / 2.0f - ak10[RB].angle,
-        dleg[RIGHT]
-    );
+    VMC_5bar_FK(&leg[LEFT], left_phi1, left_phi4, ins.Pitch_Angle, ins.Pitch_Gyro, 0.001f);
+    VMC_5bar_FK(&leg[RIGHT], right_phi1, right_phi4, ins.Pitch_Angle, ins.Pitch_Gyro, 0.001f);
 
-    // leg[LEFT].d_L0 = dl0_flr[LEFT].update(leg[LEFT].L0);
-    // leg[RIGHT].d_L0 = dl0_flr[RIGHT].update(leg[RIGHT].L0);
+    // 因为上面的腿长微分有问题，所以直接用了关节电机的角速度进行了腿速度运动学解算，而非解算后的位置再微分
+    Leg_Spd(ak10[LF].speed, ak10[LB].speed, left_phi1, left_phi4, dleg[LEFT]);
+    Leg_Spd(-ak10[RF].speed, -ak10[RB].speed, right_phi1, right_phi4, dleg[RIGHT]);
 
     OffGround_Detection(&leg[LEFT], ins.Accel[1]);
     OffGround_Detection(&leg[RIGHT], ins.Accel[1]);
 
-    if (jump_state != JPS_NONE && jump_state != JPS_INIT) {
-        rbflag.offground = true;
-    } else {
-        // rbflag.offground = leg[LEFT].is_offground && leg[RIGHT].is_offground;
-        rbflag.offground = false;
-    }
+    rbflag.offground = (jump_state != JPS_NONE && jump_state != JPS_INIT);
+    // rbflag.offground = leg[LEFT].is_offground && leg[RIGHT].is_offground;
 
     att.yaw = ins.Yaw_Angle;
+
+    rbflag.fallen =
+        (std::fabsf(att.pitch) > math::Deg2Rad(10)
+         || std::fabsf(leg[LEFT].theta) > math::Deg2Rad(10)
+         || std::fabsf(leg[RIGHT].theta) > math::Deg2Rad(10));
 }
 
 int ch_task_cnt = 0;
@@ -295,7 +266,7 @@ bool hipMotorSendEnable[4] = { true, true, true, true };
 float sirin = 0;
 
 void Chassis_Motor_Transmit(void) {
-    ch_task_cnt = (ch_task_cnt + 1) % 2;
+    ch_task_cnt = (ch_task_cnt + 1) % 4;
 
 #ifndef ZERO_FORCE
 
@@ -312,16 +283,16 @@ void Chassis_Motor_Transmit(void) {
     sirin = set.hip_torque[LF];
 
     if (ch_task_cnt == 0 && hipMotorSendEnable[0] == true) {
-        AK_Motor_MIT_Transmit(BSP_PORT3, HIP_LF_ID, 0, 0, 0, 0, set.hip_torque[LF]);
+        AK_Motor_MIT_Transmit(BSP_PORT2, HIP_LF_ID, 0, 0, 0, 0, set.hip_torque[LF]);
     }
-    if (ch_task_cnt == 0 && hipMotorSendEnable[1] == true) {
-        AK_Motor_MIT_Transmit(BSP_PORT3, HIP_LB_ID, 0, 0, 0, 0, set.hip_torque[LB]);
+    if (ch_task_cnt == 1 && hipMotorSendEnable[1] == true) {
+        AK_Motor_MIT_Transmit(BSP_PORT2, HIP_LB_ID, 0, 0, 0, 0, set.hip_torque[LB]);
     }
-    if (ch_task_cnt == 1 && hipMotorSendEnable[2] == true) {
-        AK_Motor_MIT_Transmit(BSP_PORT3, HIP_RF_ID, 0, 0, 0, 0, set.hip_torque[RF]);
+    if (ch_task_cnt == 2 && hipMotorSendEnable[2] == true) {
+        AK_Motor_MIT_Transmit(BSP_PORT2, HIP_RF_ID, 0, 0, 0, 0, set.hip_torque[RF]);
     }
     if (ch_task_cnt == 1 && hipMotorSendEnable[3] == true) {
-        AK_Motor_MIT_Transmit(BSP_PORT3, HIP_RB_ID, 0, 0, 0, 0, set.hip_torque[RB]);
+        AK_Motor_MIT_Transmit(BSP_PORT2, HIP_RB_ID, 0, 0, 0, 0, set.hip_torque[RB]);
     }
 
 #else
@@ -338,6 +309,9 @@ void Chassis_Motor_Transmit(void) {
 
 float theta_k = 0, theta_b = 10, theta_err_max;
 float abab, bblb;
+
+float v_restricted = 0;
+float x_restricted = 0;
 
 /***********************************************
  * @brief 平衡行驶过程(左右两腿分别进行LQR运算)
@@ -377,13 +351,19 @@ void Wheel_Leg_Control(void) {
 
     /* ================================ 轮 解算 ================================ */
 
-    turn_t = yaw_pid.UpdateEZ(
-        set.yaw, // 套圈最近
-        0,
-        0 - ins.Yaw_Gyro
-    ); // 这样计算更稳一点
+    if (rbflag.spinbot) {
+        turn_t = vyaw_pid.Update(math::two_pi * 1.5, ins.Yaw_Gyro);
+    } else {
+        turn_t = yaw_pid.UpdateEZ(
+            set.yaw, // 套圈最近
+            0,
+            0 - ins.Yaw_Gyro
+        ); // 这样计算更稳一点
+    }
 
     u_yaw = turn_t;
+
+    cmdpw = pwctrl::Get().cmdPower;
 
     // 更新功率控制
     pwctrl::update(
@@ -397,21 +377,40 @@ void Wheel_Leg_Control(void) {
         ur_balance
     );
 
-    u_speed_ratio = pwctrl::getDecayUspeed();
-    u_yaw_ratio = pwctrl::getDecayUyaw();
+    x_restricted = pwctrl::getDecayUspeed() * (set.x - ob.x);
+    v_restricted = pwctrl::getDecayUspeed() * (set.v - ob.v);
 
-    u_speed_limited = u_speed_ratio * u_speed_limited;
-    u_yaw_limited = u_yaw_ratio * u_yaw_limited;
+    xl[0] = set.theta - leg[LEFT].theta;
+    xl[1] = 0 - dtheta_filter[LEFT].update(leg[LEFT].d_theta);
+    xl[2] = x_restricted;
+    xl[3] = v_restricted;
+    xl[4] = math::ClampAbsf(0 - ins.Pitch_Angle, theta_err_max);
+    xl[5] = 0 - ins.Pitch_Gyro;
 
+    LQR_Control(xl, ul, ul_temp, leg[LEFT].L0);
+
+    xr[0] = set.theta - leg[RIGHT].theta;
+    xr[1] = 0 - dtheta_filter[RIGHT].update(leg[RIGHT].d_theta);
+    xr[2] = x_restricted;
+    xr[3] = v_restricted;
+    xr[4] = math::ClampAbsf(0 - ins.Pitch_Angle, theta_err_max);
+    xr[5] = 0 - ins.Pitch_Gyro;
+
+    LQR_Control(xr, ur, ur_temp, leg[RIGHT].L0);
+
+#ifdef POWER_RESTRICT_ENABLE
     // 功率限制
-    ul_limited = -(ul_balance + u_speed) + turn_t; // left 反转
-    ur_limited = (ur_balance + u_speed) + turn_t;
-    // set.hub_torque[LEFT] = ul_limited; // left 反转
-    // set.hub_torque[RIGHT] = ur_limited;
-
+    u_speed_limited = pwctrl::getDecayUspeed() * u_speed;
+    u_yaw_limited = pwctrl::getDecayUyaw() * u_yaw;
+    ul_limited = -(ul_balance + u_speed_limited) + u_yaw_limited; // left 反转
+    ur_limited = (ur_balance + u_speed_limited) + u_yaw_limited;
+    set.hub_torque[LEFT] = ul_limited;
+    set.hub_torque[RIGHT] = ur_limited;
+#else
     // 无功率限制
     set.hub_torque[LEFT] = -ul[U_T] + turn_t; // left 反转
     set.hub_torque[RIGHT] = ur[U_T] + turn_t;
+#endif
 
     if (rbflag.offground) {
         set.yaw = 0;
@@ -423,10 +422,9 @@ void Wheel_Leg_Control(void) {
 
     /* ---------------- 腿推力 ---------------- */
 
-    // 这是转向用的roll前馈，这样解算是不好的，要改成输出腿推力，而且这个关系我不知道是不是对的，不过能用
-    /// @todo 去看上交建模的给力前馈
+    /// @todo 去看上交建模的给力前馈，我这个比例是瞎选出来的
     roll_t = roll_pid.UpdateEZ(set.roll - ins.Roll_Angle, 0, 0 - ins.Roll_Gyro);
-    roll_inertial_t = 0;
+    roll_inertial_t = roll_inertial_ratio * ob.v * ins.Yaw_Gyro;
 
     // roll 前馈
     // Roll_Height_Calc(
@@ -479,7 +477,7 @@ void Wheel_Leg_Control(void) {
 
 /// @brief 限幅
 #define HIP_TORQUE_MAX 18
-#define HUB_TORQUE_MAX 3
+#define HUB_TORQUE_MAX 4.5
     Clampfp(&set.hip_torque[LF], -HIP_TORQUE_MAX, HIP_TORQUE_MAX);
     Clampfp(&set.hip_torque[LB], -HIP_TORQUE_MAX, HIP_TORQUE_MAX);
     Clampfp(&set.hip_torque[RF], -HIP_TORQUE_MAX, HIP_TORQUE_MAX);
@@ -725,7 +723,7 @@ float phi_diff = 0,   // 两腿角度差
 /// @param min_len 最小腿长
 /// @param max_len 最大腿长
 /// @note 按照右手直角坐标系，xyz前左上，绕xzy轴逆时针为roll pitch yaw
-/// 感觉不好用
+/// 感觉不好用，解算可能出现角度差一点
 void Roll_Height_Calc(
     float* ltl,
     float* ltr,

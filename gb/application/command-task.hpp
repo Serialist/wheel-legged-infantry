@@ -43,15 +43,16 @@ struct Attitude {
 enum class Status { Idle, Init, Stop, Run, Error };
 
 struct Command {
-    bool enable = false;  // 启动
-    bool reboot = false;  // 重启
-    bool sp = false;      // super power 超电
-    bool spinbot = false; // 小陀螺
-    bool aimbot = false;  //
-    bool fr = false;      // 摩擦轮
-    bool fire = false;    // 开火
-    bool jump = false;    // 跳
-    bool unstuck = false; // 脱困
+    bool ch_enable = false; // 底盘使能
+    bool gb_enable = false; // 云台使能
+    bool reboot = false;    // 重启
+    bool sp = false;        // super power 超电
+    bool spinbot = false;   // 小陀螺
+    bool aimbot = false;    //
+    bool fr = false;        // 摩擦轮
+    bool fire = false;      // 开火
+    bool jump = false;      // 跳
+    bool unstuck = false;   // 脱困
 };
 
 class Robot {

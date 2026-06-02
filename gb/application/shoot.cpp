@@ -27,19 +27,20 @@
 #include "robo-config.h"
 #include "simple-filter.hpp"
 
+using rb2::controller::PID;
 using rb2::module::Shoot;
 
 /* ================================================================ micro ================================================================ */
 
-#define FEED_DIAL_GEAR_RATIO (5 / 2) // 拨盘减速比
-#define FEED_DIAL_BULLET_CAPACITY 10 // 一个拨盘的弹量
+#define FEED_DIAL_GEAR_RATIO (5.0 / 1.0) // 拨盘减速比
+#define FEED_DIAL_BULLET_CAPACITY (10.0) // 一个拨盘的弹量
 
 /* ================================================================ variable ================================================================ */
 
 RM_Motor_Feedback_t feed_motor, fr_motor[2];
-rb2::controller::PID feed_pid = { 0, 0, 0, 0, 0 };                 // 拨盘
-rb2::controller::PID fr_pid[2] = { { 15, 0.01, 0, 10000, 1000 },   // 0 left
-                                   { 15, 0.01, 0, 10000, 1000 } }; // 1 right
+PID feed_pid = { 15, 0, 0, 10000, 0 };            // 拨盘
+PID fr_pid[2] = { { 15, 0.01, 0, 10000, 1000 },   // 0 left
+                  { 15, 0.01, 0, 10000, 1000 } }; // 1 right
 
 float fr_velocity = FR_DEFAULT_VELOCITY, // 摩擦轮射速
     feed_freq = 0, feed_velocity = 0,    // 拨盘
@@ -51,22 +52,32 @@ float test[2] = { 0 };
 
 /* ================================================================ prototype ================================================================ */
 
-void Shoot_Shoot(void);
-void Shoot_Stop();
-
 /* ================================================================ function ================================================================ */
 
 extern "C" void Shoot_Task(void const* argument) {
     for (;;) {
-        switch (shoot.GetState()) {
-            case Shoot::State::SafetyOff:
-                Shoot_Shoot();
+        switch (shoot.fricMode) {
+            case Shoot::FrictionMode::Disable:
+                fr_velocity = 0;
                 break;
 
-            case Shoot::State::SafetyOn:
-                Shoot_Stop();
+            case Shoot::FrictionMode::Enable:
+                fr_velocity = FR_DEFAULT_VELOCITY;
                 break;
         }
+
+        /* ================ 驱动摩擦轮 ================ */
+        fr_current[LEFT] = fr_pid[LEFT].Update(-fr_velocity, fr_motor[LEFT].velocity);
+        fr_current[RIGHT] = fr_pid[RIGHT].Update(fr_velocity, fr_motor[RIGHT].velocity);
+
+        test[0] = -fr_motor[LEFT].velocity;
+
+        /* ================ 驱动拨盘 ================ */
+
+        feed_velocity = // 单位rpm
+            -feed_freq * 60.0 / FEED_DIAL_BULLET_CAPACITY * FEED_DIAL_GEAR_RATIO * M2006_GEAR_RATIO;
+
+        feed_current = feed_pid.Update(feed_velocity, (float)feed_motor.velocity);
 
         RM_Motor_Control_Transmit(
             BSP_PORT1,
@@ -78,27 +89,14 @@ extern "C" void Shoot_Task(void const* argument) {
     }
 }
 
-void Shoot_Shoot(void) {
-    /* ================ 驱动摩擦轮 ================ */
-    fr_current[LEFT] = fr_pid[LEFT].Update(-fr_velocity, fr_motor[LEFT].velocity);
-    fr_current[RIGHT] = fr_pid[RIGHT].Update(fr_velocity, fr_motor[RIGHT].velocity);
-
-    test[0] = -fr_motor[LEFT].velocity;
-
-    /* ================ 驱动拨盘 ================ */
-
-    // if
-    feed_velocity = // 单位rpm
-        feed_freq * 60 / FEED_DIAL_BULLET_CAPACITY / FEED_DIAL_GEAR_RATIO * M2006_GEAR_RATIO;
-
-    feed_current = feed_pid.Update(feed_velocity, feed_motor.velocity);
-}
-
-void Shoot_Stop() {
-    fr_current[LEFT] = fr_pid[LEFT].Update(-fr_velocity, fr_motor[LEFT].velocity);
-    fr_current[RIGHT] = fr_pid[RIGHT].Update(fr_velocity, fr_motor[RIGHT].velocity);
-}
-
 void Shoot::Fire(bool trigger) {
-    feed_freq = 10;
+    if (fdMode != FeedMode::Disable && trigger) {
+        if (shoot.fdMode == Shoot::FeedMode::Auto) {
+            feed_freq = 5;
+        } else if (shoot.fdMode == Shoot::FeedMode::Unload) {
+            feed_freq = -3;
+        }
+    } else {
+        feed_freq = 0;
+    }
 }

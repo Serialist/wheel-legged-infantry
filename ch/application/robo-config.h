@@ -39,6 +39,8 @@ extern "C" {
  */
 #define REMOTE_FRAME_USART_CAN 0U
 
+#define POWER_RESTRICT_ENABLE
+
 /* ================ CAN ID ================ */
 
 // 关节
